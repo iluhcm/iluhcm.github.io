@@ -1,0 +1,1105 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="2yx0JNDw3DWn3FVwl0XV9ba4wAjjbvZ3viXpvjGwBa8" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android,View,OnLongClickListener,OnDragListener,GestureDetector,OnTouchListener," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="Android中长按拖动还是比较常见的.比如Launcher中的图标拖动及屏幕切换,ListView中item顺序的改变,新闻类App中新闻类别的顺序改变等.下面就这个事件做一下分析. Android Long Click Event就目前而言,Android中实现长按事件响应有几种方式,包括:  设置View.OnLongClickListener监听器 通过GestureDetector.On">
+<meta name="keywords" content="Android,View,OnLongClickListener,OnDragListener,GestureDetector,OnTouchListener">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android长按及拖动事件探究">
+<meta property="og:url" content="http://iluhcm.com/2015/09/07/android-long-click-and-drag-event/index.html">
+<meta property="og:site_name" content="Xing&#39;s Blog">
+<meta property="og:description" content="Android中长按拖动还是比较常见的.比如Launcher中的图标拖动及屏幕切换,ListView中item顺序的改变,新闻类App中新闻类别的顺序改变等.下面就这个事件做一下分析. Android Long Click Event就目前而言,Android中实现长按事件响应有几种方式,包括:  设置View.OnLongClickListener监听器 通过GestureDetector.On">
+<meta property="og:updated_time" content="2017-03-27T09:16:08.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android长按及拖动事件探究">
+<meta name="twitter:description" content="Android中长按拖动还是比较常见的.比如Launcher中的图标拖动及屏幕切换,ListView中item顺序的改变,新闻类App中新闻类别的顺序改变等.下面就这个事件做一下分析. Android Long Click Event就目前而言,Android中实现长按事件响应有几种方式,包括:  设置View.OnLongClickListener监听器 通过GestureDetector.On">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://iluhcm.com/2015/09/07/android-long-click-and-drag-event/"/>
+
+
+
+
+
+  <title>Android长按及拖动事件探究 | Xing's Blog</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?03e8bdd436b4561c8e760c9459ee8003";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Xing's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">To be a better man.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://iluhcm.com/2015/09/07/android-long-click-and-drag-event/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xing Li">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xing's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android长按及拖动事件探究</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-09-07T18:22:43+08:00">
+                2015-09-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2015/09/07/android-long-click-and-drag-event/" class="leancloud_visitors" data-flag-title="Android长按及拖动事件探究">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Visitors </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Android中长按拖动还是比较常见的.比如Launcher中的图标拖动及屏幕切换,ListView中item顺序的改变,新闻类App中新闻类别的顺序改变等.下面就这个事件做一下分析.</p>
+<h1 id="Android-Long-Click-Event"><a href="#Android-Long-Click-Event" class="headerlink" title="Android Long Click Event"></a>Android Long Click Event</h1><p>就目前而言,Android中实现长按事件响应有几种方式,包括:</p>
+<ul>
+<li>设置View.OnLongClickListener监听器</li>
+<li>通过GestureDetector.OnGestureListener间接获取长按事件</li>
+<li>实现View.OnTouchListener,然后在回调中通过MotionEvent判断是否触发了长按事件</li>
+</ul>
+<p>下面分别介绍这三种方式.</p>
+<h2 id="View-OnLongClickListener"><a href="#View-OnLongClickListener" class="headerlink" title="View.OnLongClickListener"></a>View.OnLongClickListener</h2><p>对于Android中的任何一个View,都可以实现长按事件监听,并回调这个事件.在<code>View</code>类里,定义了<code>OnLongClickListener</code>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * Interface definition for a callback to be invoked when a view has been clicked and held.</div><div class="line"> */</div><div class="line">public interface OnLongClickListener &#123;</div><div class="line">    /**</div><div class="line">     * Called when a view has been clicked and held.</div><div class="line">     *</div><div class="line">     * @param v The view that was clicked and held.</div><div class="line">     *</div><div class="line">     * @return true if the callback consumed the long click, false otherwise.</div><div class="line">     */</div><div class="line">    boolean onLongClick(View v);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>默认情况下,View类是不支持长按的,由<code>LONG_CLICKABLE</code>这个标记控制.如果设置了监听器,则会默认打开支持长按的开关,并回调上面的<code>boolean onLongClick(View v)</code>方法.从注释的返回值中可以看到,如果这个回调消费了长按事件,则返回<code>true</code>,否则返回<code>false</code>.这和<code>View</code>类中的各种触摸事件传递是一致的.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * Register a callback to be invoked when this view is clicked and held. If this view is not</div><div class="line"> * long clickable, it becomes long clickable.</div><div class="line"> *</div><div class="line"> * @param l The callback that will run</div><div class="line"> *</div><div class="line"> * @see #setLongClickable(boolean)</div><div class="line"> */</div><div class="line">public void setOnLongClickListener(@Nullable OnLongClickListener l) &#123;</div><div class="line">    if (!isLongClickable()) &#123;</div><div class="line">        setLongClickable(true);</div><div class="line">    &#125;</div><div class="line">    getListenerInfo().mOnLongClickListener = l;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中, <code>getListenerInfo()</code>返回一个包含了一个View类中所有的监听器事件的静态内部类<code>ListenerInfo</code>.</p>
+<h3 id="简单实例"><a href="#简单实例" class="headerlink" title="简单实例"></a>简单实例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">ImageView imageView = new ImageView(this);</div><div class="line">imageView.setImageResource(R.drawable.ic_launcher);</div><div class="line">imageView.setOnLongClickListener(new View.OnLongClickListener() &#123;</div><div class="line">    @Override</div><div class="line">    public boolean onLongClick(View v) &#123;</div><div class="line">        Log.v(TAG, &quot;perform long click.&quot;);</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<h2 id="GestureDetector-OnGestureListener"><a href="#GestureDetector-OnGestureListener" class="headerlink" title="GestureDetector.OnGestureListener"></a>GestureDetector.OnGestureListener</h2><p><code>GestureDetector</code>提供了丰富的手势识别功能.除了支持长按事件监听外,还支持多种手势事件监听.在<code>GestureDetector.OnGestureListener</code>这个监听器中,提供了6种手势监听回调:</p>
+<ul>
+<li>boolean onDown(MotionEvent e);</li>
+<li>void onShowPress(MotionEvent e);</li>
+<li>boolean onSingleTapUp(MotionEvent e);</li>
+<li>boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY);</li>
+<li>void onLongPress(MotionEvent e);</li>
+<li>boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY);</li>
+</ul>
+<p>几乎包含了一次界面触摸操作所能想到的所有操作.其中,可以通过<code>void onLongPress(MotionEvent e)</code>来实现长按监听.</p>
+<h3 id="简单实例-1"><a href="#简单实例-1" class="headerlink" title="简单实例"></a>简单实例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line">package com.amap.mock.activity;</div><div class="line"></div><div class="line">import android.app.Activity;</div><div class="line">import android.content.Context;</div><div class="line">import android.content.Intent;</div><div class="line">import android.os.Bundle;</div><div class="line">import android.util.Log;</div><div class="line">import android.view.GestureDetector;</div><div class="line">import android.view.MotionEvent;</div><div class="line">import android.view.View;</div><div class="line"></div><div class="line">import com.amap.mock.R;</div><div class="line"></div><div class="line">/**</div><div class="line"> * Created by xingli on 8/19/15.</div><div class="line"> * </div><div class="line"> * An example of performing click event.</div><div class="line"> */</div><div class="line">public class GestureActivity extends Activity implements GestureDetector.OnGestureListener &#123;</div><div class="line"></div><div class="line">    private static final String TAG = GestureActivity.class.getSimpleName();</div><div class="line"></div><div class="line">    private GestureDetector gestureDetector;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">        super.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_test);</div><div class="line">        gestureDetector = new GestureDetector(this, this);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onTouchEvent(MotionEvent event) &#123;</div><div class="line">        return gestureDetector.onTouchEvent(event);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onDown(MotionEvent e) &#123;</div><div class="line">        Log.v(TAG,&quot;onDown&quot;);</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void onShowPress(MotionEvent e) &#123;</div><div class="line">        Log.v(TAG,&quot;onShowPress&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onSingleTapUp(MotionEvent e) &#123;</div><div class="line">        Log.v(TAG,&quot;onSingleTapUp&quot;);</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) &#123;</div><div class="line">        Log.v(TAG,&quot;onScroll&quot;);</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void onLongPress(MotionEvent e) &#123;</div><div class="line">        Log.v(TAG,&quot;onLongPress&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) &#123;</div><div class="line">        Log.v(TAG,&quot;onFling&quot;);</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="GestureDetector长按事件原理解析"><a href="#GestureDetector长按事件原理解析" class="headerlink" title="GestureDetector长按事件原理解析"></a>GestureDetector长按事件原理解析</h3><p>在上面的例子中,我们看到在<code>GestureDetector</code>这个类中,实现了<code>onTouchEvent()</code>方法,直接代替<code>View</code>类中的<code>onTouchEvent()</code>方法,即可实现触摸事件的检测.下面是<code>GestureDetector.onTouchEvent()</code>的部分关键源码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div></pre></td><td class="code"><pre><div class="line">public boolean onTouchEvent(MotionEvent ev) &#123;</div><div class="line">    if (mInputEventConsistencyVerifier != null) &#123;</div><div class="line">        mInputEventConsistencyVerifier.onTouchEvent(ev, 0);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    final int action = ev.getAction();</div><div class="line">    ...</div><div class="line">    boolean handled = false;</div><div class="line"></div><div class="line">    switch (action &amp; MotionEvent.ACTION_MASK) &#123;</div><div class="line">    case MotionEvent.ACTION_POINTER_DOWN:</div><div class="line">        ...</div><div class="line">        break;</div><div class="line">   case MotionEvent.ACTION_POINTER_UP:</div><div class="line">        ...</div><div class="line">        break;</div><div class="line">   case MotionEvent.ACTION_DOWN:</div><div class="line">        if (mDoubleTapListener != null) &#123;</div><div class="line">            boolean hadTapMessage = mHandler.hasMessages(TAP);</div><div class="line">            if (hadTapMessage) mHandler.removeMessages(TAP);</div><div class="line">            if ((mCurrentDownEvent != null) &amp;&amp; (mPreviousUpEvent != null) &amp;&amp; hadTapMessage &amp;&amp;</div><div class="line">                    isConsideredDoubleTap(mCurrentDownEvent, mPreviousUpEvent, ev)) &#123;</div><div class="line">                // This is a second tap</div><div class="line">                mIsDoubleTapping = true;</div><div class="line">                // Give a callback with the first tap of the double-tap</div><div class="line">                handled |= mDoubleTapListener.onDoubleTap(mCurrentDownEvent);</div><div class="line">                // Give a callback with down event of the double-tap</div><div class="line">                handled |= mDoubleTapListener.onDoubleTapEvent(ev);</div><div class="line">            &#125; else &#123;</div><div class="line">                // This is a first tap</div><div class="line">                mHandler.sendEmptyMessageDelayed(TAP, DOUBLE_TAP_TIMEOUT);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        mDownFocusX = mLastFocusX = focusX;</div><div class="line">        mDownFocusY = mLastFocusY = focusY;</div><div class="line">        if (mCurrentDownEvent != null) &#123;</div><div class="line">            mCurrentDownEvent.recycle();</div><div class="line">        &#125;</div><div class="line">        mCurrentDownEvent = MotionEvent.obtain(ev);</div><div class="line">        mAlwaysInTapRegion = true;</div><div class="line">        mAlwaysInBiggerTapRegion = true;</div><div class="line">        mStillDown = true;</div><div class="line">        mInLongPress = false;</div><div class="line">        mDeferConfirmSingleTap = false;</div><div class="line"></div><div class="line">        if (mIsLongpressEnabled) &#123;</div><div class="line">            mHandler.removeMessages(LONG_PRESS);</div><div class="line">            mHandler.sendEmptyMessageAtTime(LONG_PRESS, mCurrentDownEvent.getDownTime()</div><div class="line">                    + TAP_TIMEOUT + LONGPRESS_TIMEOUT);</div><div class="line">        &#125;</div><div class="line">        mHandler.sendEmptyMessageAtTime(SHOW_PRESS, mCurrentDownEvent.getDownTime() + TAP_TIMEOUT);</div><div class="line">        handled |= mListener.onDown(ev);</div><div class="line">        break;</div><div class="line"></div><div class="line">    case MotionEvent.ACTION_MOVE:</div><div class="line">        if (mInLongPress || mInContextClick) &#123;</div><div class="line">            break;</div><div class="line">        &#125;</div><div class="line">        final float scrollX = mLastFocusX - focusX;</div><div class="line">        final float scrollY = mLastFocusY - focusY;</div><div class="line">        if (mIsDoubleTapping) &#123;</div><div class="line">            // Give the move events of the double-tap</div><div class="line">            handled |= mDoubleTapListener.onDoubleTapEvent(ev);</div><div class="line">        &#125; else if (mAlwaysInTapRegion) &#123;</div><div class="line">            final int deltaX = (int) (focusX - mDownFocusX);</div><div class="line">            final int deltaY = (int) (focusY - mDownFocusY);</div><div class="line">            int distance = (deltaX * deltaX) + (deltaY * deltaY);</div><div class="line">            if (distance &gt; mTouchSlopSquare) &#123;</div><div class="line">                handled = mListener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);</div><div class="line">                mLastFocusX = focusX;</div><div class="line">                mLastFocusY = focusY;</div><div class="line">                mAlwaysInTapRegion = false;</div><div class="line">                mHandler.removeMessages(TAP);</div><div class="line">                mHandler.removeMessages(SHOW_PRESS);</div><div class="line">                mHandler.removeMessages(LONG_PRESS);</div><div class="line">            &#125;</div><div class="line">            if (distance &gt; mDoubleTapTouchSlopSquare) &#123;</div><div class="line">                mAlwaysInBiggerTapRegion = false;</div><div class="line">            &#125;</div><div class="line">        &#125; else if ((Math.abs(scrollX) &gt;= 1) || (Math.abs(scrollY) &gt;= 1)) &#123;</div><div class="line">            handled = mListener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);</div><div class="line">            mLastFocusX = focusX;</div><div class="line">            mLastFocusY = focusY;</div><div class="line">        &#125;</div><div class="line">        break;</div><div class="line">    case MotionEvent.ACTION_UP:</div><div class="line">        mStillDown = false;</div><div class="line">        MotionEvent currentUpEvent = MotionEvent.obtain(ev);</div><div class="line">        if (mIsDoubleTapping) &#123;</div><div class="line">            // Finally, give the up event of the double-tap</div><div class="line">            handled |= mDoubleTapListener.onDoubleTapEvent(ev);</div><div class="line">        &#125; else if (mInLongPress) &#123;</div><div class="line">            mHandler.removeMessages(TAP);</div><div class="line">            mInLongPress = false;</div><div class="line">        &#125; else if (mAlwaysInTapRegion &amp;&amp; !mIgnoreNextUpEvent) &#123;</div><div class="line">            handled = mListener.onSingleTapUp(ev);</div><div class="line">            if (mDeferConfirmSingleTap &amp;&amp; mDoubleTapListener != null) &#123;</div><div class="line">                mDoubleTapListener.onSingleTapConfirmed(ev);</div><div class="line">            &#125;</div><div class="line">        &#125; else if (!mIgnoreNextUpEvent) &#123;</div><div class="line">           // A fling must travel the minimum tap distance</div><div class="line">            final VelocityTracker velocityTracker = mVelocityTracker;</div><div class="line">            final int pointerId = ev.getPointerId(0);</div><div class="line">            velocityTracker.computeCurrentVelocity(1000, mMaximumFlingVelocity);</div><div class="line">            final float velocityY = velocityTracker.getYVelocity(pointerId);</div><div class="line">            final float velocityX = velocityTracker.getXVelocity(pointerId);</div><div class="line"></div><div class="line">            if ((Math.abs(velocityY) &gt; mMinimumFlingVelocity)</div><div class="line">                    || (Math.abs(velocityX) &gt; mMinimumFlingVelocity))&#123;</div><div class="line">                handled = mListener.onFling(mCurrentDownEvent, ev, velocityX, velocityY);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if (mPreviousUpEvent != null) &#123;</div><div class="line">            mPreviousUpEvent.recycle();</div><div class="line">        &#125;</div><div class="line">        // Hold the event we obtained above - listeners may have changed the original.</div><div class="line">        mPreviousUpEvent = currentUpEvent;</div><div class="line">        if (mVelocityTracker != null) &#123;</div><div class="line">            // This may have been cleared when we called out to the</div><div class="line">            // application above.</div><div class="line">            mVelocityTracker.recycle();</div><div class="line">            mVelocityTracker = null;</div><div class="line">        &#125;</div><div class="line">        mIsDoubleTapping = false;</div><div class="line">        mDeferConfirmSingleTap = false;</div><div class="line">        mIgnoreNextUpEvent = false;</div><div class="line">        mHandler.removeMessages(SHOW_PRESS);</div><div class="line">        mHandler.removeMessages(LONG_PRESS);</div><div class="line">        break;</div><div class="line"></div><div class="line">    case MotionEvent.ACTION_CANCEL:</div><div class="line">        cancel();</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (!handled &amp;&amp; mInputEventConsistencyVerifier != null) &#123;</div><div class="line">        mInputEventConsistencyVerifier.onUnhandledEvent(ev, 0);</div><div class="line">    &#125;</div><div class="line">    return handled;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在<code>onTouchEvent()</code>方法中,很明显是通过Handler来传递触摸事件并触发相关的回调的.因为Handler是通过一个串行的队列来处理消息的,可以防止并发触摸操作时产生行为逻辑的混乱.在此方法中,可以看到对MotionEvent事件的处理,就长按事件来说,分为:</p>
+<ul>
+<li>MotionEvent.ACTION_DOWN</li>
+<li>MotionEvent.ACTION_MOVE</li>
+<li>MotionEvent.ACTION_UP</li>
+</ul>
+<p>在<code>MotionEvent.ACTION_DOWN</code>阶段,程序做了3件事:</p>
+<ol>
+<li>判断双击事件(我们不关心是否双击,因为没有设置这个监听器,也不是本文讨论的重点);</li>
+<li>进行初始化操作.包括:<ul>
+<li>mDownFocusX = mLastFocusX = focusX;<br>mDownFocusY = mLastFocusY = focusY; // 记录焦点坐标,用于判断在按下的过程中是否发生了手指的移动</li>
+<li>mAlwaysInTapRegion = true;            // 按下了相应的区域,判断单击事件并制定后来的事件响应机制</li>
+<li>mAlwaysInBiggerTapRegion = true;    // 按下了相应的大区域,判断双击事件</li>
+<li>mStillDown = true;                        // 用于判断用户是轻轻触摸了一下还是一直按下</li>
+<li>mInLongPress = false;                    // 判断是否正在长按</li>
+<li>mDeferConfirmSingleTap = false;        // 用于处理是否是一次<code>TAP</code>事件</li>
+</ul>
+</li>
+<li>通过发送延时消息来判断触不触发长按事件:</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">if (mIsLongpressEnabled) &#123;</div><div class="line">    mHandler.removeMessages(LONG_PRESS);</div><div class="line">    mHandler.sendEmptyMessageAtTime(LONG_PRESS, mCurrentDownEvent.getDownTime()</div><div class="line">            + TAP_TIMEOUT + LONGPRESS_TIMEOUT);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>默认的<code>TAP_TIMEOUT</code>是100ms,<code>LONGPRESS_TIMEOUT</code>是500ms.这两个参数在<code>ViewConfiguration.java</code>类中有定义,并且暂时不提供API更改触发值.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * Defines the default duration in milliseconds before a press turns into</div><div class="line"> * a long press</div><div class="line"> */</div><div class="line">private static final int DEFAULT_LONG_PRESS_TIMEOUT = 500;</div><div class="line"></div><div class="line">/**</div><div class="line"> * Defines the duration in milliseconds we will wait to see if a touch event</div><div class="line"> * is a tap or a scroll. If the user does not move within this interval, it is</div><div class="line"> * considered to be a tap.</div><div class="line"> */</div><div class="line">private static final int TAP_TIMEOUT = 100;</div></pre></td></tr></table></figure>
+<p>接下来,在<code>MotionEvent.ACTION_MOVE</code>阶段,程序判断比较简单.</p>
+<ol>
+<li><p>如果正在长按或者是在上下文中点击,则跳出循环;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">if (mInLongPress || mInContextClick) &#123;</div><div class="line">    break;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>判断是不是双击事件(<code>mAlwaysInTapRegion</code>); </p>
+</li>
+<li>如果不是双击事件,则判断是不是还在之前触摸的那个区域(<code>mAlwaysInTapRegion</code>);如果是,由于触发了<code>ACTION_MOVE</code>事件,那么说明手指已经移动过了N个单位距离,这时候,需要判断这个距离是不是大于某个阈值<code>mTouchSlopSquare</code>,其中<br><code>mTouchSlopSquare=configuration.getScaledTouchSlop()^2</code>,<br>在配置文件中默认值为<code>8dip</code>.如果大于这个阈值,则说明移动确实发生了,这时候:<ul>
+<li>handled = mListener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);    //设置滚动监听回调</li>
+<li>mLastFocusX = focusX;</li>
+<li>mLastFocusY = focusY; // 重新设置触摸焦点</li>
+<li>mAlwaysInTapRegion = false;    // 重置触摸区域判断</li>
+<li>mHandler.removeMessages(TAP);</li>
+<li>mHandler.removeMessages(SHOW_PRESS);</li>
+<li>mHandler.removeMessages(LONG_PRESS);    // 移除所有触摸相关的消息事件</li>
+</ul>
+</li>
+<li>如果以上两项都不符合,那么则确定为滚动事件,并重置焦点:<ul>
+<li>handled = mListener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);</li>
+<li>mLastFocusX = focusX;</li>
+<li>mLastFocusY = focusY;</li>
+</ul>
+</li>
+</ol>
+<p>处理完成移动事件后,到了<code>MotionEvent.ACTION_UP</code>阶段,程序主要判断当前处于哪个阶段,然后分别针对这个阶段做事件清除,资源回收,重置各种触摸状态.由于程序比较简单,就不再详细分析这个阶段的消息了.</p>
+<h2 id="View-OnTouchListener"><a href="#View-OnTouchListener" class="headerlink" title="View.OnTouchListener"></a>View.OnTouchListener</h2><p>看了<code>GestureDetector.onTouchEvent</code>的源码后,是不是觉得长按事件检测与处理很简单?接下来的这种方法就是借鉴了第二种方法来实现的,主要原理就是利用Handler发送延时消息来判断是不是触发了长按事件.不过我是在<code>MotionEvent.ACTION_MOVE</code>阶段来判断长按事件,这样做的原因留给后面来分析.先看代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div></pre></td><td class="code"><pre><div class="line">package com.amap.mock.activity;</div><div class="line"></div><div class="line">import android.os.Handler;</div><div class="line">import android.util.Log;</div><div class="line">import android.view.MotionEvent;</div><div class="line">import android.view.View;</div><div class="line">import android.view.ViewConfiguration;</div><div class="line"></div><div class="line">/**</div><div class="line"> * Created by xingli on 9/7/15.</div><div class="line"> * </div><div class="line"> * A long press event detector.</div><div class="line"> */</div><div class="line">public class LongPressHandler implements View.OnTouchListener &#123;</div><div class="line">    private static final String TAG = LongPressHandler2.class.getSimpleName();</div><div class="line"></div><div class="line">    // Default long press time threshold.</div><div class="line">    private static final long LONG_PRESS_TIME_THRESHOLD = 500;</div><div class="line">    // Long press event message handler.</div><div class="line">    private Handler mHandler = new Handler();</div><div class="line">    // The long press time threshold.</div><div class="line">    private long mPressTimeThreshold;</div><div class="line">    // Record start point and end point to judge whether user has moved while performing long press event.</div><div class="line">    private DoublePoint mTouchStartPoint = new DoublePoint();</div><div class="line">    private DoublePoint mTouchEndPoint = new DoublePoint();</div><div class="line">    // The long press thread.</div><div class="line">    private final LongPressThread mLongPressThread = new LongPressThread();</div><div class="line">    // Inset in pixels to look for touchable content when the user touches the edge of the screen.</div><div class="line">    private final float mTouchSlop;</div><div class="line">    // The long press callback.</div><div class="line">    private OnLongPressListener listener;</div><div class="line"></div><div class="line">    public LongPressHandler2(View view) &#123;</div><div class="line">        this(view, LONG_PRESS_TIME_THRESHOLD);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public LongPressHandler2(View view, long holdTime) &#123;</div><div class="line">        view.setOnTouchListener(this);</div><div class="line">        mTouchSlop = ViewConfiguration.get(view.getContext()).getScaledEdgeSlop();</div><div class="line">        Log.v(TAG, &quot;touch slop:&quot; + mTouchSlop);</div><div class="line">        mPressTimeThreshold = holdTime;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onTouch(View v, MotionEvent event) &#123;</div><div class="line">        int action = event.getAction();</div><div class="line">        switch (action) &#123;</div><div class="line">            case MotionEvent.ACTION_DOWN:</div><div class="line">                mTouchStartPoint.x = event.getRawX();</div><div class="line">                mTouchStartPoint.y = event.getRawY();</div><div class="line">                addLongPressCallback();</div><div class="line">                break;</div><div class="line">            case MotionEvent.ACTION_MOVE:</div><div class="line">                mTouchEndPoint.x = event.getRawX();</div><div class="line">                mTouchEndPoint.y = event.getRawY();</div><div class="line">                // If user is pressing and dragging, then we make a callback.</div><div class="line">                if (mLongPressThread.mLongPressing) &#123;</div><div class="line">                    resetLongPressEvent();</div><div class="line">                    if (listener != null) &#123;</div><div class="line">                        return listener.onLongPressed(event);</div><div class="line">                    &#125;</div><div class="line">                    break;</div><div class="line">                &#125;</div><div class="line">                // If user has moved before activating long press event, then the event should be reset.</div><div class="line">                if (calculateDistanceBetween(mTouchStartPoint, mTouchEndPoint) &gt; mTouchSlop) &#123;</div><div class="line">                    resetLongPressEvent();</div><div class="line">                &#125;</div><div class="line">                break;</div><div class="line">            case MotionEvent.ACTION_UP:</div><div class="line">                if (mLongPressThread.mLongPressing) &#123;</div><div class="line">                    resetLongPressEvent();</div><div class="line">                    // Must set true and left the child know we have handled this event.</div><div class="line">                    return true;</div><div class="line">                &#125;</div><div class="line">            default:</div><div class="line">                resetLongPressEvent();</div><div class="line">                break;</div><div class="line">        &#125;</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setOnLongPressListener(OnLongPressListener listener) &#123;</div><div class="line">        this.listener = listener;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * Reset the long press event.</div><div class="line">     */</div><div class="line">    private void resetLongPressEvent() &#123;</div><div class="line">        if (mLongPressThread.mAdded) &#123;</div><div class="line">            mHandler.removeCallbacks(mLongPressThread);</div><div class="line">            mLongPressThread.mAdded = false;</div><div class="line">        &#125;</div><div class="line">        mLongPressThread.mLongPressing = false;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * Add long press event handler.</div><div class="line">     */</div><div class="line">    private void addLongPressCallback() &#123;</div><div class="line">        if (!mLongPressThread.mAdded) &#123;</div><div class="line">            mLongPressThread.mLongPressing = false;</div><div class="line">            mHandler.postDelayed(mLongPressThread, mPressTimeThreshold);</div><div class="line">            mLongPressThread.mAdded = true;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * Calculate distance between two point.</div><div class="line">     * </div><div class="line">     * @param before previous point</div><div class="line">     * @param after next point</div><div class="line">     * @return the distance</div><div class="line">     */</div><div class="line">    private double calculateDistanceBetween(DoublePoint before, DoublePoint after) &#123;</div><div class="line">        return Math.sqrt(Math.pow((before.x - after.x), 2) + Math.pow((before.y - after.y), 2));</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * Judge whether the long press event happens.</div><div class="line">     *</div><div class="line">     * The time threshold of default activated event is &#123;@see #LONG_PRESS_TIME_THRESHOLD&#125;</div><div class="line">     */</div><div class="line">    private static class LongPressThread implements Runnable &#123;</div><div class="line">        // A flag to set whether the long press event happens.</div><div class="line">        boolean mLongPressing = false;</div><div class="line">        // A flag to set whether this thread has been added to the handler.</div><div class="line">        boolean mAdded = false;</div><div class="line"></div><div class="line">        @Override</div><div class="line">        public void run() &#123;</div><div class="line">            mLongPressing = true;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private static class DoublePoint &#123;</div><div class="line">        public double x;</div><div class="line">        public double y;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * The long press listener.</div><div class="line">     */</div><div class="line">    public interface OnLongPressListener &#123;</div><div class="line">        /**</div><div class="line">         * Notified when a long press occurs with the initial on down &#123;@link MotionEvent&#125; that trigged it.</div><div class="line">         */</div><div class="line">        boolean onLongPressed(MotionEvent event);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这段代码可能没有<code>GestureDetector</code>这个类写的这么规范和完整,但至少能够实现长按触发并且实现事件的回调.使用这个类有以下两个限制:</p>
+<ul>
+<li>在<code>LongPressHandler</code>这个类的构造函数中,设置了<code>OnTouchListener</code>监听器,因此如果这个View在其他地方也设置了同样的监听器,有可能不起作用,以最后一个初始化该监听器的类其作用为标准;</li>
+<li>必须设置<code>View</code>为可点击的.即<code>View.setClickable(true)</code>.显然,不可点击的话就没有长按事件了.</li>
+</ul>
+<h2 id="长按事件小结"><a href="#长按事件小结" class="headerlink" title="长按事件小结"></a>长按事件小结</h2><p>经过上面的分析,我们通过三种方式实现了长按事件的检测及事件回调处理,分别是<code>View.OnLongClickListener</code>,<code>GestureDetector.OnGestureListener</code>以及<code>View.OnTouchListener</code>.</p>
+<p>如果仅仅是考虑长按事件,那么直接设置<code>View.OnLongClickListener</code>监听器是最方便的实现;如果需要监听多种触摸事件,那么显然<code>GestureDetector.OnGestureListener</code>是理想的选择,并且在<code>GestureDetector</code>类内部已经实现了一个简单的监听器实现<code>GestureDetector.SimpleOnGestureListener</code>,这个类没有实现任何功能,需要子类覆盖相应的方法来响应事件回调;如果要实现长按拖拽呢,显然以上两个类是没有办法满足要求的,因此,扩展<code>View.OnTouchListener</code>类是个不错的选择,在文章最后,会介绍如何扩展来实现长按拖拽事件.</p>
+<h1 id="Android-Drag-Event"><a href="#Android-Drag-Event" class="headerlink" title="Android Drag Event"></a>Android Drag Event</h1><p>拖拽事件和长按事件一样,是直接得到<code>View</code>类支持的.在<code>View.ListenerInfo</code>类中,定义了<code>View.OnDragListener</code>监听器,不过需要配合上边的<code>View.OnLongClickListener</code>来使用,否则单单有这个监听器是不起作用的.目前,实现拖拽事件的方法有两种:</p>
+<ul>
+<li>设置<code>View.OnDragListener</code>和<code>View.OnLongClickListener</code>监听器,在长按事件响应时开始拖拽,通过回调判断拖拽事件</li>
+<li>通过<code>View.layout(int,int,int,int)</code>方法直接修改View的位置</li>
+</ul>
+<h2 id="View-OnDragListener"><a href="#View-OnDragListener" class="headerlink" title="View.OnDragListener"></a>View.OnDragListener</h2><p>先来看看<code>View.OnDragListener</code>的定义:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * Interface definition for a callback to be invoked when a drag is being dispatched</div><div class="line"> * to this view.  The callback will be invoked before the hosting view&apos;s own</div><div class="line"> * onDrag(event) method.  If the listener wants to fall back to the hosting view&apos;s</div><div class="line"> * onDrag(event) behavior, it should return &apos;false&apos; from this callback.</div><div class="line"> */</div><div class="line">public interface OnDragListener &#123;</div><div class="line">    /**</div><div class="line">     * Called when a drag event is dispatched to a view. This allows listeners</div><div class="line">     * to get a chance to override base View behavior.</div><div class="line">     *</div><div class="line">     * @param v The View that received the drag event.</div><div class="line">     * @param event The &#123;@link android.view.DragEvent&#125; object for the drag event.</div><div class="line">     * @return &#123;@code true&#125; if the drag event was handled successfully, or &#123;@code false&#125;</div><div class="line">     * if the drag event was not handled. Note that &#123;@code false&#125; will trigger the View</div><div class="line">     * to call its &#123;@link #onDragEvent(DragEvent) onDragEvent()&#125; handler.</div><div class="line">     */</div><div class="line">    boolean onDrag(View v, DragEvent event);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>恩,虽然仅仅是个接口,然而有许多注意事项.这个接口会在屏幕响应拖拽事件时调用,并且会在View类中的<code>View.onDrag(event)</code>方法之前调用.如果需要系统继续调用<code>View.onDrag(event)</code>方法,那么这个监听器回调应该返回<code>false</code>,让事件传递到下一层.</p>
+<p>前面说了,仅仅设置<code>View.OnDragListener</code>监听器是不够的,因为系统并不会主动去触发这个事件监听,而是通过<code>View.startDrag(ClipData, DragShadowBuilder, Object, int)</code>这个方法,这个方法会在View类的顶层根视图<code>ViewRootImpl</code>中处理拖拽事件,注意,<code>ViewRootImpl</code>并非继承自<code>View</code>.下面是一个简单的例子.</p>
+<h3 id="简单实例-2"><a href="#简单实例-2" class="headerlink" title="简单实例"></a>简单实例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div></pre></td><td class="code"><pre><div class="line">package com.amap.mock.activity;</div><div class="line"></div><div class="line">import android.app.Activity;</div><div class="line">import android.content.ClipData;</div><div class="line">import android.content.ClipDescription;</div><div class="line">import android.os.Bundle;</div><div class="line">import android.util.Log;</div><div class="line">import android.view.DragEvent;</div><div class="line">import android.view.View;</div><div class="line">import android.widget.ImageView;</div><div class="line">import android.widget.RelativeLayout;</div><div class="line"></div><div class="line">import com.amap.mock.R;</div><div class="line"></div><div class="line">/**</div><div class="line"> * Created by xingli on 9/9/15.</div><div class="line"> *</div><div class="line"> * An example of performing drag event.</div><div class="line"> */</div><div class="line">public class DragActivity extends Activity implements View.OnDragListener, View.OnLongClickListener &#123;</div><div class="line"></div><div class="line">    private static final String TAG = DragActivity.class.getSimpleName();</div><div class="line">    private ImageView mIvLogo;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">        super.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_test);</div><div class="line">        mIvLogo = (ImageView) findViewById(R.id.iv_logo);</div><div class="line">        mIvLogo.setClickable(true);</div><div class="line">        mIvLogo.setOnLongClickListener(this);</div><div class="line">        mIvLogo.setOnDragListener(this);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onDrag(View v, DragEvent event) &#123;</div><div class="line">        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) v.getLayoutParams();</div><div class="line">        switch (event.getAction()) &#123;</div><div class="line">            case DragEvent.ACTION_DRAG_STARTED:</div><div class="line">                Log.d(TAG, &quot;Action is DragEvent.ACTION_DRAG_STARTED&quot;);</div><div class="line">                // Do nothing</div><div class="line">                break;</div><div class="line">            case DragEvent.ACTION_DRAG_ENTERED:</div><div class="line">                Log.d(TAG, &quot;Action is DragEvent.ACTION_DRAG_ENTERED&quot;);</div><div class="line">                break;</div><div class="line">            case DragEvent.ACTION_DRAG_EXITED:</div><div class="line">                Log.d(TAG, &quot;Action is DragEvent.ACTION_DRAG_EXITED&quot;);</div><div class="line">                break;</div><div class="line">            case DragEvent.ACTION_DRAG_LOCATION:</div><div class="line">                Log.d(TAG, &quot;Action is DragEvent.ACTION_DRAG_LOCATION&quot;);</div><div class="line">                break;</div><div class="line">            case DragEvent.ACTION_DRAG_ENDED:</div><div class="line">                Log.d(TAG, &quot;Action is DragEvent.ACTION_DRAG_ENDED&quot;);</div><div class="line">                // Do nothing</div><div class="line">                break;</div><div class="line">            case DragEvent.ACTION_DROP:</div><div class="line">                Log.d(TAG, &quot;ACTION_DROP event&quot;);</div><div class="line">                // Do nothing</div><div class="line">                break;</div><div class="line">            default:</div><div class="line">                break;</div><div class="line">        &#125;</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onLongClick(View v) &#123;</div><div class="line">        ClipData.Item item = new ClipData.Item(&quot;&quot;);</div><div class="line">        String[] mimeTypes = &#123; ClipDescription.MIMETYPE_TEXT_PLAIN &#125;;</div><div class="line">        ClipData dragData = new ClipData(&quot;&quot;, mimeTypes, item);</div><div class="line">        // Instantiates the drag shadow builder.</div><div class="line">        View.DragShadowBuilder myShadow = new View.DragShadowBuilder(v);</div><div class="line">        // Starts the drag</div><div class="line">        v.startDrag(dragData, // the data to be dragged</div><div class="line">            myShadow, // the drag shadow builder</div><div class="line">            null, // no need to use local data</div><div class="line">            0 // flags (not currently used, set to 0)</div><div class="line">        );</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>首先需要监听长按事件,然后在触发长按事件后,便可以开始拖动了.拖动的时候会回调<code>View.onDrag()</code>方法.其中,在<code>DragEvent</code>中定义了几个动作,表示拖动过程:</p>
+<ul>
+<li><code>DragEvent.ACTION_DRAG_STARTED</code></li>
+</ul>
+<p>调用<code>View.startDrag()</code>并获得拖动的阴影后进入这个阶段</p>
+<ul>
+<li><code>DragEvent.ACTION_DRAG_ENTERED</code></li>
+</ul>
+<p>系统会把带有这个类型的拖拽事件发送给当前布局中所有的View对象的拖拽事件监听器,如果要继续接收拖拽事件,包括可能的放下事件,View对象的拖拽事件监听器必须返回true.</p>
+<ul>
+<li><code>DragEvent.ACTION_DRAG_LOCATION</code></li>
+</ul>
+<p>当接收到<code>ACTION_DRAG_ENTERED</code>事件,并且拖动的影子与原来的View还有重叠的区域时,进入这个状态,只要还在拖动并且符合要求,则这个状态是会被调用多次的.</p>
+<ul>
+<li><code>DragEvent.ACTION_DRAG_EXITED</code></li>
+</ul>
+<p>当接收到<code>ACTION_DRAG_ENTERED</code>事件及至少一次<code>ACTION_DRAG_LOCATION</code>事件,并且拖动的影子与原来的View没有重叠的区域,即影子与View分离时,进入这个状态,此状态只会在不重叠的一瞬间调用一次.</p>
+<ul>
+<li><code>DragEvent.ACTION_DROP</code></li>
+</ul>
+<p>当用户在一个View对象之上释放了拖拽影子，这个对象的拖拽事件监听器就会收到这种操作类型。如果这个监听器在响应<code>ACTION_DRAG_STARTED</code>拖拽事件中返回了true，那么这种操作类型只会发送给一个View对象。如果用户在没有被注册监听器的View对象上释放了拖拽影子，或者用户没有在当前布局的任何部分释放操作影子，这个操作类型就不会被发送。如果View对象成功的处理放下事件，监听器要返回true，否则应该返回false。</p>
+<ul>
+<li><code>DragEvent.ACTION_DRAG_ENDED</code></li>
+</ul>
+<p>当系统结束拖拽操作时，View对象拖拽监听器会接收这种事件操作类型。这种操作类型之前不一定是<code>ACTION_DROP</code>事件。如果系统发送了一个<code>ACTION_DROP</code>事件，那么接收<code>ACTION_DRAG_ENDED</code>操作类型不意味着放下操作成功了。监听器必须调用getResult()方法来获得响应<code>ACTION_DROP</code>事件中的返回值。如果<code>ACTION_DROP</code>事件没有被发送，那么getResult()会返回false。</p>
+<h2 id="View-layout-int-int-int-int"><a href="#View-layout-int-int-int-int" class="headerlink" title="View.layout(int,int,int,int)"></a>View.layout(int,int,int,int)</h2><p>上面的方法有个致命的弱点,那就是图标没办法放到指定拖动的点,而只能实现拖动的效果.因为Android系统在设计的时候,<code>View.OnDragListener</code>并不是用来进行图标拖动的,而是文字的复制粘贴,我们只是强行地将它作用于图标的拖拽.但上面这种方案也是可以解决这个问题的,那就是先移除原来的图标,然后再在新的位置重绘图标,不过这略显麻烦了,对于内存吃紧的Android系统来说,这无疑是雪上加霜.</p>
+<p>下面我们通过重新布局图标的Layout来实现拖动效果.要实现这种效果,就要用到上面介绍的长按事件中的第三种方案,采用设置<code>View.OnTouchListener</code>监听器来监听触摸事件,并在<code>MotionEvent.ACTION_MOVE</code>中处理拖动.</p>
+<p>对于上面的<code>LongPressHandler</code>类,还需要做小小的修改,因为上面这个类触发了一次长按回调后,就顺便移除了这个回调,后面的触摸事件就接收不了监听了.解决方案也很简单,在下面这段代码中,把移除监听注销掉就可以了.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">case MotionEvent.ACTION_MOVE:</div><div class="line">    mTouchEndPoint.x = event.getRawX();</div><div class="line">    mTouchEndPoint.y = event.getRawY();</div><div class="line">    // If user is pressing and dragging, then we make a callback.</div><div class="line">    if (mLongPressThread.mLongPressing) &#123;</div><div class="line">        // 注销下面这行,实现长期监听.</div><div class="line">        // resetLongPressEvent();</div><div class="line">        if (listener != null) &#123;</div><div class="line">            return listener.onLongPressed(event);</div><div class="line">        &#125;</div><div class="line">        break;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>然后,我们在主类中调用这个方法的回调,在回调里进行图标的拖拽.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div></pre></td><td class="code"><pre><div class="line">package com.amap.mock.activity;</div><div class="line"></div><div class="line">import android.app.Activity;</div><div class="line">import android.os.Bundle;</div><div class="line">import android.view.Gravity;</div><div class="line">import android.view.MotionEvent;</div><div class="line">import android.widget.FrameLayout;</div><div class="line">import android.widget.ImageView;</div><div class="line"></div><div class="line">import com.amap.mock.R;</div><div class="line"></div><div class="line">/**</div><div class="line"> * Created by xingli on 9/9/15.</div><div class="line"> *</div><div class="line"> * An example of performing long press and drag event.</div><div class="line"> */</div><div class="line">public class DragActivity extends Activity &#123;</div><div class="line"></div><div class="line">    private static final String TAG = DragActivity.class.getSimpleName();</div><div class="line">    private ImageView mIvLogo;</div><div class="line">    private LongPressHandler longPressHandler;</div><div class="line">    private int statusBarHeight;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">        super.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_test);</div><div class="line">        mIvLogo = (ImageView) findViewById(R.id.iv_logo);</div><div class="line">        mIvLogo.setClickable(true);</div><div class="line">        setDragEnable(true);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setDragEnable(boolean enable) &#123;</div><div class="line">        if (enable) &#123;</div><div class="line">            if (longPressHandler == null) &#123;</div><div class="line">                longPressHandler = new LongPressHandler(mIvLogo);</div><div class="line">            &#125;</div><div class="line">            longPressHandler.setOnLongPressListener(new LongPressHandler.OnLongPressListener() &#123;</div><div class="line">                @Override</div><div class="line">                public boolean onLongPressed(MotionEvent event) &#123;</div><div class="line">                    FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mIvLogo.getLayoutParams();</div><div class="line">                    params.gravity = Gravity.TOP | Gravity.LEFT;</div><div class="line">                    switch (event.getAction()) &#123;</div><div class="line">                        case MotionEvent.ACTION_MOVE:</div><div class="line">                            int x = (int) event.getRawX();</div><div class="line">                            int y = (int) event.getRawY();</div><div class="line">                            int width = mIvLogo.getMeasuredWidth();</div><div class="line">                            int height = mIvLogo.getMeasuredHeight();</div><div class="line">                            int l = x - width / 2;</div><div class="line">                            int r = x + width / 2;</div><div class="line">                            int t = y - height / 2 - getStatusBarHeight();</div><div class="line">                            int b = y + height / 2 - getStatusBarHeight();</div><div class="line">                            params.leftMargin = l;</div><div class="line">                            params.topMargin = t;</div><div class="line">                            mIvLogo.layout(l, t, r, b);</div><div class="line">                            return true;</div><div class="line">                    &#125;</div><div class="line">                    return false;</div><div class="line">                &#125;</div><div class="line">            &#125;);</div><div class="line">        &#125; else &#123;</div><div class="line">            if (longPressHandler != null) &#123;</div><div class="line">                longPressHandler.setOnLongPressListener(null);</div><div class="line">                longPressHandler = null;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * Get the status bar height.</div><div class="line">     * </div><div class="line">     * @return the height</div><div class="line">     */</div><div class="line">    public int getStatusBarHeight() &#123;</div><div class="line">        if (statusBarHeight == 0) &#123;</div><div class="line">            int resourceId = getResources().getIdentifier(&quot;status_bar_height&quot;, &quot;dimen&quot;, &quot;android&quot;);</div><div class="line">            if (resourceId &gt; 0) &#123;</div><div class="line">                statusBarHeight = getResources().getDimensionPixelSize(resourceId);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        return statusBarHeight;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中,Activity的布局:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</div><div class="line">&lt;FrameLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">    android:id=&quot;@+id/container&quot;</div><div class="line">    android:layout_width=&quot;fill_parent&quot;</div><div class="line">    android:layout_height=&quot;fill_parent&quot;</div><div class="line">    android:orientation=&quot;vertical&quot;&gt;</div><div class="line"></div><div class="line">    &lt;ImageView</div><div class="line">        android:id=&quot;@+id/iv_logo&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:src=&quot;@drawable/ic_launcher&quot; /&gt;</div><div class="line"></div><div class="line">&lt;/FrameLayout&gt;</div></pre></td></tr></table></figure>
+<p>这段代码的关键思想在于,在拖动时,动态计算当前位置的坐标,然后调用<code>View.layout()</code>方法对这个View重新布局.有几个需要注意的地方:</p>
+<ul>
+<li>记得算上动态栏的高度,可以通过<code>getResources().getDimensionPixelSize(resourceId);</code>得到某个资源的像素值;</li>
+<li>需要计算图像的中心点,否则移动的距离以你图标的左上角来计算;</li>
+<li>在上面的源码中,我还做了一件事,就是获取图标的布局,重新设置Margin值.其实如果你除了拖动以外不进行别的操作的话,没必要进行这样的设置.但如果你需要重绘这个按钮的话,那么重绘的时候是按照旧的LayoutParams来绘制的,这样会造成图标又回到了原来的地方.我在设置FloatingActionButton的时候就遇到了这样的问题,具体代码可参考<a href="https://github.com/iluhcm/CircularFloatingActionMenu/blob/master/src/main/java/com/oguzdev/circularfloatingactionmenu/library/FloatingActionMenu.java" target="_blank" rel="external">Github源码</a>.</li>
+<li>如果不想长按拖动,而是直接拖动,那么修改长按触发阈值<code>LONG_PRESS_TIME_THRESHOLD</code>,或者通过<code>public LongPressHandler(View view, long holdTime)</code>构造函数来实例化<code>LongPressHandler</code>就可以了.</li>
+</ul>
+<h2 id="触摸事件小结"><a href="#触摸事件小结" class="headerlink" title="触摸事件小结"></a>触摸事件小结</h2><p>经过上面的分析,我们通过两种方式实现了触摸事件的实现及事件回调处理,分别是View.OnDragListener接口和View.layout()方法.</p>
+<p>实际上触摸事件是和长按事件分不开的,只是触发时间的长短阈值设置不同罢了.在第一种方法中,通过调用<code>View.startDrag()</code>方法触发拖拽事件,通过设置<code>View.OnDragListener</code>设置事件回调,便可以在回调中处理拖拽事件.但是这种方法的应用场景并不是图标拖拽,而是文字的复制粘贴,原始的视图是不会移动的.一般我们会通过覆盖<code>View.onTouchEvent()</code>或者设置<code>View.OnTouchListener</code>监听器来监听滑动事件,并在<code>MotionEvent.ACTION_MOVE</code>状态中处理拖拽问题,这便是第二种方案的思想.</p>
+<h1 id="Source-Code"><a href="#Source-Code" class="headerlink" title="Source Code"></a>Source Code</h1><p>长按拖拽的源码在<a href="https://github.com/iluhcm/CircularFloatingActionMenu" target="_blank" rel="external">Github</a>上,欢迎star&amp;fork:)</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="http://grepcode.com/file/repo1.maven.org/maven2/org.robolectric/android-all/5.0.0_r2-robolectric-1/android/view/View.java" target="_blank" rel="external">http://grepcode.com/file/repo1.maven.org/maven2/org.robolectric/android-all/5.0.0_r2-robolectric-1/android/view/View.java</a><br><a href="http://www.ablanxue.com/prone_4213_1.html" target="_blank" rel="external">http://www.ablanxue.com/prone_4213_1.html</a><br><a href="http://www.yiibai.com/android/android_drag_and_drop.html" target="_blank" rel="external">http://www.yiibai.com/android/android_drag_and_drop.html</a><br><a href="http://developer.android.com/guide/topics/ui/drag-drop.html" target="_blank" rel="external">http://developer.android.com/guide/topics/ui/drag-drop.html</a><br><a href="http://www.jcodecraeer.com/a/anzhuokaifa/developer/2013/0311/1003.html" target="_blank" rel="external">http://www.jcodecraeer.com/a/anzhuokaifa/developer/2013/0311/1003.html</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <ul class="post-copyright">
+    <li class="post-copyright-author">
+      <strong>Post author:</strong>
+      Xing Li
+    </li>
+    <li class="post-copyright-link">
+      <strong>Post link:</strong>
+      <a href="http://iluhcm.com/2015/09/07/android-long-click-and-drag-event/" title="Android长按及拖动事件探究">http://iluhcm.com/2015/09/07/android-long-click-and-drag-event/</a>
+    </li>
+    <li class="post-copyright-license">
+      <strong>Copyright Notice: </strong>
+      All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+    </li>
+  </ul>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/View/" rel="tag"># View</a>
+          
+            <a href="/tags/OnLongClickListener/" rel="tag"># OnLongClickListener</a>
+          
+            <a href="/tags/OnDragListener/" rel="tag"># OnDragListener</a>
+          
+            <a href="/tags/GestureDetector/" rel="tag"># GestureDetector</a>
+          
+            <a href="/tags/OnTouchListener/" rel="tag"># OnTouchListener</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/09/03/how-to-detect-useful-sensors-for-android-devices/" rel="next" title="Android系统中Sensor及SensorManager探究">
+                <i class="fa fa-chevron-left"></i> Android系统中Sensor及SensorManager探究
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/09/15/accelerate-blogs-access-speed-by-deploying-it-to-github-and-gitcafe/" rel="prev" title="将博客同时部署至Github和GitCafe加速访问站点">
+                将博客同时部署至Github和GitCafe加速访问站点 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div id="sidebar-dimmer"></div>
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="Xing Li" />
+          <p class="site-author-name" itemprop="name">Xing Li</p>
+           
+              <p class="site-description motion-element" itemprop="description">If asked how the pond can be so lucid and fresh, told that sources with flowing water replenish.</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">categories</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">48</span>
+                <span class="site-state-item-name">tags</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/iluhcm" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.facebook.com/xing.li.731135" target="_blank" title="Facebook">
+                  
+                    <i class="fa fa-fw fa-facebook"></i>
+                  
+                  Facebook
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/iluhcm" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://plus.google.com/101164893136136383839/posts" target="_blank" title="Google+">
+                  
+                    <i class="fa fa-fw fa-google-plus"></i>
+                  
+                  Google+
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/lshcm" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/iluhcm" target="_blank" title="Zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://music.163.com/#/user/home?id=38148117" target="_blank" title="Netease">
+                  
+                    <i class="fa fa-fw fa-music"></i>
+                  
+                  Netease
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-Long-Click-Event"><span class="nav-number">1.</span> <span class="nav-text">Android Long Click Event</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#View-OnLongClickListener"><span class="nav-number">1.1.</span> <span class="nav-text">View.OnLongClickListener</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简单实例"><span class="nav-number">1.1.1.</span> <span class="nav-text">简单实例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GestureDetector-OnGestureListener"><span class="nav-number">1.2.</span> <span class="nav-text">GestureDetector.OnGestureListener</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简单实例-1"><span class="nav-number">1.2.1.</span> <span class="nav-text">简单实例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GestureDetector长按事件原理解析"><span class="nav-number">1.2.2.</span> <span class="nav-text">GestureDetector长按事件原理解析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#View-OnTouchListener"><span class="nav-number">1.3.</span> <span class="nav-text">View.OnTouchListener</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#长按事件小结"><span class="nav-number">1.4.</span> <span class="nav-text">长按事件小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-Drag-Event"><span class="nav-number">2.</span> <span class="nav-text">Android Drag Event</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#View-OnDragListener"><span class="nav-number">2.1.</span> <span class="nav-text">View.OnDragListener</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简单实例-2"><span class="nav-number">2.1.1.</span> <span class="nav-text">简单实例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#View-layout-int-int-int-int"><span class="nav-number">2.2.</span> <span class="nav-text">View.layout(int,int,int,int)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#触摸事件小结"><span class="nav-number">2.3.</span> <span class="nav-text">触摸事件小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Source-Code"><span class="nav-number">3.</span> <span class="nav-text">Source Code</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xing Li</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("CI5TJwN9TiLhei285z2E32es-gzGzoHsz", "RwQ5NncufhCOGqfbhKM1ucxz");AV.useAVCloudUS();</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

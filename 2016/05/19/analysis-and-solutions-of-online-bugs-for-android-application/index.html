@@ -1,0 +1,1058 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="2yx0JNDw3DWn3FVwl0XV9ba4wAjjbvZ3viXpvjGwBa8" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android,Bug,Online,Exception," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="Android v2.5.2java.lang.OutOfMemoryError: Failed to allocate a 2560012 byte allocation with 2300136 free bytes and 2MB until OOM1234567891011121314151617181920212223java.lang.OutOfMemoryError: Failed">
+<meta name="keywords" content="Android,Bug,Online,Exception">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android应用线上崩溃Bug分析及解决方案">
+<meta property="og:url" content="http://iluhcm.com/2016/05/19/analysis-and-solutions-of-online-bugs-for-android-application/index.html">
+<meta property="og:site_name" content="Xing&#39;s Blog">
+<meta property="og:description" content="Android v2.5.2java.lang.OutOfMemoryError: Failed to allocate a 2560012 byte allocation with 2300136 free bytes and 2MB until OOM1234567891011121314151617181920212223java.lang.OutOfMemoryError: Failed">
+<meta property="og:updated_time" content="2017-03-27T09:16:08.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android应用线上崩溃Bug分析及解决方案">
+<meta name="twitter:description" content="Android v2.5.2java.lang.OutOfMemoryError: Failed to allocate a 2560012 byte allocation with 2300136 free bytes and 2MB until OOM1234567891011121314151617181920212223java.lang.OutOfMemoryError: Failed">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://iluhcm.com/2016/05/19/analysis-and-solutions-of-online-bugs-for-android-application/"/>
+
+
+
+
+
+  <title>Android应用线上崩溃Bug分析及解决方案 | Xing's Blog</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?03e8bdd436b4561c8e760c9459ee8003";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Xing's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">To be a better man.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://iluhcm.com/2016/05/19/analysis-and-solutions-of-online-bugs-for-android-application/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xing Li">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xing's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android应用线上崩溃Bug分析及解决方案</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-19T09:23:29+08:00">
+                2016-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2016/05/19/analysis-and-solutions-of-online-bugs-for-android-application/" class="leancloud_visitors" data-flag-title="Android应用线上崩溃Bug分析及解决方案">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Visitors </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Android-v2-5-2"><a href="#Android-v2-5-2" class="headerlink" title="Android v2.5.2"></a>Android v2.5.2</h1><h2 id="java-lang-OutOfMemoryError-Failed-to-allocate-a-2560012-byte-allocation-with-2300136-free-bytes-and-2MB-until-OOM"><a href="#java-lang-OutOfMemoryError-Failed-to-allocate-a-2560012-byte-allocation-with-2300136-free-bytes-and-2MB-until-OOM" class="headerlink" title="java.lang.OutOfMemoryError: Failed to allocate a 2560012 byte allocation with 2300136 free bytes and 2MB until OOM"></a>java.lang.OutOfMemoryError: Failed to allocate a 2560012 byte allocation with 2300136 free bytes and 2MB until OOM</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">java.lang.OutOfMemoryError: Failed to allowcate a 2560012 byte allocation with 2300136 free bytes and 2MB until OOM</div><div class="line">	at dalvik.system.VMRuntime.newNonMovableArray(Native Method)</div><div class="line">	at android.graphics.Bitmap.nativeCreate(Native Method)</div><div class="line">	at android.graphics.Bitmap.createBitmap(Bitmap.java:847)</div><div class="line">	at android.graphics.Bitmap.createBitmap(Bitmap.java:817)</div><div class="line">	at android.graphics.Bitmap.createBitmap(Bitmap.java:784)</div><div class="line">	at com.facebook.imagepipeline.memory.BitmapPool.i(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.BitmapPool.b(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.BasePool.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.platform.ArtDecoder.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.platform.ArtDecoder.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.decoder.ImageDecoder.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.decoder.ImageDecoder.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.DecodeProducer$ProgressiveDecoder.c(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.DecodeProducer$ProgressiveDecoder.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.DecodeProducer$ProgressiveDecoder$1.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.JobScheduler.e(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.JobScheduler.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.JobScheduler$1.run(Unknown Source)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1112)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:587)</div><div class="line">	at com.facebook.imagepipeline.core.PriorityThreadFactory$1.run(Unknown Source)</div><div class="line">	at java.lang.Thread.run(Thread.java:831)</div></pre></td></tr></table></figure>
+<p>系统版本特点：5.0以上<br>机型分布特点：华为、小米居多<br>原因分析：图片加载占用内存过多，短时间内无法释放，剩余的内存资源无法再加载更多的图片，导致OOM异常。<br>可能的解决办法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;application</div><div class="line">	android:name=&quot;.ParaseApplication&quot;</div><div class="line">	android:allowBackup=&quot;true&quot;</div><div class="line">	android:icon=&quot;@mipmap/ic_launcher&quot;</div><div class="line">	android:label=&quot;@string/app_name&quot;</div><div class="line">	android:theme=&quot;@style/AppTheme&quot;</div><div class="line">	android:largeHeap=&quot;true&quot;</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<h2 id="java-lang-RuntimeException-Unable-to-start-activity-ComponentInfo-com-kaola-com-kaola-spring-ui-kaola-InterestedCategoryActivity-java-lang-NullPointerException-Attempt-to-read-from-field-‘com-android-server-am-ActivityStackSupervisor-com-android-server-am-ActivityRecord-mStackSupervisor’-on-a-null-object-reference"><a href="#java-lang-RuntimeException-Unable-to-start-activity-ComponentInfo-com-kaola-com-kaola-spring-ui-kaola-InterestedCategoryActivity-java-lang-NullPointerException-Attempt-to-read-from-field-‘com-android-server-am-ActivityStackSupervisor-com-android-server-am-ActivityRecord-mStackSupervisor’-on-a-null-object-reference" class="headerlink" title="java.lang.RuntimeException: Unable to start activity ComponentInfo{com.kaola/com.kaola.spring.ui.kaola.InterestedCategoryActivity}: java.lang.NullPointerException: Attempt to read from field ‘com.android.server.am.ActivityStackSupervisor com.android.server.am.ActivityRecord.mStackSupervisor’ on a null object reference"></a>java.lang.RuntimeException: Unable to start activity ComponentInfo{com.kaola/com.kaola.spring.ui.kaola.InterestedCategoryActivity}: java.lang.NullPointerException: Attempt to read from field ‘com.android.server.am.ActivityStackSupervisor com.android.server.am.ActivityRecord.mStackSupervisor’ on a null object reference</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">java.lang.RuntimeException: Unable to start activity ComponentInfo&#123;com.kaola/com.kaola.spring.ui.kaola.InterestedCategoryActivity&#125;: java.lang.NullPointerException: Attempt to read from field &apos;com.android.server.am.ActivityStackSupervisor com.android.server.am.ActivityRecord.mStackSupervisor&apos; on a null object reference</div><div class="line">	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2379)</div><div class="line">	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2441)</div><div class="line">	at android.app.ActivityThread.access$800(ActivityThread.java:154)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1323)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:102)</div><div class="line">	at android.os.Looper.loop(Looper.java:135)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5336)</div><div class="line">	at java.lang.reflect.Method.invoke(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:372)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:904)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:699)</div><div class="line">Caused by: java.lang.NullPointerException: Attempt to read from field &apos;com.android.server.am.ActivityStackSupervisor com.android.server.am.ActivityRecord.mStackSupervisor&apos; on a null object reference</div><div class="line">	at android.os.Parcel.readException(Parcel.java:1546)</div><div class="line">	at android.os.Parcel.readException(Parcel.java:1493)</div><div class="line">	at android.app.ActivityManagerProxy.convertToTranslucent(ActivityManagerNative.java:4417)</div><div class="line">	at android.app.Activity.convertToTranslucent(Activity.java:5469)</div><div class="line">	at android.app.EnterTransitionCoordinator.prepareEnter(EnterTransitionCoordinator.java:275)</div><div class="line">	at android.app.EnterTransitionCoordinator.(EnterTransitionCoordinator.java:69)</div><div class="line">	at android.app.ActivityTransitionState.enterReady(ActivityTransitionState.java:181)</div><div class="line">	at android.app.Activity.performStart(Activity.java:6011)</div><div class="line">	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2342)</div><div class="line">	... 10 more</div><div class="line">java.lang.NullPointerException: Attempt to read from field &apos;com.android.server.am.ActivityStackSupervisor com.android.server.am.ActivityRecord.mStackSupervisor&apos; on a null object reference</div><div class="line">	at android.os.Parcel.readException(Parcel.java:1546)</div><div class="line">	at android.os.Parcel.readException(Parcel.java:1493)</div><div class="line">	at android.app.ActivityManagerProxy.convertToTranslucent(ActivityManagerNative.java:4417)</div><div class="line">	at android.app.Activity.convertToTranslucent(Activity.java:5469)</div><div class="line">	at android.app.EnterTransitionCoordinator.prepareEnter(EnterTransitionCoordinator.java:275)</div><div class="line">	at android.app.EnterTransitionCoordinator.(EnterTransitionCoordinator.java:69)</div><div class="line">	at android.app.ActivityTransitionState.enterReady(ActivityTransitionState.java:181)</div><div class="line">	at android.app.Activity.performStart(Activity.java:6011)</div><div class="line">	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2342)</div><div class="line">	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2441)</div><div class="line">	at android.app.ActivityThread.access$800(ActivityThread.java:154)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1323)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:102)</div><div class="line">	at android.os.Looper.loop(Looper.java:135)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5336)</div><div class="line">	at java.lang.reflect.Method.invoke(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:372)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:904)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:699)</div></pre></td></tr></table></figure>
+<p>系统版本特点：5.0以上<br>机型分布特点：全部是nubia<br>原因分析：特定机型修改了系统启动Activity的源码，导致的NPE。在<code>android.app.ActivityThread.performLaunchActivity#performLaunchActivity()</code>方法签名中并没有找到对应的Exception log。<br>解决办法：暂时规避这些特定的机型。</p>
+<h2 id="java-lang-OutOfMemoryError-Failed-to-allocate-a-2560012-byte-allocation-with-2300136-free-bytes-and-2MB-until-OOM-1"><a href="#java-lang-OutOfMemoryError-Failed-to-allocate-a-2560012-byte-allocation-with-2300136-free-bytes-and-2MB-until-OOM-1" class="headerlink" title="java.lang.OutOfMemoryError: Failed to allocate a 2560012 byte allocation with 2300136 free bytes and 2MB until OOM"></a>java.lang.OutOfMemoryError: Failed to allocate a 2560012 byte allocation with 2300136 free bytes and 2MB until OOM</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">java.lang.OutOfMemoryError: Failed to allocate a 2560012 byte allocation with 2300136 free bytes and 2MB until OOM</div><div class="line">	at dalvik.system.VMRuntime.newNonMovableArray(Native Method)</div><div class="line">	at android.graphics.Bitmap.nativeCreate(Native Method)</div><div class="line">	at android.graphics.Bitmap.createBitmap(Bitmap.java:847)</div><div class="line">	at android.graphics.Bitmap.createBitmap(Bitmap.java:817)</div><div class="line">	at android.graphics.Bitmap.createBitmap(Bitmap.java:784)</div><div class="line">	at com.facebook.imagepipeline.memory.BitmapPool.i(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.BitmapPool.b(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.BasePool.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.platform.ArtDecoder.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.platform.ArtDecoder.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.decoder.ImageDecoder.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.decoder.ImageDecoder.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.DecodeProducer$ProgressiveDecoder.c(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.DecodeProducer$ProgressiveDecoder.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.DecodeProducer$ProgressiveDecoder$1.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.JobScheduler.e(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.JobScheduler.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.JobScheduler$1.run(Unknown Source)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1112)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:587)</div><div class="line">	at com.facebook.imagepipeline.core.PriorityThreadFactory$1.run(Unknown Source)</div><div class="line">	at java.lang.Thread.run(Thread.java:831)</div></pre></td></tr></table></figure>
+<p>系统版本特点：4.3以上，5系统占大头<br>机型分布特点：华为、小米<br>原因分析：同1.</p>
+<h2 id="java-lang-NoClassDefFoundError-com-facebook-imagepipeline-memory-NativeMemoryChunk"><a href="#java-lang-NoClassDefFoundError-com-facebook-imagepipeline-memory-NativeMemoryChunk" class="headerlink" title="java.lang.NoClassDefFoundError: com/facebook/imagepipeline/memory/NativeMemoryChunk"></a>java.lang.NoClassDefFoundError: com/facebook/imagepipeline/memory/NativeMemoryChunk</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">java.lang.NoClassDefFoundError: com/facebook/imagepipeline/memory/NativeMemoryChunk</div><div class="line">	at com.facebook.imagepipeline.memory.NativeMemoryChunkPool.i(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.NativeMemoryChunkPool.b(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.BasePool.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.NativePooledByteBufferOutputStream.(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.NativePooledByteBufferFactory.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.NativePooledByteBufferFactory.b(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.LocalFetchProducer.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.LocalFetchProducer.b(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.LocalResourceFetchProducer.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.LocalFetchProducer$1.d(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.producers.LocalFetchProducer$1.c(Unknown Source)</div><div class="line">	at com.facebook.common.executors.StatefulRunnable.run(Unknown Source)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1112)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:587)</div><div class="line">	at java.lang.Thread.run(Thread.java:841)</div></pre></td></tr></table></figure>
+<p>系统版本特点：4.2.1-4.4.4<br>机型分布特点：华为、三星N9008、小米3<br>原因分析：<code>libmemchunk.so</code>加载失败，与<code>NELoginJni</code>有些类似<br>解决办法：</p>
+<ol>
+<li>把<code>libmemchunk.so</code>放到armeabi-v7a目录下</li>
+<li><a href="https://github.com/facebook/fresco/blob/master/fbcore/src/main/java/com/facebook/common/internal/proguard_annotations.pro" target="_blank" rel="external">https://github.com/facebook/fresco/blob/master/fbcore/src/main/java/com/facebook/common/internal/proguard_annotations.pro</a></li>
+<li>更新fresco到最新版本</li>
+</ol>
+<p>Ref：<br><a href="https://github.com/facebook/fresco/issues/410" target="_blank" rel="external">https://github.com/facebook/fresco/issues/410</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"># Keep our interfaces so they can be used by other ProGuard rules.</div><div class="line"># See http://sourceforge.net/p/proguard/bugs/466/</div><div class="line">-keep,allowobfuscation @interface com.facebook.common.internal.DoNotStrip</div><div class="line"></div><div class="line"># Do not strip any method/class that is annotated with @DoNotStrip</div><div class="line">-keep @com.facebook.common.internal.DoNotStrip class *</div><div class="line">-keepclassmembers class * &#123;</div><div class="line">    @com.facebook.common.internal.DoNotStrip *;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="java-lang-RuntimeException-Unable-to-start-activity-ComponentInfo-com-kaola-com-kaola-spring-ui-goodsdetail-SkuPopWindowActivity-java-lang-NumberFormatException-Invalid-double-“5-712”"><a href="#java-lang-RuntimeException-Unable-to-start-activity-ComponentInfo-com-kaola-com-kaola-spring-ui-goodsdetail-SkuPopWindowActivity-java-lang-NumberFormatException-Invalid-double-“5-712”" class="headerlink" title="java.lang.RuntimeException: Unable to start activity ComponentInfo{com.kaola/com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity}: java.lang.NumberFormatException: Invalid double: “5,712”"></a>java.lang.RuntimeException: Unable to start activity ComponentInfo{com.kaola/com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity}: java.lang.NumberFormatException: Invalid double: “5,712”</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">java.lang.RuntimeException: Unable to start activity ComponentInfo&#123;com.kaola/com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity&#125;: java.lang.NumberFormatException: Invalid double: &quot;5,712&quot;</div><div class="line">	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2444)</div><div class="line">	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2504)</div><div class="line">	at android.app.ActivityThread.access$900(ActivityThread.java:165)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1368)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:102)</div><div class="line">	at android.os.Looper.loop(Looper.java:150)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5546)</div><div class="line">	at java.lang.reflect.Method.invoke(Native Method)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:792)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:682)</div><div class="line">Caused by: java.lang.NumberFormatException: Invalid double: &quot;5,712&quot;</div><div class="line">	at java.lang.StringToReal.invalidReal(StringToReal.java:63)</div><div class="line">	at java.lang.StringToReal.initialParse(StringToReal.java:164)</div><div class="line">	at java.lang.StringToReal.parseDouble(StringToReal.java:282)</div><div class="line">	at java.lang.Double.parseDouble(Double.java:301)</div><div class="line">	at com.kaola.common.utils.w.c(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity.f(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity.b(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity.d(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity.onCreate(Unknown Source)</div><div class="line">	at android.app.Activity.performCreate(Activity.java:6367)</div><div class="line">	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1110)</div><div class="line">	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2397)</div><div class="line">	... 9 more</div><div class="line">java.lang.NumberFormatException: Invalid double: &quot;5,712&quot;</div><div class="line">	at java.lang.StringToReal.invalidReal(StringToReal.java:63)</div><div class="line">	at java.lang.StringToReal.initialParse(StringToReal.java:164)</div><div class="line">	at java.lang.StringToReal.parseDouble(StringToReal.java:282)</div><div class="line">	at java.lang.Double.parseDouble(Double.java:301)</div><div class="line">	at com.kaola.common.utils.w.c(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity.f(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity.b(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity.d(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity.onCreate(Unknown Source)</div><div class="line">	at android.app.Activity.performCreate(Activity.java:6367)</div><div class="line">	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1110)</div><div class="line">	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2397)</div><div class="line">	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2504)</div><div class="line">	at android.app.ActivityThread.access$900(ActivityThread.java:165)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1368)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:102)</div><div class="line">	at android.os.Looper.loop(Looper.java:150)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5546)</div><div class="line">	at java.lang.reflect.Method.invoke(Native Method)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:792)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:682)</div></pre></td></tr></table></figure>
+<p>系统版本特点：4.3以上<br>机型分布特点：华为、三星N9008、小米3<br>原因分析：将String转换成Double的时候，不符合转换预设的格式，导致转换出错。这个转换跟区域有关<br>解决办法：指定区域为<code>Locale.CHINA</code>。</p>
+<h2 id="java-lang-IllegalArgumentException-pointerIndex-out-of-range"><a href="#java-lang-IllegalArgumentException-pointerIndex-out-of-range" class="headerlink" title="java.lang.IllegalArgumentException: pointerIndex out of range"></a>java.lang.IllegalArgumentException: pointerIndex out of range</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div></pre></td><td class="code"><pre><div class="line">java.lang.IllegalArgumentException: pointerIndex out of range</div><div class="line">	at android.view.MotionEvent.nativeGetAxisValue(Native Method)</div><div class="line">	at android.view.MotionEvent.getX(MotionEvent.java:1979)</div><div class="line">	at android.support.v4.view.x.c(Unknown Source)</div><div class="line">	at android.support.v4.view.w$b.c(Unknown Source)</div><div class="line">	at android.support.v4.view.w.c(Unknown Source)</div><div class="line">	at android.support.v4.view.ViewPager.onInterceptTouchEvent(Unknown Source)</div><div class="line">	at android.view.ViewGroup.dispatchTouchEvent(ViewGroup.java:1913)</div><div class="line">	at android.view.ViewGroup.dispatchTransformedTouchEvent(ViewGroup.java:2348)</div><div class="line">	at android.view.ViewGroup.dispatchTouchEvent(ViewGroup.java:2042)</div><div class="line">	at android.view.ViewGroup.dispatchTransformedTouchEvent(ViewGroup.java:2348)</div><div class="line">	at android.view.ViewGroup.dispatchTouchEvent(ViewGroup.java:2042)</div><div class="line">	at android.view.ViewGroup.dispatchTransformedTouchEvent(ViewGroup.java:2348)</div><div class="line">	at android.view.ViewGroup.dispatchTouchEvent(ViewGroup.java:2042)</div><div class="line">	at android.view.ViewGroup.dispatchTransformedTouchEvent(ViewGroup.java:2348)</div><div class="line">	at android.view.ViewGroup.dispatchTouchEvent(ViewGroup.java:2042)</div><div class="line">	at android.view.ViewGroup.dispatchTransformedTouchEvent(ViewGroup.java:2348)</div><div class="line">	at android.view.ViewGroup.dispatchTouchEvent(ViewGroup.java:2042)</div><div class="line">	at android.view.ViewGroup.dispatchTransformedTouchEvent(ViewGroup.java:2348)</div><div class="line">	at android.view.ViewGroup.dispatchTouchEvent(ViewGroup.java:2042)</div><div class="line">	at android.view.ViewGroup.dispatchTransformedTouchEvent(ViewGroup.java:2348)</div><div class="line">	at android.view.ViewGroup.dispatchTouchEvent(ViewGroup.java:2042)</div><div class="line">	at android.view.ViewGroup.dispatchTransformedTouchEvent(ViewGroup.java:2348)</div><div class="line">	at android.view.ViewGroup.dispatchTouchEvent(ViewGroup.java:2042)</div><div class="line">	at android.view.ViewGroup.dispatchTransformedTouchEvent(ViewGroup.java:2348)</div><div class="line">	at android.view.ViewGroup.dispatchTouchEvent(ViewGroup.java:2042)</div><div class="line">	at com.android.internal.policy.impl.PhoneWindow$DecorView.superDispatchTouchEvent(PhoneWindow.java:2164)</div><div class="line">	at com.android.internal.policy.impl.PhoneWindow.superDispatchTouchEvent(PhoneWindow.java:1596)</div><div class="line">	at android.app.Activity.dispatchTouchEvent(Activity.java:2527)</div><div class="line">	at com.android.internal.policy.impl.PhoneWindow$DecorView.dispatchTouchEvent(PhoneWindow.java:2112)</div><div class="line">	at android.view.View.dispatchPointerEvent(View.java:8015)</div><div class="line">	at android.view.ViewRootImpl$ViewPostImeInputStage.processPointerEvent(ViewRootImpl.java:4632)</div><div class="line">	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:4503)</div><div class="line">	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:4023)</div><div class="line">	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:4073)</div><div class="line">	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:4042)</div><div class="line">	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:4149)</div><div class="line">	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:4050)</div><div class="line">	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:4206)</div><div class="line">	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:4023)</div><div class="line">	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:4073)</div><div class="line">	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:4042)</div><div class="line">	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:4050)</div><div class="line">	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:4023)</div><div class="line">	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:6331)</div><div class="line">	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:6293)</div><div class="line">	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:6247)</div><div class="line">	at android.view.ViewRootImpl$WindowInputEventReceiver.onInputEvent(ViewRootImpl.java:6479)</div><div class="line">	at android.view.InputEventReceiver.dispatchInputEvent(InputEventReceiver.java:185)</div><div class="line">	at android.view.InputEventReceiver.nativeConsumeBatchedInputEvents(Native Method)</div><div class="line">	at android.view.InputEventReceiver.consumeBatchedInputEvents(InputEventReceiver.java:176)</div><div class="line">	at android.view.ViewRootImpl.doConsumeBatchedInput(ViewRootImpl.java:6441)</div><div class="line">	at android.view.ViewRootImpl$ConsumeBatchedInputRunnable.run(ViewRootImpl.java:6507)</div><div class="line">	at android.view.Choreographer$CallbackRecord.run(Choreographer.java:788)</div><div class="line">	at android.view.Choreographer.doCallbacks(Choreographer.java:591)</div><div class="line">	at android.view.Choreographer.doFrame(Choreographer.java:558)</div><div class="line">	at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:774)</div><div class="line">	at android.os.Handler.handleCallback(Handler.java:808)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:103)</div><div class="line">	at android.os.Looper.loop(Looper.java:193)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5351)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:515)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:829)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:645)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div></pre></td></tr></table></figure>
+<p>系统版本特点：4.4.2以上<br>机型分布特点：华为、三星、小米<br>原因分析：调用<code>MotionEvent#getX();</code>或<code>MotionEvent#getX(int);</code>方法的时候系统找不到对应的pointerIndex，导致越界。<br>解决办法：</p>
+<ul>
+<li><a href="https://github.com/chrisbanes/PhotoView/issues/31" target="_blank" rel="external">https://github.com/chrisbanes/PhotoView/issues/31</a></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">/** Custom your own ViewPager to extends support ViewPager. java source: */</div><div class="line">/** Created by azi on 2013-6-21.  */</div><div class="line"></div><div class="line">package com.chaokuadi.android.support.view;</div><div class="line"></div><div class="line">import android.content.Context;</div><div class="line">import android.util.AttributeSet;</div><div class="line">import android.view.MotionEvent;</div><div class="line"></div><div class="line">public class ViewPagerFixed extends android.support.v4.view.ViewPager &#123;</div><div class="line"></div><div class="line">    public ViewPagerFixed(Context context) &#123;</div><div class="line">        super(context);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public ViewPagerFixed(Context context, AttributeSet attrs) &#123;</div><div class="line">        super(context, attrs);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onTouchEvent(MotionEvent ev) &#123;</div><div class="line">        try &#123;</div><div class="line">            return super.onTouchEvent(ev);</div><div class="line">        &#125; catch (IllegalArgumentException ex) &#123;</div><div class="line">            ex.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onInterceptTouchEvent(MotionEvent ev) &#123;</div><div class="line">        try &#123;</div><div class="line">            return super.onInterceptTouchEvent(ev);</div><div class="line">        &#125; catch (IllegalArgumentException ex) &#123;</div><div class="line">            ex.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><a href="http://stackoverflow.com/questions/6919292/pointerindex-out-of-range-android-multitouch" target="_blank" rel="external">http://stackoverflow.com/questions/6919292/pointerindex-out-of-range-android-multitouch</a></li>
+</ul>
+<p>有两个Pointer时判断<code>event.getPointerCount() &gt;= 2</code></p>
+<ul>
+<li><a href="http://www.jcodecraeer.com/a/anzhuokaifa/androidkaifa/2015/0501/2822.html" target="_blank" rel="external">http://www.jcodecraeer.com/a/anzhuokaifa/androidkaifa/2015/0501/2822.html</a></li>
+</ul>
+<p>在我们的工程中，很有可能也是出现在这个<code>com.kaola.framework.ui.photoview.PhotoView</code>里。</p>
+<p>在使用的地方也找到了下面类似的方法签名<code>MotionEventCompat#getX(MotionEvent, int)</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * Call &#123;@link MotionEvent#getX(int)&#125;.</div><div class="line"> * If running on a pre-&#123;@link android.os.Build.VERSION_CODES#ECLAIR&#125; device,</div><div class="line"> * &#123;@link IndexOutOfBoundsException&#125; is thrown.</div><div class="line"> */</div><div class="line">public static float getX(MotionEvent event, int pointerIndex) &#123;</div><div class="line">    return IMPL.getX(event, pointerIndex);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="java-lang-UnsatisfiedLinkError-dlopen-failed-“-data-data-com-kaola-app-lib-libnelogin-so”-is-too-small-to-be-an-ELF-executable"><a href="#java-lang-UnsatisfiedLinkError-dlopen-failed-“-data-data-com-kaola-app-lib-libnelogin-so”-is-too-small-to-be-an-ELF-executable" class="headerlink" title="java.lang.UnsatisfiedLinkError: dlopen failed: “/data/data/com.kaola/app_lib/libnelogin.so” is too small to be an ELF executable"></a>java.lang.UnsatisfiedLinkError: dlopen failed: “/data/data/com.kaola/app_lib/libnelogin.so” is too small to be an ELF executable</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">java.lang.UnsatisfiedLinkError: dlopen failed: &quot;/data/data/com.kaola/app_lib/libnelogin.so&quot; is too small to be an ELF executable</div><div class="line">	at java.lang.Runtime.load(Runtime.java:333)</div><div class="line">	at java.lang.System.load(System.java:541)</div><div class="line">	at com.netease.loginapi.util.e.a(Unknown Source)</div><div class="line">	at com.netease.loginapi.util.NELoginJni.(Unknown Source)</div><div class="line">	at com.netease.loginapi.NEConfig.(Unknown Source)</div><div class="line">	at com.netease.loginapi.NELoginAPIFactory.createAPI(Unknown Source)</div><div class="line">	at com.kaola.app.HTApplication.onCreate(Unknown Source)</div><div class="line">	at android.app.Instrumentation.callApplicationOnCreate(Instrumentation.java:1009)</div><div class="line">	at android.app.ActivityThread.handleBindApplication(ActivityThread.java:4613)</div><div class="line">	at android.app.ActivityThread.access$1800(ActivityThread.java:139)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1316)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:102)</div><div class="line">	at android.os.Looper.loop(Looper.java:136)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5314)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:515)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:864)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:680)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div></pre></td></tr></table></figure>
+<p>系统版本特点：4.3.1以上<br>机型分布特点：魅族&gt;小米、华为、oppo等<br>原因分析：在调用网易登录SDK的时候，找不到适配相关系统架构（x86、x86_64、armv7等）的so包，目前仅提供x86架构的so包，遇到其他CPU架构机子的时候可能会报这个问题。<br>解决办法：提供全系列的so包，但不现实。</p>
+<h2 id="java-lang-ExceptionInInitializerError"><a href="#java-lang-ExceptionInInitializerError" class="headerlink" title="java.lang.ExceptionInInitializerError"></a>java.lang.ExceptionInInitializerError</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div></pre></td><td class="code"><pre><div class="line">java.lang.ExceptionInInitializerError</div><div class="line">	at com.tencent.tauth.Tencent.createInstance(Unknown Source)</div><div class="line">	at com.netease.oauth.a.(Unknown Source)</div><div class="line">	at com.netease.oauth.a.a(Unknown Source)</div><div class="line">	at com.kaola.app.HTApplication.onCreate(Unknown Source)</div><div class="line">	at android.app.Instrumentation.callApplicationOnCreate(Instrumentation.java:1007)</div><div class="line">	at android.app.ActivityThread.handleBindApplication(ActivityThread.java:4564)</div><div class="line">	at android.app.ActivityThread.access$1500(ActivityThread.java:151)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1402)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:110)</div><div class="line">	at android.os.Looper.loop(Looper.java:193)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5322)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:515)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:829)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:645)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div><div class="line">Caused by: java.lang.IllegalArgumentException: Invalid path: /storage/sdcard0</div><div class="line">	at android.os.StatFs.doStat(StatFs.java:46)</div><div class="line">	at android.os.StatFs.(StatFs.java:39)</div><div class="line">	at com.tencent.open.a.d$c.b(Unknown Source)</div><div class="line">	at com.tencent.open.a.d$b.b(Unknown Source)</div><div class="line">	at com.tencent.open.a.f.c(Unknown Source)</div><div class="line">	at com.tencent.open.a.f.(Unknown Source)</div><div class="line">	... 16 more</div><div class="line">Caused by: libcore.io.ErrnoException: statvfs failed: ENOTCONN (Transport endpoint is not connected)</div><div class="line">	at libcore.io.Posix.statvfs(Native Method)</div><div class="line">	at libcore.io.ForwardingOs.statvfs(ForwardingOs.java:132)</div><div class="line">	at android.os.StatFs.doStat(StatFs.java:44)</div><div class="line">	... 21 more</div><div class="line">java.lang.IllegalArgumentException: Invalid path: /storage/sdcard0</div><div class="line">	at android.os.StatFs.doStat(StatFs.java:46)</div><div class="line">	at android.os.StatFs.(StatFs.java:39)</div><div class="line">	at com.tencent.open.a.d$c.b(Unknown Source)</div><div class="line">	at com.tencent.open.a.d$b.b(Unknown Source)</div><div class="line">	at com.tencent.open.a.f.c(Unknown Source)</div><div class="line">	at com.tencent.open.a.f.(Unknown Source)</div><div class="line">	at com.tencent.tauth.Tencent.createInstance(Unknown Source)</div><div class="line">	at com.netease.oauth.a.(Unknown Source)</div><div class="line">	at com.netease.oauth.a.a(Unknown Source)</div><div class="line">	at com.kaola.app.HTApplication.onCreate(Unknown Source)</div><div class="line">	at android.app.Instrumentation.callApplicationOnCreate(Instrumentation.java:1007)</div><div class="line">	at android.app.ActivityThread.handleBindApplication(ActivityThread.java:4564)</div><div class="line">	at android.app.ActivityThread.access$1500(ActivityThread.java:151)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1402)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:110)</div><div class="line">	at android.os.Looper.loop(Looper.java:193)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5322)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:515)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:829)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:645)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div><div class="line">Caused by: libcore.io.ErrnoException: statvfs failed: ENOTCONN (Transport endpoint is not connected)</div><div class="line">	at libcore.io.Posix.statvfs(Native Method)</div><div class="line">	at libcore.io.ForwardingOs.statvfs(ForwardingOs.java:132)</div><div class="line">	at android.os.StatFs.doStat(StatFs.java:44)</div><div class="line">	... 21 more</div><div class="line">libcore.io.ErrnoException: statvfs failed: ENOTCONN (Transport endpoint is not connected)</div><div class="line">	at libcore.io.Posix.statvfs(Native Method)</div><div class="line">	at libcore.io.ForwardingOs.statvfs(ForwardingOs.java:132)</div><div class="line">	at android.os.StatFs.doStat(StatFs.java:44)</div><div class="line">	at android.os.StatFs.(StatFs.java:39)</div><div class="line">	at com.tencent.open.a.d$c.b(Unknown Source)</div><div class="line">	at com.tencent.open.a.d$b.b(Unknown Source)</div><div class="line">	at com.tencent.open.a.f.c(Unknown Source)</div><div class="line">	at com.tencent.open.a.f.(Unknown Source)</div><div class="line">	at com.tencent.tauth.Tencent.createInstance(Unknown Source)</div><div class="line">	at com.netease.oauth.a.(Unknown Source)</div><div class="line">	at com.netease.oauth.a.a(Unknown Source)</div><div class="line">	at com.kaola.app.HTApplication.onCreate(Unknown Source)</div><div class="line">	at android.app.Instrumentation.callApplicationOnCreate(Instrumentation.java:1007)</div><div class="line">	at android.app.ActivityThread.handleBindApplication(ActivityThread.java:4564)</div><div class="line">	at android.app.ActivityThread.access$1500(ActivityThread.java:151)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1402)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:110)</div><div class="line">	at android.os.Looper.loop(Looper.java:193)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5322)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:515)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:829)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:645)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div></pre></td></tr></table></figure>
+<p>系统版本特点：4.4.2和4.4.4<br>机型分布特点：华为、htc、dakele、酷派<br>原因分析：腾讯登录sdk问题。猜测是他们用<code>StatFs</code>获取sd卡文件系统信息的时候出问题。  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">private static StructStatVfs doStat(String path) &#123;</div><div class="line">    try &#123;</div><div class="line">        return Os.statvfs(path);</div><div class="line">    &#125; catch (ErrnoException e) &#123;</div><div class="line">        throw new IllegalArgumentException(&quot;Invalid path: &quot; + path, e);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>解决办法：更新sdk</p>
+<p>Ref：<a href="https://github.com/paypal/PayPal-Android-SDK/issues/77" target="_blank" rel="external">https://github.com/paypal/PayPal-Android-SDK/issues/77</a></p>
+<h2 id="java-lang-RuntimeException-Unable-to-start-receiver-com-kaola-app-TimeChangeListener-java-lang-SecurityException-Permission-Denial-get-set-setting-for-user-asks-to-run-as-user-0-but-is-calling-from-user-100-this-requires-android-permission-INTERACT-ACROSS-USERS-FULL"><a href="#java-lang-RuntimeException-Unable-to-start-receiver-com-kaola-app-TimeChangeListener-java-lang-SecurityException-Permission-Denial-get-set-setting-for-user-asks-to-run-as-user-0-but-is-calling-from-user-100-this-requires-android-permission-INTERACT-ACROSS-USERS-FULL" class="headerlink" title="java.lang.RuntimeException: Unable to start receiver com.kaola.app.TimeChangeListener: java.lang.SecurityException: Permission Denial: get/set setting for user asks to run as user 0 but is calling from user 100; this requires android.permission.INTERACT_ACROSS_USERS_FULL"></a>java.lang.RuntimeException: Unable to start receiver com.kaola.app.TimeChangeListener: java.lang.SecurityException: Permission Denial: get/set setting for user asks to run as user 0 but is calling from user 100; this requires android.permission.INTERACT_ACROSS_USERS_FULL</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div></pre></td><td class="code"><pre><div class="line">java.lang.RuntimeException: Unable to start receiver com.kaola.app.TimeChangeListener: java.lang.SecurityException: Permission Denial: get/set setting for user asks to run as user 0 but is calling from user 100; this requires android.permission.INTERACT_ACROSS_USERS_FULL</div><div class="line">	at android.app.ActivityThread.handleReceiver(ActivityThread.java:3641)</div><div class="line">	at android.app.ActivityThread.access$2000(ActivityThread.java:221)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1876)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:102)</div><div class="line">	at android.os.Looper.loop(Looper.java:158)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:7224)</div><div class="line">	at java.lang.reflect.Method.invoke(Native Method)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:1230)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1120)</div><div class="line">Caused by: java.lang.SecurityException: Permission Denial: get/set setting for user asks to run as user 0 but is calling from user 100; this requires android.permission.INTERACT_ACROSS_USERS_FULL</div><div class="line">	at android.os.Parcel.readException(Parcel.java:1620)</div><div class="line">	at android.database.DatabaseUtils.readExceptionFromParcel(DatabaseUtils.java:183)</div><div class="line">	at android.database.DatabaseUtils.readExceptionFromParcel(DatabaseUtils.java:135)</div><div class="line">	at android.content.ContentProviderProxy.call(ContentProviderNative.java:646)</div><div class="line">	at android.provider.Settings$NameValueCache.getStringForUser(Settings.java:1505)</div><div class="line">	at android.provider.Settings$Secure.getStringForUser(Settings.java:8489)</div><div class="line">	at com.netease.mobsecurity.factory.JNIFactory.w6e685a9adf5af10b(Native Method)</div><div class="line">	at com.netease.mobsecurity.factory.a.a(Unknown Source)</div><div class="line">	at com.netease.mobsecurity.impl.getInfo.a.a(Unknown Source)</div><div class="line">	at com.netease.mobsecurity.interfacejni.SecruityInfo.getSecInfo(Unknown Source)</div><div class="line">	at com.kaola.common.utils.i.b(Unknown Source)</div><div class="line">	at com.kaola.spring.common.net.j.a(Unknown Source)</div><div class="line">	at com.kaola.spring.common.net.a.a(Unknown Source)</div><div class="line">	at com.kaola.spring.common.net.a.a(Unknown Source)</div><div class="line">	at com.kaola.spring.common.net.a.a(Unknown Source)</div><div class="line">	at com.kaola.app.TimeChangeListener.onReceive(Unknown Source)</div><div class="line">	at android.app.ActivityThread.handleReceiver(ActivityThread.java:3634)</div><div class="line">	... 8 more</div><div class="line">java.lang.SecurityException: Permission Denial: get/set setting for user asks to run as user 0 but is calling from user 100; this requires android.permission.INTERACT_ACROSS_USERS_FULL</div><div class="line">	at android.os.Parcel.readException(Parcel.java:1620)</div><div class="line">	at android.database.DatabaseUtils.readExceptionFromParcel(DatabaseUtils.java:183)</div><div class="line">	at android.database.DatabaseUtils.readExceptionFromParcel(DatabaseUtils.java:135)</div><div class="line">	at android.content.ContentProviderProxy.call(ContentProviderNative.java:646)</div><div class="line">	at android.provider.Settings$NameValueCache.getStringForUser(Settings.java:1505)</div><div class="line">	at android.provider.Settings$Secure.getStringForUser(Settings.java:8489)</div><div class="line">	at com.netease.mobsecurity.factory.JNIFactory.w6e685a9adf5af10b(Native Method)</div><div class="line">	at com.netease.mobsecurity.factory.a.a(Unknown Source)</div><div class="line">	at com.netease.mobsecurity.impl.getInfo.a.a(Unknown Source)</div><div class="line">	at com.netease.mobsecurity.interfacejni.SecruityInfo.getSecInfo(Unknown Source)</div><div class="line">	at com.kaola.common.utils.i.b(Unknown Source)</div><div class="line">	at com.kaola.spring.common.net.j.a(Unknown Source)</div><div class="line">	at com.kaola.spring.common.net.a.a(Unknown Source)</div><div class="line">	at com.kaola.spring.common.net.a.a(Unknown Source)</div><div class="line">	at com.kaola.spring.common.net.a.a(Unknown Source)</div><div class="line">	at com.kaola.app.TimeChangeListener.onReceive(Unknown Source)</div><div class="line">	at android.app.ActivityThread.handleReceiver(ActivityThread.java:3634)</div><div class="line">	at android.app.ActivityThread.access$2000(ActivityThread.java:221)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1876)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:102)</div><div class="line">	at android.os.Looper.loop(Looper.java:158)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:7224)</div><div class="line">	at java.lang.reflect.Method.invoke(Native Method)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:1230)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1120)</div></pre></td></tr></table></figure>
+<p>系统版本特点：5.0以上<br>机型分布特点：三星、魅族、索尼<br>原因分析：根据提示，<code>android.permission.INTERACT_ACROSS_USERS_FULL</code>权限未添加，与安全部门sdk有关。<br>解决办法：更新安全部门sdk</p>
+<h2 id="java-lang-UnsatisfiedLinkError-Couldn’t-load-memchunk-from-loader-dalvik-system-PathClassLoader-DexPathList-zip-file-“-data-app-com-kaola-2-apk”-nativeLibraryDirectories-vendor-lib-system-lib-data-datalib-findLibrary-returned-null"><a href="#java-lang-UnsatisfiedLinkError-Couldn’t-load-memchunk-from-loader-dalvik-system-PathClassLoader-DexPathList-zip-file-“-data-app-com-kaola-2-apk”-nativeLibraryDirectories-vendor-lib-system-lib-data-datalib-findLibrary-returned-null" class="headerlink" title="java.lang.UnsatisfiedLinkError: Couldn’t load memchunk from loader dalvik.system.PathClassLoader[DexPathList[[zip file “/data/app/com.kaola-2.apk”],nativeLibraryDirectories=[/vendor/lib, /system/lib, /data/datalib]]]: findLibrary returned null"></a>java.lang.UnsatisfiedLinkError: Couldn’t load memchunk from loader dalvik.system.PathClassLoader[DexPathList[[zip file “/data/app/com.kaola-2.apk”],nativeLibraryDirectories=[/vendor/lib, /system/lib, /data/datalib]]]: findLibrary returned null</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">java.lang.UnsatisfiedLinkError: Couldn&apos;t load memchunk from loader dalvik.system.PathClassLoader[DexPathList[[zip file &quot;/data/app/com.kaola-2.apk&quot;],nativeLibraryDirectories=[/vendor/lib, /system/lib, /data/datalib]]]: findLibrary returned null</div><div class="line">	at java.lang.Runtime.loadLibrary(Runtime.java:358)</div><div class="line">	at java.lang.System.loadLibrary(System.java:555)</div><div class="line">	at com.facebook.common.soloader.SoLoaderShim$DefaultHandler.a(Unknown Source)</div><div class="line">	at com.facebook.common.soloader.SoLoaderShim.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.NativeMemoryChunk.(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.NativeMemoryChunkPool.i(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.NativeMemoryChunkPool.b(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.BasePool.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.NativePooledByteBufferOutputStream.(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.NativePooledByteBufferFactory.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.memory.NativePooledByteBufferFactory.b(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.cache.BufferedDiskCache.b(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.cache.BufferedDiskCache.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.cache.BufferedDiskCache$2.a(Unknown Source)</div><div class="line">	at com.facebook.imagepipeline.cache.BufferedDiskCache$2.call(Unknown Source)</div><div class="line">	at bolts.f.run(Unknown Source)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1112)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:587)</div><div class="line">	at java.lang.Thread.run(Thread.java:841)</div></pre></td></tr></table></figure>
+<p>系统版本特点：4.4.2<br>机型分布特点：华为<br>原因分析：找不到native包<code>libmemchunk.so</code>。<br>Ref:<a href="https://github.com/facebook/fresco/issues/410" target="_blank" rel="external">https://github.com/facebook/fresco/issues/410</a></p>
+<h2 id="java-lang-RuntimeException-startPreview-failed"><a href="#java-lang-RuntimeException-startPreview-failed" class="headerlink" title="java.lang.RuntimeException: startPreview failed"></a>java.lang.RuntimeException: startPreview failed</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">java.lang.RuntimeException: startPreview failed</div><div class="line">	at android.hardware.Camera.startPreview(Native Method)</div><div class="line">	at com.kaola.spring.ui.qrcode.a.c.d(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.qrcode.b.a.b(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.qrcode.b.a.(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.qrcode.QrCodeActivity.a(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.qrcode.QrCodeActivity.surfaceCreated(Unknown Source)</div><div class="line">	at android.view.SurfaceView.updateWindow(SurfaceView.java:683)</div><div class="line">	at android.view.SurfaceView$3.onPreDraw(SurfaceView.java:200)</div><div class="line">	at android.view.ViewTreeObserver.dispatchOnPreDraw(ViewTreeObserver.java:1018)</div><div class="line">	at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:2260)</div><div class="line">	at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1265)</div><div class="line">	at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:6944)</div><div class="line">	at android.view.Choreographer$CallbackRecord.run(Choreographer.java:777)</div><div class="line">	at android.view.Choreographer.doCallbacks(Choreographer.java:590)</div><div class="line">	at android.view.Choreographer.doFrame(Choreographer.java:560)</div><div class="line">	at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:763)</div><div class="line">	at android.os.Handler.handleCallback(Handler.java:739)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:95)</div><div class="line">	at android.os.Looper.loop(Looper.java:145)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:6862)</div><div class="line">	at java.lang.reflect.Method.invoke(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:372)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:1404)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1199)</div></pre></td></tr></table></figure>
+<p>系统版本特点：4.2.1以上<br>机型分布特点：魅族、华为、三星<br>原因分析：相机预览失败，可能是部分厂商修改了这部分源码（相机源码通常是被修改得最频繁的一部分代码）。<br>解决办法：方法签名<code>public native final void startPreview()</code>，已经涉及native层代码，目前处理方案只能在preview的时候try-catch并提醒用户预览失败。</p>
+<hr>
+<h1 id="Android其他版本较高崩溃率Bugs"><a href="#Android其他版本较高崩溃率Bugs" class="headerlink" title="Android其他版本较高崩溃率Bugs"></a>Android其他版本较高崩溃率Bugs</h1><h2 id="java-lang-RuntimeException-An-error-occured-while-executing-doInBackground-v2-1-2"><a href="#java-lang-RuntimeException-An-error-occured-while-executing-doInBackground-v2-1-2" class="headerlink" title="java.lang.RuntimeException: An error occured while executing doInBackground() (v2.1.2)"></a>java.lang.RuntimeException: An error occured while executing doInBackground() (v2.1.2)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">java.lang.RuntimeException: An error occured while executing doInBackground()</div><div class="line">	at android.os.AsyncTask$3.done(AsyncTask.java:304)</div><div class="line">	at java.util.concurrent.FutureTask.finishCompletion(FutureTask.java:355)</div><div class="line">	at java.util.concurrent.FutureTask.setException(FutureTask.java:222)</div><div class="line">	at java.util.concurrent.FutureTask.run(FutureTask.java:242)</div><div class="line">	at android.os.AsyncTask$SerialExecutor$1.run(AsyncTask.java:231)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1112)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:587)</div><div class="line">	at java.lang.Thread.run(Thread.java:818)</div><div class="line">Caused by: java.lang.NullPointerException: Attempt to invoke virtual method &apos;com.netease.mobsecurity.impl.getInfo.IGenInfo com.netease.mobsecurity.impl.SecurityImplManager.getGenInfoComp()&apos; on a null object reference</div><div class="line">	at com.netease.mobsecurity.interfacejni.SecruityInfo.(Unknown Source)</div><div class="line">	at com.kaola.common.utils.g.b(Unknown Source)</div><div class="line">	at com.kaola.app.d.a(Unknown Source)</div><div class="line">	at com.kaola.app.d.doInBackground(Unknown Source)</div><div class="line">	at android.os.AsyncTask$2.call(AsyncTask.java:292)</div><div class="line">	at java.util.concurrent.FutureTask.run(FutureTask.java:237)</div><div class="line">	... 4 more</div><div class="line">java.lang.NullPointerException: Attempt to invoke virtual method &apos;com.netease.mobsecurity.impl.getInfo.IGenInfo com.netease.mobsecurity.impl.SecurityImplManager.getGenInfoComp()&apos; on a null object reference</div><div class="line">	at com.netease.mobsecurity.interfacejni.SecruityInfo.(Unknown Source)</div><div class="line">	at com.kaola.common.utils.g.b(Unknown Source)</div><div class="line">	at com.kaola.app.d.a(Unknown Source)</div><div class="line">	at com.kaola.app.d.doInBackground(Unknown Source)</div><div class="line">	at android.os.AsyncTask$2.call(AsyncTask.java:292)</div><div class="line">	at java.util.concurrent.FutureTask.run(FutureTask.java:237)</div><div class="line">	at android.os.AsyncTask$SerialExecutor$1.run(AsyncTask.java:231)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1112)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:587)</div><div class="line">	at java.lang.Thread.run(Thread.java:818)</div></pre></td></tr></table></figure>
+<p>原因分析：</p>
+<pre><code>Caused by: java.lang.NullPointerException: Attempt to invoke virtual method &apos;com.netease.mobsecurity.impl.getInfo.IGenInfo com.netease.mobsecurity.impl.SecurityImplManager.getGenInfoComp()&apos; on a null object reference
+</code></pre><p>安全部门sdk的问题，猜测是Activity或Application结束时AsyncTask还在执行，结束后报NPE异常。<br>解决办法：</p>
+<ul>
+<li>安全部门提供异步调用获取设备id方案。</li>
+<li>DeviceInfoUtils.getDeviceId(getApplicationContext()); try-catch</li>
+</ul>
+<h2 id="java-lang-RuntimeException-Canvas-trying-to-use-a-recycled-bitmap-android-graphics-Bitmap-57a98e98-v2-4-2"><a href="#java-lang-RuntimeException-Canvas-trying-to-use-a-recycled-bitmap-android-graphics-Bitmap-57a98e98-v2-4-2" class="headerlink" title="java.lang.RuntimeException: Canvas: trying to use a recycled bitmap android.graphics.Bitmap@57a98e98 (v2.4.2)"></a>java.lang.RuntimeException: Canvas: trying to use a recycled bitmap android.graphics.Bitmap@57a98e98 (v2.4.2)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div></pre></td><td class="code"><pre><div class="line">java.lang.RuntimeException: Canvas: trying to use a recycled bitmap android.graphics.Bitmap@57a98e98</div><div class="line">	at android.graphics.Canvas.throwIfRecycled(Canvas.java:1026)</div><div class="line">	at android.graphics.Canvas.setBitmap(Canvas.java:189)</div><div class="line">	at android.view.View.buildDrawingCache(View.java:12978)</div><div class="line">	at android.view.View.getDrawingCache(View.java:12796)</div><div class="line">	at android.view.View.draw(View.java:13450)</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13763)</div><div class="line">	at android.support.v4.view.ViewPager.draw(Unknown Source)</div><div class="line">	at android.view.View.draw(View.java:13644)</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13642)v</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13642)</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13763)</div><div class="line">	at android.view.View.draw(View.java:13644)</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13642)</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13763)</div><div class="line">	at android.widget.FrameLayout.draw(FrameLayout.java:467)</div><div class="line">	at android.widget.ScrollView.draw(ScrollView.java:1588)</div><div class="line">	at android.view.View.draw(View.java:13644)</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13642)</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13642)</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13642)</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13763)</div><div class="line">	at android.widget.FrameLayout.draw(FrameLayout.java:467)</div><div class="line">	at android.view.View.draw(View.java:13644)</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13642)</div><div class="line">	at android.view.ViewGroup.drawChild(ViewGroup.java:2930)</div><div class="line">	at android.view.ViewGroup.dispatchDraw(ViewGroup.java:2799)</div><div class="line">	at android.view.View.draw(View.java:13763)</div><div class="line">	at android.widget.FrameLayout.draw(FrameLayout.java:467)</div><div class="line">	at com.android.internal.policy.impl.PhoneWindow$DecorView.draw(PhoneWindow.java:2211)</div><div class="line">	at android.view.ViewRootImpl.drawSoftware(ViewRootImpl.java:2288)</div><div class="line">	at android.view.ViewRootImpl.draw(ViewRootImpl.java:2184)</div><div class="line">	at android.view.ViewRootImpl.performDraw(ViewRootImpl.java:2052)</div><div class="line">	at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:1861)</div><div class="line">	at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:996)</div><div class="line">	at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:4358)</div><div class="line">	at android.view.Choreographer$CallbackRecord.run(Choreographer.java:749)</div><div class="line">	at android.view.Choreographer.doCallbacks(Choreographer.java:562)</div><div class="line">	at android.view.Choreographer.doFrame(Choreographer.java:532)</div><div class="line">	at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:735)</div><div class="line">	at android.os.Handler.handleCallback(Handler.java:725)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:92)</div><div class="line">	at android.os.Looper.loop(Looper.java:137)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5054)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:511)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:793)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:560)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div></pre></td></tr></table></figure>
+<p>原因分析：调用了<code>mBitmap.recycle();</code>后继续使用这个<code>mBitmap</code>的相关方法。<br>解决办法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">if (mBitmap != null &amp;&amp; !mBitmap.isRecycled()) &#123;</div><div class="line">    mBitmap.recycle();</div><div class="line">    mBitmap = null; </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在使用<code>mBitmap</code>的时候记得判空。</p>
+<h2 id="java-lang-IllegalStateException-Fragment-already-added-u-438fce18-1-id-0x7f0a009b"><a href="#java-lang-IllegalStateException-Fragment-already-added-u-438fce18-1-id-0x7f0a009b" class="headerlink" title="java.lang.IllegalStateException: Fragment already added: u{438fce18 #1 id=0x7f0a009b}"></a>java.lang.IllegalStateException: Fragment already added: u{438fce18 #1 id=0x7f0a009b}</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">java.lang.IllegalStateException: Fragment already added: u&#123;438fce18 #1 id=0x7f0a009b&#125;</div><div class="line">	at android.support.v4.app.q.a(Unknown Source)</div><div class="line">	at android.support.v4.app.d.run(Unknown Source)</div><div class="line">	at android.support.v4.app.q.f(Unknown Source)</div><div class="line">	at android.support.v4.app.r.run(Unknown Source)</div><div class="line">	at android.os.Handler.handleCallback(Handler.java:733)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:95)</div><div class="line">	at android.os.Looper.loop(Looper.java:136)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5315)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:515)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:864)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:680)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div></pre></td></tr></table></figure>
+<p>原因分析：Fragment重复添加。<br>解决办法：添加前判断存在性，或使用replace方法。</p>
+<h2 id="java-lang-NullPointerException"><a href="#java-lang-NullPointerException" class="headerlink" title="java.lang.NullPointerException"></a>java.lang.NullPointerException</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">java.lang.NullPointerException</div><div class="line">	at android.webkit.WebViewClassic.loadDataWithBaseURL(WebViewClassic.java:3373)</div><div class="line">	at android.webkit.WebView.loadDataWithBaseURL(WebView.java:852)</div><div class="line">	at com.kaola.spring.ui.webview.m.run(Unknown Source)</div><div class="line">	at android.os.Handler.handleCallback(Handler.java:615)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:92)</div><div class="line">	at android.os.Looper.loop(Looper.java:137)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:4898)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:511)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:1008)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:775)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div></pre></td></tr></table></figure>
+<p>原因分析：调用loadDataWithBaseURL()加载网页的时候未判空。</p>
+<h2 id="java-lang-IllegalStateException-Cannot-perform-this-operation-because-there-is-no-current-transaction"><a href="#java-lang-IllegalStateException-Cannot-perform-this-operation-because-there-is-no-current-transaction" class="headerlink" title="java.lang.IllegalStateException: Cannot perform this operation because there is no current transaction."></a>java.lang.IllegalStateException: Cannot perform this operation because there is no current transaction.</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">java.lang.IllegalStateException: Cannot perform this operation because there is no current transaction.</div><div class="line">	at android.database.sqlite.SQLiteSession.throwIfNoTransaction(SQLiteSession.java:915)</div><div class="line">	at android.database.sqlite.SQLiteSession.endTransaction(SQLiteSession.java:398)</div><div class="line">	at android.database.sqlite.SQLiteDatabase.endTransaction(SQLiteDatabase.java:522)</div><div class="line">	at com.tencent.stat.n.b(Unknown Source)</div><div class="line">	at com.tencent.stat.n.a(Unknown Source)</div><div class="line">	at com.tencent.stat.q.run(Unknown Source)</div><div class="line">	at android.os.Handler.handleCallback(Handler.java:725)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:92)</div><div class="line">	at android.os.Looper.loop(Looper.java:153)</div><div class="line">	at android.os.HandlerThread.run(HandlerThread.java:60)</div></pre></td></tr></table></figure>
+<p>原因分析：可以调用多次beginTransaction()，但只能调用一次endTransaction()。这个异常就是调用多次endTransaction()造成的。</p>
+<h2 id="android-database-sqlite-SQLiteException-Failed-to-change-locale-for-db-‘-data-data-com-kaola-databases-webview-db’-to-‘zh-CN’"><a href="#android-database-sqlite-SQLiteException-Failed-to-change-locale-for-db-‘-data-data-com-kaola-databases-webview-db’-to-‘zh-CN’" class="headerlink" title="android.database.sqlite.SQLiteException: Failed to change locale for db ‘/data/data/com.kaola/databases/webview.db’ to ‘zh_CN’."></a>android.database.sqlite.SQLiteException: Failed to change locale for db ‘/data/data/com.kaola/databases/webview.db’ to ‘zh_CN’.</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">android.database.sqlite.SQLiteException: Failed to change locale for db &apos;/data/data/com.kaola/databases/webview.db&apos; to &apos;zh_CN&apos;.</div><div class="line">	at android.database.sqlite.SQLiteConnection.setLocaleFromConfiguration(SQLiteConnection.java:390)</div><div class="line">	at android.database.sqlite.SQLiteConnection.open(SQLiteConnection.java:218)</div><div class="line">	at android.database.sqlite.SQLiteConnection.open(SQLiteConnection.java:193)</div><div class="line">	at android.database.sqlite.SQLiteConnectionPool.openConnectionLocked(SQLiteConnectionPool.java:463)</div><div class="line">	at android.database.sqlite.SQLiteConnectionPool.open(SQLiteConnectionPool.java:185)</div><div class="line">	at android.database.sqlite.SQLiteConnectionPool.open(SQLiteConnectionPool.java:177)</div><div class="line">	at android.database.sqlite.SQLiteDatabase.openInner(SQLiteDatabase.java:804)</div><div class="line">	at android.database.sqlite.SQLiteDatabase.open(SQLiteDatabase.java:789)</div><div class="line">	at android.database.sqlite.SQLiteDatabase.openDatabase(SQLiteDatabase.java:694)</div><div class="line">	at android.app.ContextImpl.openOrCreateDatabase(ContextImpl.java:976)</div><div class="line">	at android.app.ContextImpl.openOrCreateDatabase(ContextImpl.java:965)</div><div class="line">	at android.content.ContextWrapper.openOrCreateDatabase(ContextWrapper.java:240)</div><div class="line">	at android.webkit.WebViewDatabaseClassic.initDatabase(WebViewDatabaseClassic.java:146)</div><div class="line">	at android.webkit.WebViewDatabaseClassic.init(WebViewDatabaseClassic.java:130)</div><div class="line">	at android.webkit.WebViewDatabaseClassic.access$000(WebViewDatabaseClassic.java:35)</div><div class="line">	at android.webkit.WebViewDatabaseClassic$1.run(WebViewDatabaseClassic.java:109)</div><div class="line">Caused by: android.database.sqlite.SQLiteFullException: database or disk is full (code 13)</div><div class="line">	at android.database.sqlite.SQLiteConnection.nativeExecute(Native Method)</div><div class="line">	at android.database.sqlite.SQLiteConnection.execute(SQLiteConnection.java:552)</div><div class="line">	at android.database.sqlite.SQLiteConnection.setLocaleFromConfiguration(SQLiteConnection.java:364)</div><div class="line">	... 15 more</div><div class="line">android.database.sqlite.SQLiteFullException: database or disk is full (code 13)</div><div class="line">	at android.database.sqlite.SQLiteConnection.nativeExecute(Native Method)</div><div class="line">	at android.database.sqlite.SQLiteConnection.execute(SQLiteConnection.java:552)</div><div class="line">	at android.database.sqlite.SQLiteConnection.setLocaleFromConfiguration(SQLiteConnection.java:364)</div><div class="line">	at android.database.sqlite.SQLiteConnection.open(SQLiteConnection.java:218)</div><div class="line">	at android.database.sqlite.SQLiteConnection.open(SQLiteConnection.java:193)</div><div class="line">	at android.database.sqlite.SQLiteConnectionPool.openConnectionLocked(SQLiteConnectionPool.java:463)</div><div class="line">	at android.database.sqlite.SQLiteConnectionPool.open(SQLiteConnectionPool.java:185)</div><div class="line">	at android.database.sqlite.SQLiteConnectionPool.open(SQLiteConnectionPool.java:177)</div><div class="line">	at android.database.sqlite.SQLiteDatabase.openInner(SQLiteDatabase.java:804)</div><div class="line">	at android.database.sqlite.SQLiteDatabase.open(SQLiteDatabase.java:789)</div><div class="line">	at android.database.sqlite.SQLiteDatabase.openDatabase(SQLiteDatabase.java:694)</div><div class="line">	at android.app.ContextImpl.openOrCreateDatabase(ContextImpl.java:976)</div><div class="line">	at android.app.ContextImpl.openOrCreateDatabase(ContextImpl.java:965)</div><div class="line">	at android.content.ContextWrapper.openOrCreateDatabase(ContextWrapper.java:240)</div><div class="line">	at android.webkit.WebViewDatabaseClassic.initDatabase(WebViewDatabaseClassic.java:146)</div><div class="line">	at android.webkit.WebViewDatabaseClassic.init(WebViewDatabaseClassic.java:130)</div><div class="line">	at android.webkit.WebViewDatabaseClassic.access$000(WebViewDatabaseClassic.java:35)</div><div class="line">	at android.webkit.WebViewDatabaseClassic$1.run(WebViewDatabaseClassic.java:109)</div></pre></td></tr></table></figure>
+<p>原因分析：在生成数据库db文件的时候使用了A区域，在打开的时候默认使用B区域打开，如A=Locale.US，B=Locale.CHINA，会产生这种问题。<br>解决方法：</p>
+<p>把</p>
+<pre><code>myDatabase = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READWRITE);
+</code></pre><p>修改成：  </p>
+<pre><code>myDatabase = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.NO_LOCALIZED_COLLATORS | SQLiteDatabase.OPEN_READWRITE);
+</code></pre><p>Ref：<a href="http://stackoverflow.com/questions/19491675/failed-to-change-locale-for-db-data-data-my-easymedi-controller-databases-easy" target="_blank" rel="external">http://stackoverflow.com/questions/19491675/failed-to-change-locale-for-db-data-data-my-easymedi-controller-databases-easy</a></p>
+<h2 id="Unable-to-stop-activity-com-kaola-com-kaola-spring-ui-MainActivity-java-lang-IllegalArgumentException-View-not-attached-to-window-manager"><a href="#Unable-to-stop-activity-com-kaola-com-kaola-spring-ui-MainActivity-java-lang-IllegalArgumentException-View-not-attached-to-window-manager" class="headerlink" title="Unable to stop activity {com.kaola/com.kaola.spring.ui.MainActivity}: java.lang.IllegalArgumentException: View not attached to window manager"></a>Unable to stop activity {com.kaola/com.kaola.spring.ui.MainActivity}: java.lang.IllegalArgumentException: View not attached to window manager</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">java.lang.RuntimeException: Unable to stop activity &#123;com.kaola/com.kaola.spring.ui.MainActivity&#125;: java.lang.IllegalArgumentException: View not attached to window manager</div><div class="line">	at android.app.ActivityThread.performStopActivityInner(ActivityThread.java:3393)</div><div class="line">	at android.app.ActivityThread.handleStopActivity(ActivityThread.java:3446)</div><div class="line">	at android.app.ActivityThread.access$900(ActivityThread.java:171)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1414)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:107)</div><div class="line">	at android.os.Looper.loop(Looper.java:194)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5433)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:525)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:853)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:620)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div><div class="line">Caused by: java.lang.IllegalArgumentException: View not attached to window manager</div><div class="line">	at android.view.WindowManagerGlobal.findViewLocked(WindowManagerGlobal.java:385)</div><div class="line">	at android.view.WindowManagerGlobal.removeView(WindowManagerGlobal.java:287)</div><div class="line">	at android.view.WindowManagerImpl.removeViewImmediate(WindowManagerImpl.java:89)</div><div class="line">	at android.widget.PopupWindow.dismiss(PopupWindow.java:1304)</div><div class="line">	at com.kaola.spring.ui.MainActivity.q(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.MainActivity.onStop(Unknown Source)</div><div class="line">	at android.app.Instrumentation.callActivityOnStop(Instrumentation.java:1280)</div><div class="line">	at com.lbe.security.service.core.client.b.x.callActivityOnStop(Unknown Source)</div><div class="line">	at android.app.Activity.performStop(Activity.java:5373)</div><div class="line">	at android.app.ActivityThread.performStopActivityInner(ActivityThread.java:3390)</div><div class="line">	... 11 more</div><div class="line">java.lang.IllegalArgumentException: View not attached to window manager</div><div class="line">	at android.view.WindowManagerGlobal.findViewLocked(WindowManagerGlobal.java:385)</div><div class="line">	at android.view.WindowManagerGlobal.removeView(WindowManagerGlobal.java:287)</div><div class="line">	at android.view.WindowManagerImpl.removeViewImmediate(WindowManagerImpl.java:89)</div><div class="line">	at android.widget.PopupWindow.dismiss(PopupWindow.java:1304)</div><div class="line">	at com.kaola.spring.ui.MainActivity.q(Unknown Source)</div><div class="line">	at com.kaola.spring.ui.MainActivity.onStop(Unknown Source)</div><div class="line">	at android.app.Instrumentation.callActivityOnStop(Instrumentation.java:1280)</div><div class="line">	at com.lbe.security.service.core.client.b.x.callActivityOnStop(Unknown Source)</div><div class="line">	at android.app.Activity.performStop(Activity.java:5373)</div><div class="line">	at android.app.ActivityThread.performStopActivityInner(ActivityThread.java:3390)</div><div class="line">	at android.app.ActivityThread.handleStopActivity(ActivityThread.java:3446)</div><div class="line">	at android.app.ActivityThread.access$900(ActivityThread.java:171)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1414)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:107)</div><div class="line">	at android.os.Looper.loop(Looper.java:194)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5433)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:525)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:853)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:620)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div></pre></td></tr></table></figure>
+<p>原因分析：MainActivity在执行<code>onStop()</code>的同时，调用了<code>showFindHobbyPopWindow()</code>并启动新的Activity<br>解决办法：<code>isFinishing()</code>（没试过，不知道有没有用）</p>
+<p>Ref：<a href="http://stackoverflow.com/questions/22924825/view-not-attached-to-window-manager-crash" target="_blank" rel="external">http://stackoverflow.com/questions/22924825/view-not-attached-to-window-manager-crash</a></p>
+<h2 id="java-lang-IllegalStateException-Can-not-perform-this-action-after-onSaveInstanceState"><a href="#java-lang-IllegalStateException-Can-not-perform-this-action-after-onSaveInstanceState" class="headerlink" title="java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState"></a>java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState</div><div class="line">	at android.support.v4.app.s.v(Unknown Source)</div><div class="line">	at android.support.v4.app.s.d(Unknown Source)</div><div class="line">	at android.support.v4.app.n.onBackPressed(Unknown Source)</div><div class="line">	at com.kaola.common.widgets.f.onClick(Unknown Source)</div><div class="line">	at android.view.View.performClick(View.java:5207)</div><div class="line">	at android.view.View$PerformClick.run(View.java:21177)</div><div class="line">	at android.os.Handler.handleCallback(Handler.java:739)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:95)</div><div class="line">	at android.os.Looper.loop(Looper.java:148)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5432)</div><div class="line">	at java.lang.reflect.Method.invoke(Native Method)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:735)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:625)</div></pre></td></tr></table></figure>
+<p>原因分析：在调用onSaveInstanceState（猜测是替换掉当前的Fragment）和commitAllowingStateLoss的时候更新了UI线程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">private void checkStateLoss() &#123;</div><div class="line">    if (mStateSaved) &#123;</div><div class="line">        throw new IllegalStateException(</div><div class="line">                &quot;Can not perform this action after onSaveInstanceState&quot;);</div><div class="line">    &#125;</div><div class="line">    if (mNoTransactionsBecause != null) &#123;</div><div class="line">        throw new IllegalStateException(</div><div class="line">                &quot;Can not perform this action inside of &quot; + mNoTransactionsBecause);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>mStateSaved</code>只有在保存数据到<code>Parcel</code>的时候才会置为<code>true</code>。</p>
+<p>Ref：<a href="http://stackoverflow.com/questions/17184653/commitallowingstateloss-in-fragment-activities" target="_blank" rel="external">http://stackoverflow.com/questions/17184653/commitallowingstateloss-in-fragment-activities</a></p>
+<h2 id="java-lang-RuntimeException-Unable-to-start-activity-ComponentInfo-com-kaola-com-kaola-spring-ui-MainActivity-android-content-res-Resources-NotFoundException-File-res-layout-activity-main-xml-from-xml-type-layout-resource-ID-0x7f03003f"><a href="#java-lang-RuntimeException-Unable-to-start-activity-ComponentInfo-com-kaola-com-kaola-spring-ui-MainActivity-android-content-res-Resources-NotFoundException-File-res-layout-activity-main-xml-from-xml-type-layout-resource-ID-0x7f03003f" class="headerlink" title="java.lang.RuntimeException: Unable to start activity ComponentInfo{com.kaola/com.kaola.spring.ui.MainActivity}: android.content.res.Resources$NotFoundException: File res/layout/activity_main.xml from xml type layout resource ID #0x7f03003f"></a>java.lang.RuntimeException: Unable to start activity ComponentInfo{com.kaola/com.kaola.spring.ui.MainActivity}: android.content.res.Resources$NotFoundException: File res/layout/activity_main.xml from xml type layout resource ID #0x7f03003f</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div></pre></td><td class="code"><pre><div class="line">java.lang.RuntimeException: Unable to start activity ComponentInfo&#123;com.kaola/com.kaola.spring.ui.MainActivity&#125;: android.content.res.Resources$NotFoundException: File res/layout/activity_main.xml from xml type layout resource ID #0x7f03003f</div><div class="line">	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2187)</div><div class="line">	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2247)</div><div class="line">	at android.app.ActivityThread.access$800(ActivityThread.java:138)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1199)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:102)</div><div class="line">	at android.os.Looper.loop(Looper.java:136)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5106)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:515)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:818)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:634)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div><div class="line">Caused by: android.content.res.Resources$NotFoundException: File res/layout/activity_main.xml from xml type layout resource ID #0x7f03003f</div><div class="line">	at android.content.res.Resources.loadXmlResourceParser(Resources.java:2504)</div><div class="line">	at android.content.res.Resources.loadXmlResourceParser(Resources.java:2459)</div><div class="line">	at android.content.res.Resources.getLayout(Resources.java:982)</div><div class="line">	at android.view.LayoutInflater.inflate(LayoutInflater.java:395)</div><div class="line">	at android.view.LayoutInflater.inflate(LayoutInflater.java:353)</div><div class="line">	at com.android.internal.policy.impl.PhoneWindow.setContentView(PhoneWindow.java:290)</div><div class="line">	at android.app.Activity.setContentView(Activity.java:1940)</div><div class="line">	at com.kaola.spring.ui.MainActivity.onCreate(Unknown Source)</div><div class="line">	at android.app.Activity.performCreate(Activity.java:5242)</div><div class="line">	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1087)</div><div class="line">	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2151)</div><div class="line">	... 11 more</div><div class="line">Caused by: java.io.FileNotFoundException: res/layout/activity_main.xml</div><div class="line">	at android.content.res.AssetManager.openXmlAssetNative(Native Method)</div><div class="line">	at android.content.res.AssetManager.openXmlBlockAsset(AssetManager.java:504)</div><div class="line">	at android.content.res.Resources.loadXmlResourceParser(Resources.java:2486)</div><div class="line">	... 21 more</div><div class="line">android.content.res.Resources$NotFoundException: File res/layout/activity_main.xml from xml type layout resource ID #0x7f03003f</div><div class="line">	at android.content.res.Resources.loadXmlResourceParser(Resources.java:2504)</div><div class="line">	at android.content.res.Resources.loadXmlResourceParser(Resources.java:2459)</div><div class="line">	at android.content.res.Resources.getLayout(Resources.java:982)</div><div class="line">	at android.view.LayoutInflater.inflate(LayoutInflater.java:395)</div><div class="line">	at android.view.LayoutInflater.inflate(LayoutInflater.java:353)</div><div class="line">	at com.android.internal.policy.impl.PhoneWindow.setContentView(PhoneWindow.java:290)</div><div class="line">	at android.app.Activity.setContentView(Activity.java:1940)</div><div class="line">	at com.kaola.spring.ui.MainActivity.onCreate(Unknown Source)</div><div class="line">	at android.app.Activity.performCreate(Activity.java:5242)</div><div class="line">	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1087)</div><div class="line">	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2151)</div><div class="line">	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2247)</div><div class="line">	at android.app.ActivityThread.access$800(ActivityThread.java:138)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1199)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:102)</div><div class="line">	at android.os.Looper.loop(Looper.java:136)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5106)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:515)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:818)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:634)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div><div class="line">Caused by: java.io.FileNotFoundException: res/layout/activity_main.xml</div><div class="line">	at android.content.res.AssetManager.openXmlAssetNative(Native Method)</div><div class="line">	at android.content.res.AssetManager.openXmlBlockAsset(AssetManager.java:504)</div><div class="line">	at android.content.res.Resources.loadXmlResourceParser(Resources.java:2486)</div><div class="line">	... 21 more</div><div class="line">java.io.FileNotFoundException: res/layout/activity_main.xml</div><div class="line">	at android.content.res.AssetManager.openXmlAssetNative(Native Method)</div><div class="line">	at android.content.res.AssetManager.openXmlBlockAsset(AssetManager.java:504)</div><div class="line">	at android.content.res.Resources.loadXmlResourceParser(Resources.java:2486)</div><div class="line">	at android.content.res.Resources.loadXmlResourceParser(Resources.java:2459)</div><div class="line">	at android.content.res.Resources.getLayout(Resources.java:982)</div><div class="line">	at android.view.LayoutInflater.inflate(LayoutInflater.java:395)</div><div class="line">	at android.view.LayoutInflater.inflate(LayoutInflater.java:353)</div><div class="line">	at com.android.internal.policy.impl.PhoneWindow.setContentView(PhoneWindow.java:290)</div><div class="line">	at android.app.Activity.setContentView(Activity.java:1940)</div><div class="line">	at com.kaola.spring.ui.MainActivity.onCreate(Unknown Source)</div><div class="line">	at android.app.Activity.performCreate(Activity.java:5242)</div><div class="line">	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1087)</div><div class="line">	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2151)</div><div class="line">	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2247)</div><div class="line">	at android.app.ActivityThread.access$800(ActivityThread.java:138)</div><div class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1199)</div><div class="line">	at android.os.Handler.dispatchMessage(Handler.java:102)</div><div class="line">	at android.os.Looper.loop(Looper.java:136)</div><div class="line">	at android.app.ActivityThread.main(ActivityThread.java:5106)</div><div class="line">	at java.lang.reflect.Method.invokeNative(Native Method)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:515)</div><div class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:818)</div><div class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:634)</div><div class="line">	at dalvik.system.NativeStart.main(Native Method)</div></pre></td></tr></table></figure>
+<p>原因分析：这个问题发生的比较诡异，机型不固定，系统版本不固定。目前只有几个资源文件找不到：</p>
+<ul>
+<li><code>res/drawable-xxhdpi-v4/ic_comment_praise_unclick.png</code></li>
+<li><code>res/layout/activity_main.xml</code></li>
+<li><code>res/drawable-xxhdpi-v4/aftersale_select_logistics.png</code></li>
+<li><code>res/anim/home_search_view_in.xml</code></li>
+<li><code>res/drawable-xxhdpi-v4/bg_splash.png</code></li>
+<li><code>res/drawable-xxhdpi-v4/ic_goods_detail_share_white.png</code></li>
+<li><code>res/drawable-xhdpi-v4/home_search_icon.png</code></li>
+</ul>
+<p>大部分是去v4这个包下面去找资源，但我们的配置里好像没有资源文件是放在v4文件夹下面的。猜测可能是系统厂商改了获取资源路径的源码导致获取失败。</p>
+<h2 id="java-lang-IllegalArgumentException-View-com-android-internal-policy-impl-PhoneWindow-DecorView-24e9c19a-V-E…-R……D-0-0-1026-348-not-attached-to-window-manager"><a href="#java-lang-IllegalArgumentException-View-com-android-internal-policy-impl-PhoneWindow-DecorView-24e9c19a-V-E…-R……D-0-0-1026-348-not-attached-to-window-manager" class="headerlink" title="java.lang.IllegalArgumentException: View=com.android.internal.policy.impl.PhoneWindow$DecorView{24e9c19a V.E….. R……D 0,0-1026,348} not attached to window manager"></a>java.lang.IllegalArgumentException: View=com.android.internal.policy.impl.PhoneWindow$DecorView{24e9c19a V.E….. R……D 0,0-1026,348} not attached to window manager</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">java.lang.IllegalArgumentException: View=com.android.internal.policy.impl.PhoneWindow$DecorView&#123;24e9c19a V.E..... R......D 0,0-1026,348&#125; not attached to window manager</div><div class="line">at android.view.WindowManagerGlobal.findViewLocked(WindowManagerGlobal.java:403)</div><div class="line">at android.view.WindowManagerGlobal.removeView(WindowManagerGlobal.java:322)</div><div class="line">at android.view.WindowManagerImpl.removeViewImmediate(WindowManagerImpl.java:84)</div><div class="line">at android.app.Dialog.dismissDialog(Dialog.java:368)</div><div class="line">at android.app.Dialog.dismiss(Dialog.java:351)</div><div class="line">at com.kaola.spring.ui.kaola.AvatarNicknameSetActivity.e(Unknown Source)</div><div class="line">at com.kaola.spring.ui.kaola.AvatarNicknameSetActivity.c(Unknown Source)</div><div class="line">at com.kaola.spring.ui.kaola.d.a(Unknown Source)</div><div class="line">at com.kaola.common.c.d$b.handleMessage(Unknown Source)</div><div class="line">at android.os.Handler.dispatchMessage(Handler.java:102)</div><div class="line">at android.os.Looper.loop(Looper.java:135)</div><div class="line">at android.app.ActivityThread.main(ActivityThread.java:5539)</div><div class="line">at java.lang.reflect.Method.invoke(Native Method)</div><div class="line">at java.lang.reflect.Method.invoke(Method.java:372)</div><div class="line">at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:960)</div><div class="line">at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:755)</div></pre></td></tr></table></figure>
+<p>原因分析：非常典型的Activity已经被<code>finish()</code>，但Dialog还没有被<code>dimiss()</code>造成的异常。<br>解决办法：在<code>onPause()</code>或<code>onStop()</code>方法调用<code>Dialog.dismiss()</code>。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <ul class="post-copyright">
+    <li class="post-copyright-author">
+      <strong>Post author:</strong>
+      Xing Li
+    </li>
+    <li class="post-copyright-link">
+      <strong>Post link:</strong>
+      <a href="http://iluhcm.com/2016/05/19/analysis-and-solutions-of-online-bugs-for-android-application/" title="Android应用线上崩溃Bug分析及解决方案">http://iluhcm.com/2016/05/19/analysis-and-solutions-of-online-bugs-for-android-application/</a>
+    </li>
+    <li class="post-copyright-license">
+      <strong>Copyright Notice: </strong>
+      All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+    </li>
+  </ul>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/Bug/" rel="tag"># Bug</a>
+          
+            <a href="/tags/Online/" rel="tag"># Online</a>
+          
+            <a href="/tags/Exception/" rel="tag"># Exception</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/24/before-graduation/" rel="next" title="写在毕业之前">
+                <i class="fa fa-chevron-left"></i> 写在毕业之前
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/06/how-to-open-a-hyperlink-using-app-webview-with-textview/" rel="prev" title="使用Android内置WebView打开TextView中的超链接">
+                使用Android内置WebView打开TextView中的超链接 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div id="sidebar-dimmer"></div>
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="Xing Li" />
+          <p class="site-author-name" itemprop="name">Xing Li</p>
+           
+              <p class="site-description motion-element" itemprop="description">If asked how the pond can be so lucid and fresh, told that sources with flowing water replenish.</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">categories</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">48</span>
+                <span class="site-state-item-name">tags</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/iluhcm" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.facebook.com/xing.li.731135" target="_blank" title="Facebook">
+                  
+                    <i class="fa fa-fw fa-facebook"></i>
+                  
+                  Facebook
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/iluhcm" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://plus.google.com/101164893136136383839/posts" target="_blank" title="Google+">
+                  
+                    <i class="fa fa-fw fa-google-plus"></i>
+                  
+                  Google+
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/lshcm" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/iluhcm" target="_blank" title="Zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://music.163.com/#/user/home?id=38148117" target="_blank" title="Netease">
+                  
+                    <i class="fa fa-fw fa-music"></i>
+                  
+                  Netease
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-v2-5-2"><span class="nav-number">1.</span> <span class="nav-text">Android v2.5.2</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-OutOfMemoryError-Failed-to-allocate-a-2560012-byte-allocation-with-2300136-free-bytes-and-2MB-until-OOM"><span class="nav-number">1.1.</span> <span class="nav-text">java.lang.OutOfMemoryError: Failed to allocate a 2560012 byte allocation with 2300136 free bytes and 2MB until OOM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-RuntimeException-Unable-to-start-activity-ComponentInfo-com-kaola-com-kaola-spring-ui-kaola-InterestedCategoryActivity-java-lang-NullPointerException-Attempt-to-read-from-field-‘com-android-server-am-ActivityStackSupervisor-com-android-server-am-ActivityRecord-mStackSupervisor’-on-a-null-object-reference"><span class="nav-number">1.2.</span> <span class="nav-text">java.lang.RuntimeException: Unable to start activity ComponentInfo{com.kaola/com.kaola.spring.ui.kaola.InterestedCategoryActivity}: java.lang.NullPointerException: Attempt to read from field ‘com.android.server.am.ActivityStackSupervisor com.android.server.am.ActivityRecord.mStackSupervisor’ on a null object reference</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-OutOfMemoryError-Failed-to-allocate-a-2560012-byte-allocation-with-2300136-free-bytes-and-2MB-until-OOM-1"><span class="nav-number">1.3.</span> <span class="nav-text">java.lang.OutOfMemoryError: Failed to allocate a 2560012 byte allocation with 2300136 free bytes and 2MB until OOM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-NoClassDefFoundError-com-facebook-imagepipeline-memory-NativeMemoryChunk"><span class="nav-number">1.4.</span> <span class="nav-text">java.lang.NoClassDefFoundError: com/facebook/imagepipeline/memory/NativeMemoryChunk</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-RuntimeException-Unable-to-start-activity-ComponentInfo-com-kaola-com-kaola-spring-ui-goodsdetail-SkuPopWindowActivity-java-lang-NumberFormatException-Invalid-double-“5-712”"><span class="nav-number">1.5.</span> <span class="nav-text">java.lang.RuntimeException: Unable to start activity ComponentInfo{com.kaola/com.kaola.spring.ui.goodsdetail.SkuPopWindowActivity}: java.lang.NumberFormatException: Invalid double: “5,712”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-IllegalArgumentException-pointerIndex-out-of-range"><span class="nav-number">1.6.</span> <span class="nav-text">java.lang.IllegalArgumentException: pointerIndex out of range</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-UnsatisfiedLinkError-dlopen-failed-“-data-data-com-kaola-app-lib-libnelogin-so”-is-too-small-to-be-an-ELF-executable"><span class="nav-number">1.7.</span> <span class="nav-text">java.lang.UnsatisfiedLinkError: dlopen failed: “/data/data/com.kaola/app_lib/libnelogin.so” is too small to be an ELF executable</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-ExceptionInInitializerError"><span class="nav-number">1.8.</span> <span class="nav-text">java.lang.ExceptionInInitializerError</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-RuntimeException-Unable-to-start-receiver-com-kaola-app-TimeChangeListener-java-lang-SecurityException-Permission-Denial-get-set-setting-for-user-asks-to-run-as-user-0-but-is-calling-from-user-100-this-requires-android-permission-INTERACT-ACROSS-USERS-FULL"><span class="nav-number">1.9.</span> <span class="nav-text">java.lang.RuntimeException: Unable to start receiver com.kaola.app.TimeChangeListener: java.lang.SecurityException: Permission Denial: get/set setting for user asks to run as user 0 but is calling from user 100; this requires android.permission.INTERACT_ACROSS_USERS_FULL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-UnsatisfiedLinkError-Couldn’t-load-memchunk-from-loader-dalvik-system-PathClassLoader-DexPathList-zip-file-“-data-app-com-kaola-2-apk”-nativeLibraryDirectories-vendor-lib-system-lib-data-datalib-findLibrary-returned-null"><span class="nav-number">1.10.</span> <span class="nav-text">java.lang.UnsatisfiedLinkError: Couldn’t load memchunk from loader dalvik.system.PathClassLoader[DexPathList[[zip file “/data/app/com.kaola-2.apk”],nativeLibraryDirectories=[/vendor/lib, /system/lib, /data/datalib]]]: findLibrary returned null</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-RuntimeException-startPreview-failed"><span class="nav-number">1.11.</span> <span class="nav-text">java.lang.RuntimeException: startPreview failed</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Android其他版本较高崩溃率Bugs"><span class="nav-number">2.</span> <span class="nav-text">Android其他版本较高崩溃率Bugs</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-RuntimeException-An-error-occured-while-executing-doInBackground-v2-1-2"><span class="nav-number">2.1.</span> <span class="nav-text">java.lang.RuntimeException: An error occured while executing doInBackground() (v2.1.2)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-RuntimeException-Canvas-trying-to-use-a-recycled-bitmap-android-graphics-Bitmap-57a98e98-v2-4-2"><span class="nav-number">2.2.</span> <span class="nav-text">java.lang.RuntimeException: Canvas: trying to use a recycled bitmap android.graphics.Bitmap@57a98e98 (v2.4.2)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-IllegalStateException-Fragment-already-added-u-438fce18-1-id-0x7f0a009b"><span class="nav-number">2.3.</span> <span class="nav-text">java.lang.IllegalStateException: Fragment already added: u{438fce18 #1 id=0x7f0a009b}</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-NullPointerException"><span class="nav-number">2.4.</span> <span class="nav-text">java.lang.NullPointerException</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-IllegalStateException-Cannot-perform-this-operation-because-there-is-no-current-transaction"><span class="nav-number">2.5.</span> <span class="nav-text">java.lang.IllegalStateException: Cannot perform this operation because there is no current transaction.</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#android-database-sqlite-SQLiteException-Failed-to-change-locale-for-db-‘-data-data-com-kaola-databases-webview-db’-to-‘zh-CN’"><span class="nav-number">2.6.</span> <span class="nav-text">android.database.sqlite.SQLiteException: Failed to change locale for db ‘/data/data/com.kaola/databases/webview.db’ to ‘zh_CN’.</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Unable-to-stop-activity-com-kaola-com-kaola-spring-ui-MainActivity-java-lang-IllegalArgumentException-View-not-attached-to-window-manager"><span class="nav-number">2.7.</span> <span class="nav-text">Unable to stop activity {com.kaola/com.kaola.spring.ui.MainActivity}: java.lang.IllegalArgumentException: View not attached to window manager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-IllegalStateException-Can-not-perform-this-action-after-onSaveInstanceState"><span class="nav-number">2.8.</span> <span class="nav-text">java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-RuntimeException-Unable-to-start-activity-ComponentInfo-com-kaola-com-kaola-spring-ui-MainActivity-android-content-res-Resources-NotFoundException-File-res-layout-activity-main-xml-from-xml-type-layout-resource-ID-0x7f03003f"><span class="nav-number">2.9.</span> <span class="nav-text">java.lang.RuntimeException: Unable to start activity ComponentInfo{com.kaola/com.kaola.spring.ui.MainActivity}: android.content.res.Resources$NotFoundException: File res/layout/activity_main.xml from xml type layout resource ID #0x7f03003f</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-IllegalArgumentException-View-com-android-internal-policy-impl-PhoneWindow-DecorView-24e9c19a-V-E…-R……D-0-0-1026-348-not-attached-to-window-manager"><span class="nav-number">2.10.</span> <span class="nav-text">java.lang.IllegalArgumentException: View=com.android.internal.policy.impl.PhoneWindow$DecorView{24e9c19a V.E….. R……D 0,0-1026,348} not attached to window manager</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xing Li</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("CI5TJwN9TiLhei285z2E32es-gzGzoHsz", "RwQ5NncufhCOGqfbhKM1ucxz");AV.useAVCloudUS();</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
