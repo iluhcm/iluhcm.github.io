@@ -1,0 +1,1072 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="2yx0JNDw3DWn3FVwl0XV9ba4wAjjbvZ3viXpvjGwBa8" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android,Router,Priority,Regular Expression," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="前⾔当前，Android路由框架已经有很多了，如⾬后春笋般出现，大概是因为去年提出了Android组件化的概念，组件化所要解决的核心问题是解耦。当一个产品的业务规模上升到⼀定程度，甚⾄是跨团队开发时，如何保持团队间业务的往来，互不影响或⼲涉对⽅的开发进度，也不关心业务⽅的实现，这是大型应⽤都会遇到的问题。路由正是为了模块间的解耦⽽出现的。本⽂解析了考拉Android端的路由设计⽅案，与市⾯上的路由">
+<meta name="keywords" content="Android,Router,Priority,Regular Expression">
+<meta property="og:type" content="article">
+<meta property="og:title" content="考拉Android客户端路由总线设计">
+<meta property="og:url" content="http://iluhcm.com/2017/07/12/design-of-router-using-with-android/index.html">
+<meta property="og:site_name" content="Xing&#39;s Blog">
+<meta property="og:description" content="前⾔当前，Android路由框架已经有很多了，如⾬后春笋般出现，大概是因为去年提出了Android组件化的概念，组件化所要解决的核心问题是解耦。当一个产品的业务规模上升到⼀定程度，甚⾄是跨团队开发时，如何保持团队间业务的往来，互不影响或⼲涉对⽅的开发进度，也不关心业务⽅的实现，这是大型应⽤都会遇到的问题。路由正是为了模块间的解耦⽽出现的。本⽂解析了考拉Android端的路由设计⽅案，与市⾯上的路由">
+<meta property="og:image" content="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router_architecture.png">
+<meta property="og:image" content="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router.jpg">
+<meta property="og:updated_time" content="2017-07-12T03:30:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="考拉Android客户端路由总线设计">
+<meta name="twitter:description" content="前⾔当前，Android路由框架已经有很多了，如⾬后春笋般出现，大概是因为去年提出了Android组件化的概念，组件化所要解决的核心问题是解耦。当一个产品的业务规模上升到⼀定程度，甚⾄是跨团队开发时，如何保持团队间业务的往来，互不影响或⼲涉对⽅的开发进度，也不关心业务⽅的实现，这是大型应⽤都会遇到的问题。路由正是为了模块间的解耦⽽出现的。本⽂解析了考拉Android端的路由设计⽅案，与市⾯上的路由">
+<meta name="twitter:image" content="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router_architecture.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://iluhcm.com/2017/07/12/design-of-router-using-with-android/"/>
+
+
+
+
+
+  <title>考拉Android客户端路由总线设计 | Xing's Blog</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?03e8bdd436b4561c8e760c9459ee8003";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Xing's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">To be a better man.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://iluhcm.com/2017/07/12/design-of-router-using-with-android/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xing Li">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xing's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">考拉Android客户端路由总线设计</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-07-12T09:42:59+08:00">
+                2017-07-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/07/12/design-of-router-using-with-android/" class="leancloud_visitors" data-flag-title="考拉Android客户端路由总线设计">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Visitors </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前⾔"><a href="#前⾔" class="headerlink" title="前⾔"></a>前⾔</h1><p>当前，Android路由框架已经有很多了，如⾬后春笋般出现，大概是因为去年提出了Android组件化的概念，组件化所要解决的核心问题是解耦。当一个产品的业务规模上升到⼀定程度，甚⾄是跨团队开发时，如何保持团队间业务的往来，互不影响或⼲涉对⽅的开发进度，也不关心业务⽅的实现，这是大型应⽤都会遇到的问题。路由正是为了模块间的解耦⽽出现的。本⽂解析了考拉Android端的路由设计⽅案，与市⾯上的路由⽅案类似，但更多的倾向于与考拉业务进⾏一定程度的结合。</p>
+<h2 id="传统的页⾯跳转"><a href="#传统的页⾯跳转" class="headerlink" title="传统的页⾯跳转"></a>传统的页⾯跳转</h2><h3 id="native-native页⾯跳转"><a href="#native-native页⾯跳转" class="headerlink" title="native-native页⾯跳转"></a>native-native页⾯跳转</h3><p>native页⾯间的跳转，对于新⼿来说⼀般会在跳转的页⾯使⽤如下代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent(this, MainActivity.class);</div><div class="line">intent.putExtra(&quot;dataKey&quot;, &quot;dataValue&quot;);</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
+<p>对于有⼀定经验的程序员，会在跳转的类⽣成⾃⼰的跳转⽅法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public class OrderManagerActivity extends BaseActivity &#123;</div><div class="line">	public static void launch(Context context, int startTab) &#123;</div><div class="line">		Intent i = new Intent(context, OrderManagerActivity.class);</div><div class="line">		i.putExtra(INTENT_IN_INT_START_TAB, startTab);</div><div class="line">		context.startActivity(i); </div><div class="line">	&#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>⽆论使⽤哪种⽅式，本质都是⽣成⼀个<code>Intent</code>，然后再通过<code>Context.startActivity(Intent)</code>实现页⾯跳转。这种⽅式没有问题，唯⼀的不⾜是多模块之间的跳转⽀持不够友好。如果已知其他模块的类名以及对应的路径，可以通过<code>Intent.setComponent(Component)</code>⽅法启动其他模块的页⾯，但往往模块的类名是有可能变化的，⼀旦业务⽅把模块换个名字，这种隐藏的Bug对于开发的内⼼来说是崩溃的。另⼀⽅⾯，这种重复的模板代码，每次⾄少写两⾏，难道不能够简化么？</p>
+<h3 id="H5-native页⾯跳转"><a href="#H5-native页⾯跳转" class="headerlink" title="H5-native页⾯跳转"></a>H5-native页⾯跳转</h3><p>对于考拉这种电商应⽤，活动页⾯是具有时效性和即时性的，并且这两种特性需要得到保障。运营随时有可能更改活动页⾯，也有可能要求点击某个链接就能跳转到⼀个native页⾯。传统的做法是进⾏url拦截，判断url的host是否符合<code>*.kaola.com</code>，path是否有对应的native页⾯可以跳转，然后取出param参数封装成⼀个<code>Intent</code>传递并启动⼀个native页⾯。</p>
+<p>感受⼀下在考拉App⼯程中曾经出现过的下⾯这段代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div></pre></td><td class="code"><pre><div class="line">public static Intent startActivityByUrl(Context context, String url, boolean fromWeb, boolean outer) &#123;</div><div class="line">    if (StringUtils.isNotBlank(url) &amp;&amp; url.startsWith(StringConstants.REDIRECT_URL)) &#123;  </div><div class="line">        try &#123;</div><div class="line">            String realUrl = Uri.parse(url).getQueryParameter(&quot;target&quot;);</div><div class="line">            if (StringUtils.isNotBlank(realUrl)) &#123;</div><div class="line">                url = URLDecoder.decode(realUrl, &quot;UTF-8&quot;);</div><div class="line">            &#125;</div><div class="line">        &#125; catch (Exception e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    Intent intent = null;</div><div class="line">    try &#123;</div><div class="line">        Uri uri = Uri.parse(url);</div><div class="line">        String host = uri.getHost();</div><div class="line">        List&lt;String&gt; pathSegments = uri.getPathSegments();</div><div class="line">        String path = uri.getPath();</div><div class="line">        int segmentsLength = (pathSegments == null ? 0 : pathSegments.size());</div><div class="line"></div><div class="line">        if (!host.contains(StringConstants.KAO_LA)) &#123;</div><div class="line">            return null;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if((StringUtils.isBlank(path)))&#123;</div><div class="line">            do something...</div><div class="line">            return intent;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if (segmentsLength == 2 &amp;&amp; path.startsWith(StringConstants.JUMP_TO_GOODS_DETAIL)) &#123;</div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.JUMP_TO_SPRING_ACTIVITY_TAB)) &#123;  </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.JUMP_TO_SPRING_ACTIVITY_DETAIL) &amp;&amp; segmentsLength == 3) &#123; </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.START_CART) &amp;&amp; segmentsLength == 1) &#123; </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.JUMP_TO_COUPON_DETAIL)</div><div class="line">                || (path.startsWith(StringConstants.JUMP_TO_COUPON) &amp;&amp; segmentsLength == 2)) &#123;</div><div class="line">            do something...</div><div class="line">        &#125; else if (canOpenMainPage(host, uri.getPath())) &#123; </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.START_ORDER)) &#123; </div><div class="line">            if (!UserInfo.isLogin(context)) &#123;</div><div class="line">                do something...</div><div class="line">            &#125; else &#123;</div><div class="line">                do something...</div><div class="line">            &#125;</div><div class="line">        &#125; else if (path.startsWith(StringConstants.START_SAVE)) &#123; </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.JUMP_TO_NEW_DISCOVERY)) &#123;  </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.JUMP_TO_NEW_DISCOVERY_2) &amp;&amp; segmentsLength == 3) &#123; </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.START_BRAND_INTRODUCE)</div><div class="line">                || path.startsWith(StringConstants.START_BRAND_INTRODUCE2)) &#123;  </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.START_BRAND_DETAIL) &amp;&amp; segmentsLength == 2) &#123;  </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.JUMP_TO_ORDER_DETAIL)) &#123;  </div><div class="line">            if (!UserInfo.isLogin(context) &amp;&amp; outer) &#123;</div><div class="line">                do something...</div><div class="line">            &#125; else &#123;</div><div class="line">                do something...</div><div class="line">            &#125;</div><div class="line">        &#125; else if (path.startsWith(&quot;/cps/user/certify.html&quot;)) &#123;   </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.IDENTIFY)) &#123; </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(&quot;/album/share.html&quot;)) &#123;  </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(&quot;/album/tag/share.html&quot;)) &#123;  </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(&quot;/live/roomDetail.html&quot;)) &#123;   </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(StringConstants.JUMP_TO_ORDER_COMMENT)) &#123; </div><div class="line">            if (!UserInfo.isLogin(context) &amp;&amp; outer) &#123;</div><div class="line">                do something...</div><div class="line">            &#125; else &#123;</div><div class="line">                do something...</div><div class="line">            &#125;</div><div class="line">        &#125; else if (openOrderDetail(url, path)) &#123;</div><div class="line">            if (!UserInfo.isLogin(context) &amp;&amp; outer) &#123;</div><div class="line">                do something...</div><div class="line">            &#125; else &#123;</div><div class="line">                do something...</div><div class="line">            &#125;</div><div class="line">        &#125; else if (path.startsWith(StringConstants.JUMP_TO_SINGLE_COMMENT)) &#123;  </div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(&quot;/member/activity/vip_help.html&quot;)) &#123;</div><div class="line">            do something...</div><div class="line">        &#125; else if (path.startsWith(&quot;/goods/search.html&quot;)) &#123;</div><div class="line">            do something...</div><div class="line">        &#125; else if(path.startsWith(&quot;/afterSale/progress.html&quot;))&#123;  </div><div class="line">            do something...</div><div class="line">        &#125; else if(path.startsWith(&quot;/afterSale/apply.html&quot;))&#123;  </div><div class="line">            do something...</div><div class="line">        &#125; else if(path.startsWith(&quot;/order/track.html&quot;)) &#123; </div><div class="line">            do something...</div><div class="line">        &#125;</div><div class="line">    &#125; catch (Exception e) &#123;</div><div class="line">        e.printStackTrace();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (intent != null &amp;&amp; !(context instanceof Activity)) &#123;</div><div class="line">        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</div><div class="line">    &#125;</div><div class="line">    return intent;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这段代码整整260⾏，看到代码时我的内⼼是崩溃的。这种做法的弊端在于：</p>
+<ul>
+<li><strong>耦合性太强</strong>。已知拦截的所有页⾯的引⽤都必须能够拿到，否则⽆法跳转；</li>
+<li><strong>代码混乱</strong>。path⾮常多，从众多的path中匹配多个已知的native页⾯，想必要判断匹配规则就要写很多函数解决；</li>
+<li><strong>拦截过程不透明</strong>。开发者很难在url拦截的过程中加⼊⾃⼰的业务逻辑，如打点、启动Activity前添加特定的Flag等；</li>
+<li><strong>没有优先级概念，也⽆法降级处理</strong>。同⼀个url，只要匹配到⼀个native页⾯，就必须打开这个页⾯，⽆法通过调整优先级跳转到别的页⾯或者使⽤H5打开。</li>
+</ul>
+<h3 id="native-H5页⾯跳转"><a href="#native-H5页⾯跳转" class="headerlink" title="native-H5页⾯跳转"></a>native-H5页⾯跳转</h3><p>这种情况不必多说，启动⼀个WebView即可。</p>
+<h2 id="页⾯路由的意义"><a href="#页⾯路由的意义" class="headerlink" title="页⾯路由的意义"></a>页⾯路由的意义</h2><p>路由最先被应⽤于⽹络中，路由的定义是通过互联的⽹络把信息从<strong>源地址</strong>传输到<strong>⽬的地址</strong>的活动。页⾯跳转也是相当于从<strong>源页⾯</strong>跳转到<strong>⽬标页⾯</strong>的过程，每个页⾯可以定义为⼀个统⼀资源标识符（URI），在⽹络当中能够被别⼈访问，也可以访问已经被定义了的页⾯。路由常⻅的使⽤场景有以下⼏种：</p>
+<ul>
+<li>App接收到⼀个通知，点击通知打开App的某个页⾯（OuterStartActivity）</li>
+<li>浏览器App中点击某个链接打开App的某个页⾯（OuterStartActivity）</li>
+<li>App的H5活动页⾯打开⼀个链接，可能是H5跳转，也可能是跳转到某⼀个native页⾯（WebViewActivity）</li>
+<li>打开页⾯需要某些条件，先验证完条件，再去打开那个页⾯（需要登录）</li>
+<li>App内的跳转，可以减少⼿动构建Intent的成本，同时可以统⼀携带部分参数到下⼀个页⾯（打点）</li>
+</ul>
+<h1 id="考拉路由总线"><a href="#考拉路由总线" class="headerlink" title="考拉路由总线"></a>考拉路由总线</h1><h2 id="考拉路由框架"><a href="#考拉路由框架" class="headerlink" title="考拉路由框架"></a>考拉路由框架</h2><p><img src="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router_architecture.png" alt=""></p>
+<p>考拉路由框架如图。主要分为三个模块：<strong>路由收集</strong>、<strong>路由初始化</strong>以及<strong>页⾯路由</strong>。路由收集阶段，定义了基于Activity类的注解，通过APT收集路由信息并⽣成路由表类；路由初始化阶段，根据⽣成的路由表信息注⼊路由字典；页⾯路由阶段，则通过路由字典查找路由信息，并根据查找结果定制不同的路由策略略。</p>
+<h2 id="考拉路由设计思路"><a href="#考拉路由设计思路" class="headerlink" title="考拉路由设计思路"></a>考拉路由设计思路</h2><p>总的来说，路由设计追求的是功能模块的解耦，能够实现基本路由功能，以及开发者使⽤上⾜够简单。考拉路由的前两个阶段对于路由使⽤者⼏乎是透明的，只需要在使⽤路由的页⾯定义⼀个类注解<code>@Router</code>即可，第三个阶段的使⽤也相当简单，后⾯会详细介绍。</p>
+<h3 id="接⼝设计"><a href="#接⼝设计" class="headerlink" title="接⼝设计"></a>接⼝设计</h3><p><img src="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router.jpg" alt=""></p>
+<p>⼀个好的模块或框架，需要事先设计好接⼝，预留⾜够的权限供调⽤者使⽤，以满⾜各种各样的需求。考拉路由框架在设计过程中使⽤了常⻅的设计模式，如Builder模式、Factory模式、Wrapper模式等，并遵循以下设计原则。</p>
+<ul>
+<li><strong>针对接⼝编程，⽽不是针对实现编程</strong></li>
+</ul>
+<p>这条规则排在最前⾯的原因是，针对接⼝编程，不管是对开发者还是对使⽤者，真的是<strong>百利⽽⽆⼀害</strong>。在路由版本迭代的过程中，⽆论怎么修改接⼝的实现，也不会担⼼影响到上层业务的逻辑，对于业务来说，路由的使⽤是透明的。</p>
+<p>考拉路由框架在设计过程中并未完全遵循这条原则，但在路由的关键步骤都尽量地预留了接⼝，具体有：</p>
+<p><strong>RouterRequestCallback</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public interface RouterRequestCallback &#123;</div><div class="line">    void onFound(RouterRequest request, RouterResponse response);</div><div class="line"></div><div class="line">    boolean onLost(RouterRequest request);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>路由表中是否能够匹配到路由信息的回调，如果能够匹配，则回调<code>onFound()</code>，如果不能够匹配，则返回<code>onLost()</code>。<code>onLost()</code>的结果由开发来定义，如果返回的结果是true，则认为开发者处理了这次路由不匹配的结果，最终返回的<code>RouterResult</code>的结果是成功路由。</p>
+<p><strong>RouterHandler</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface RouterHandler extends RouterStarter &#123;</div><div class="line">	RouterResponse findResponse(RouterRequest request); </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>路由处理与启动接⼝，根据给定的路由请求，查找路由信息，根据路由响应结果，分发给相应的启动器执⾏后续页⾯跳转。</p>
+<p><strong>RouterResultCallback</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public interface RouterResultCallback &#123;</div><div class="line">    boolean beforeRoute(Context context, Intent intent);</div><div class="line"></div><div class="line">    void doRoute(Context context, Intent intent, Object extra);</div><div class="line"></div><div class="line">    void errorRoute(Context context, Intent intent, String errorCode, Object extra);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>匹配到路由信息后，真正执⾏路由过程的回调。<code>beforeRoute()</code>这个⽅法是在真正路由之前的回调，如果开发者返回true，则认为这条路由信息已被开发消费，不会再回调后⾯的doRoute以及执⾏路由。在路由过程中发⽣的任何异常，都会回调<code>errorRoute()</code>⽅法，这时候路由中断。</p>
+<p><strong>ResponseInvoker</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface ResponseInvoker &#123;</div><div class="line">    void invoke(Context context, Intent intent, Object... args);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>路由执⾏者。如果开发需要执⾏路由前进⾏⼀些全局操作，例如添加额外的信息传⼊到下⼀个Activity，则可以⾃⼰实现这个接⼝。路由框架提供默认的实现：<code>ActivityInvoker</code>。开发也可以继承<code>ActivityInvoker</code>，重写<code>invoke()</code>⽅法，先实现⾃⼰的操作，然后再调⽤<code>super.invoke()</code>⽅法。</p>
+<p><strong>OnActivityResultListener</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface OnActivityResultListener &#123;</div><div class="line">    void onActivityResult(int requestCode, int resultCode, Intent data);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>特别强调⼀下这个Listener。本来这个回调的作用是方便调用者在执行<code>startActivityForResult</code>的时候可以通过回调来告知结果，但由于不保留活动的限制，离开页面以后这个监听器是无法被系统保存的，因此不推荐在<code>Activity/Fragment</code>中使用回调，而是在非Activity组件里使用，如<code>View/Window/Dialog</code>。这个过程已经由<code>core</code>包⾥的<code>BaseActivity</code>实现，开发使⽤的时候，可以直接调⽤<code>BaseActivity.startActivityForResult(intent, requestCode, onActivityResultListener)</code>，也可以通过<code>KaolaRouter.with(context).url(url).startForResult(requestCode, onActivityResultListener)</code>调⽤。例如，要启动订单管理页并回调：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">KaolaRouter.with(context)</div><div class="line">        .url(url)</div><div class="line">        .data(&quot;orderId&quot;, &quot;replace url param key.&quot;)</div><div class="line">        .startForResult(1, new OnActivityResultListener() &#123;</div><div class="line">            @Override</div><div class="line">            public void onActivityResult(int requestCode, int resultCode, Intent data) &#123;</div><div class="line">                DebugLog.e(requestCode + &quot; &quot; + resultCode + &quot; &quot; + data.toString());</div><div class="line">            &#125;</div><div class="line">        &#125;);</div></pre></td></tr></table></figure>
+<p><strong>RouterResult</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">public interface RouterResult &#123;</div><div class="line"></div><div class="line">    boolean isSuccess();</div><div class="line"></div><div class="line">    RouterRequest getRouterRequest();</div><div class="line"></div><div class="line">    RouterResponse getRouterResponse();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>告知路由的结果，路由结果可以被⼲预，例如<code>RouterRequestCallback.onLost()</code>，返回true的时候，路由也是成功的。这个接⼝不管路由的成功或失败都会回调。</p>
+<p><strong>不随意暴露不必要的API</strong></p>
+<p><em>“要区别设计良好的模块与设计不好的模块，最重要的因素在于，这个模块对于外部的其他模块⽽⾔言，是否隐藏其内部数据和其他实现细节。设计良好的模块会隐藏所有的实现细节，把它的API与它的实现清晰地隔离开来。然后，模块之间只通过它们的API进⾏通信，⼀个模块不需要知道其他模块的内部⼯作情况。这被称为封装(encapsulation)。”</em>（摘⾃Effective Java, P58）</p>
+<p>举个例⼦，考拉路由框架对路由调⽤的⼊参做了限制，⼀旦⼊参，则不能再做修改。实现上，由<code>RouterRequestWrapper</code>继承⾃<code>RouterRequestBuilder</code>，后者通过Builder模式给⽤户构造相关的参数，前者通过Wrapper模式装饰所有的变量，并提供get能⼒，供路由框架使⽤。</p>
+<p><strong>单⼀职责</strong></p>
+<p>⽆论是类还是⽅法，均需要遵循单⼀职责原则。⼀个类实现⼀个功能，⼀个⽅法做⼀件事。例如，<code>KaolaRouterHandler</code>是考拉路由的处理器，实现了<code>RouterHandler</code>接⼝，实现路由的查找与转发；<code>RouterRequestBuilder</code>⽤于收集路由请求所需参数；<code>RouterResponseFactory</code>⽤于⽣成路由响应的结果。</p>
+<p><strong>提供默认实现</strong></p>
+<p>针对接⼝编程的好处是随时可以替换实现，考拉路由框架在路由过程中的所有监听、拦截以及Action都提供了默认的实现。使⽤者即可以不关⼼底层的实现逻辑，也可以根据需要替换相关的实现。</p>
+<h3 id="功能设计"><a href="#功能设计" class="headerlink" title="功能设计"></a>功能设计</h3><p>路由在⼀定程度上和⽹络请求是类似的，可以分为请求、处理以及响应三个阶段。这三个阶段对使⽤者来说既可以是透明的，也可以在路由过程中进⾏拦截处理。考拉路由框架⽀持的功能有：</p>
+<ol>
+<li>⽀持基本Activity的启动，以及startActivityForResult回调；✅</li>
+<li>⽀持不同协议执⾏不同跳转；（kaola://*、http(s)://*、native://*等）✅</li>
+<li>⽀持多个主机域跳转⾄同⼀个页⾯；（(pre.)*.kaola.com(.hk)）✅</li>
+<li>⽀持路由的正则匹配；✅</li>
+<li>Activity启动⽀持不同Flag；✅</li>
+<li>⽀持路由的动态拦截、监听以及降级；✅</li>
+</ol>
+<h2 id="考拉路由实现原理"><a href="#考拉路由实现原理" class="headerlink" title="考拉路由实现原理"></a>考拉路由实现原理</h2><p>考拉路由框架基于注解收集路由信息，通过APT实现路由表的动态⽣成，类似于ButterKnife的做法，在运⾏时导⼊路由表信息，并通过正则表达式查找路由，根据路由结果实现最终的页⾯跳转。</p>
+<h3 id="收集路由信息"><a href="#收集路由信息" class="headerlink" title="收集路由信息"></a>收集路由信息</h3><p>⾸先定义⼀个注解<code>@Router</code>，注解⾥包含了路由协议、路由主机、路由路径以及路由优先级。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">@Target(ElementType.TYPE) </div><div class="line">@Retention(RetentionPolicy.CLASS) </div><div class="line">public @interface Router &#123;</div><div class="line">    /**</div><div class="line">     * URI协议，已经提供默认值</div><div class="line">     */</div><div class="line">    String scheme() default &quot;(https|http|kaola|native)://&quot;;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * URI主机，已经提供默认值</div><div class="line">     */</div><div class="line">    String host() default &quot;(pre\\.)?(\\w+\\.)?kaola\\.com(\\.hk)?&quot;;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * URI路径，选填，如果使用默认值，则只支持本地路由，不支持url拦截</div><div class="line">     */</div><div class="line">    String value() default &quot;&quot;;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 路由优先级，默认为0。</div><div class="line">     */</div><div class="line">    int priority() default 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>对于需要使⽤路由的页⾯，只需要在类的声明处加上这个注解，标明这个页⾯对应的路由路径即可。例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">@Router(&quot;/app/myQuestion.html&quot;) </div><div class="line">public class MyQuestionAndAnswerActivity extends BaseActivity &#123; </div><div class="line">	……</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>那么通过APT⽣成的标记这个页⾯的url则是⼀个正则表达式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">(https|http|kaola|native)://(pre\.)?(\w+\.)?kaola\.com(\.hk)?/app/myQuestion\.html</div></pre></td></tr></table></figure>
+<p>路由表则是由多条这样的正则表达式构成。</p>
+<h3 id="⽣成路由表"><a href="#⽣成路由表" class="headerlink" title="⽣成路由表"></a>⽣成路由表</h3><p>路由表的⽣成需要使⽤<code>APT(Android Processing Tool)</code>⼯具以及Square公司开源的<code>com.squareup:javapoet</code>类库，⽬的是根据我们定义的Router注解让机器帮我们“写代码”，⽣成⼀个Map类型的路由表，其中key根据Router注解的信息⽣成对应的正则表达式，value是这个注解对应的类的信息集合。⾸先定义⼀个<code>RouterProcessor</code>，继承⾃<code>AbstractProcessor</code>，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">public class RouterProcessor extends AbstractProcessor &#123;</div><div class="line">    @Override</div><div class="line">    public synchronized void init(ProcessingEnvironment processingEnv) &#123;</div><div class="line">        super.init(processingEnv);</div><div class="line">		// 初始化相关环境信息</div><div class="line">        mFiler = processingEnv.getFiler();</div><div class="line">        elementUtil = processingEnv.getElementUtils();</div><div class="line">        typeUtil = processingEnv.getTypeUtils();</div><div class="line">        Log.setLogger(processingEnv.getMessager());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public Set&lt;String&gt; getSupportedAnnotationTypes() &#123;</div><div class="line">        Set&lt;String&gt; supportAnnotationTypes = new HashSet&lt;&gt;();</div><div class="line">        // 获取需要处理理的注解类型，⽬目前只处理理Router注解</div><div class="line">        supportAnnotationTypes.add(Router.class.getCanonicalName());</div><div class="line">        return supportAnnotationTypes;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean process(Set&lt;? extends TypeElement&gt; annotations, RoundEnvironment roundEnv) &#123;</div><div class="line">    // 收集与Router相关的所有类信息，解析并⽣生成路路由表</div><div class="line">        Set&lt;? extends Element&gt; routeElements = roundEnv.getElementsAnnotatedWith(Router.class);</div><div class="line">        try &#123;</div><div class="line">            Log.i(&quot;&gt;&gt;&gt; Found routes, start... &lt;&lt;&lt;&quot;);</div><div class="line">            return parseRoutes(routeElements);</div><div class="line">        &#125; catch (Exception e) &#123;</div><div class="line">            Log.e(e.getMessage(), e);</div><div class="line">            return false;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上述的三个⽅法属于AbstractProcessor的⽅法，public boolean process(Set&lt;? extends TypeElement&gt; annotations, RoundEnvironment roundEnv)是抽象⽅法，需要⼦类实现。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div></pre></td><td class="code"><pre><div class="line">private boolean parseRoutes(Set&lt;? extends Element&gt; routeElements) throws IOException &#123;</div><div class="line">    if (null == routeElements || routeElements.size() == 0) &#123;</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line">    Log.i(&quot;&gt;&gt;&gt; Found routes, size is &quot; + routeElements.size() + &quot; &lt;&lt;&lt;&quot;);</div><div class="line"></div><div class="line">    // 获取Activity类的类型，后⾯面⽤用于判断是否是其⼦子类</div><div class="line">    TypeElement typeActivity = elementUtil.getTypeElement(ACTIVITY);</div><div class="line">	// 获取路路由Builder类的标准类名</div><div class="line">    ClassName routeBuilderCn = ClassName.get(RouteBuilder.class);</div><div class="line">	// 构建Map&lt;String, Route&gt;集合</div><div class="line">    String routerConstClassName = RouterProvider.ROUTER_CONST_NAME;</div><div class="line">    TypeSpec.Builder typeSpec =</div><div class="line">            TypeSpec.classBuilder(routerConstClassName).addJavadoc(WARNING_TIPS).addModifiers(PUBLIC);</div><div class="line">    /**</div><div class="line">     * Map&lt;String, Route&gt;</div><div class="line">     */</div><div class="line">    ParameterizedTypeName inputMapTypeName =</div><div class="line">            ParameterizedTypeName.get(ClassName.get(Map.class), ClassName.get(String.class),</div><div class="line">                    ClassName.get(Route.class));</div><div class="line">    ParameterSpec groupParamSpec = ParameterSpec.builder(inputMapTypeName, ROUTER_MAP_NAME).build();</div><div class="line">    MethodSpec.Builder loadIntoMethodOfGroupBuilder = MethodSpec.methodBuilder(METHOD_LOAD_INTO)</div><div class="line">            .addAnnotation(Override.class)</div><div class="line">            .addModifiers(PUBLIC)</div><div class="line">            .addParameter(groupParamSpec);</div><div class="line">	// 将路路由信息放⼊入Map&lt;String, Route&gt;集合中</div><div class="line">    for (Element element : routeElements) &#123;</div><div class="line">        TypeMirror tm = element.asType();</div><div class="line">        Router route = element.getAnnotation(Router.class);</div><div class="line">		// 获取当前Activity的标准类名</div><div class="line">        if (typeUtil.isSubtype(tm, typeActivity.asType())) &#123;</div><div class="line">            ClassName activityCn = ClassName.get((TypeElement) element);</div><div class="line">            String key = &quot;key&quot; + element.getSimpleName().toString();</div><div class="line">            String routeString = RouteBuilder.assembleRouteUri(route.scheme(), route.host(), route.value());</div><div class="line">            if (null == routeString) &#123;</div><div class="line">                //String keyValue = RouteBuilder.generateUriFromClazz(Activity.class);</div><div class="line">                loadIntoMethodOfGroupBuilder.addStatement(&quot;String $N= $T.generateUriFromClazz($T.class)&quot;, key,</div><div class="line">                        routeBuilderCn, activityCn);</div><div class="line">            &#125; else &#123;</div><div class="line">                //String keyValue = &quot;(&quot; + route.value() + &quot;)|(&quot; + RouteBuilder.generateUriFromClazz(Activity.class) + &quot;)&quot;;</div><div class="line">                loadIntoMethodOfGroupBuilder.addStatement(</div><div class="line">                        &quot;String $N=$S + $S + $S+$T.generateUriFromClazz($T.class)+$S&quot;, key, &quot;(&quot;, routeString, &quot;)|(&quot;,</div><div class="line">                        routeBuilderCn, activityCn, &quot;)&quot;);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            /**</div><div class="line">             * routerMap.put(url, RouteBuilder.build(String url, int priority, Class&lt;?&gt; destination));</div><div class="line">             */</div><div class="line">            loadIntoMethodOfGroupBuilder.addStatement(&quot;$N.put($N, $T.build($N, $N, $T.class))&quot;, ROUTER_MAP_NAME,</div><div class="line">                    key, routeBuilderCn, key, String.valueOf(route.priority()), activityCn);</div><div class="line"></div><div class="line">            typeSpec.addField(generateRouteConsts(element));</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // Generate RouterConst.java</div><div class="line">    JavaFile.builder(RouterProvider.OUTPUT_DIRECTORY, typeSpec.build()).build().writeTo(mFiler);</div><div class="line"></div><div class="line">    // Generate RouterGenerator</div><div class="line">    JavaFile.builder(RouterProvider.OUTPUT_DIRECTORY, TypeSpec.classBuilder(RouterProvider.ROUTER_GENERATOR_NAME)</div><div class="line">            .addJavadoc(WARNING_TIPS)</div><div class="line">            .addSuperinterface(ClassName.get(RouterProvider.class))</div><div class="line">            .addModifiers(PUBLIC)</div><div class="line">            .addMethod(loadIntoMethodOfGroupBuilder.build())</div><div class="line">            .build()).build().writeTo(mFiler);</div><div class="line"></div><div class="line">    return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最终⽣成的路由表如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * DO NOT EDIT THIS FILE!!! IT WAS GENERATED BY KAOLA PROCESSOR. */</div><div class="line">public class RouterGenerator implements RouterProvider &#123;</div><div class="line">  @Override</div><div class="line">  public void loadRouter(Map&lt;String, Route&gt; routerMap) &#123;</div><div class="line">    String keyActivityDetailActivity=&quot;(&quot; + &quot;(https|http|kaola|native)://(pre\\.)?(\\w+\\.)?kaola\\.com(\\.hk)?/activity/spring/\\w+&quot; + &quot;)|(&quot;+RouteBuilder.generateUriFromClazz(ActivityDetailActivity.class)+&quot;)&quot;;</div><div class="line">    routerMap.put(keyActivityDetailActivity, RouteBuilder.build(keyActivityDetailActivity, 0, ActivityDetailActivity.class));</div><div class="line">    String keyLabelDetailActivity=&quot;(&quot; + &quot;(https|http|kaola|native)://(pre\\.)?(\\w+\\.)?kaola\\.com(\\.hk)?/album/tag/share\\.html&quot; + &quot;)|(&quot;+RouteBuilder.generateUriFromClazz(LabelDetailActivity.class)+&quot;)&quot;;</div><div class="line">    routerMap.put(keyLabelDetailActivity, RouteBuilder.build(keyLabelDetailActivity, 0, LabelDetailActivity.class));</div><div class="line">    String keyMyQuestionAndAnswerActivity=&quot;(&quot; + &quot;(https|http|kaola|native)://(pre\\.)?(\\w+\\.)?kaola\\.com(\\.hk)?/app/myQuestion.html&quot; + &quot;)|(&quot;+RouteBuilder.generateUriFromClazz(MyQuestionAndAnswerActivity.class)+&quot;)&quot;;</div><div class="line">    routerMap.put(keyMyQuestionAndAnswerActivity, RouteBuilder.build(keyMyQuestionAndAnswerActivity, 0, MyQuestionAndAnswerActivity.class));</div><div class="line">	……</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>路由集合key是⼀组正则表达式，因此可以匹配多个路径。</p>
+<h3 id="初始化路由"><a href="#初始化路由" class="headerlink" title="初始化路由"></a>初始化路由</h3><p>路由初始化在Application的过程中以同步的⽅式进⾏。通过获取<code>RouterGenerator</code>的类直接⽣成实例，并将路由信息保存在<code>sRouterMap</code>变量中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">public static void init() &#123;</div><div class="line">    try &#123;</div><div class="line">        sRouterMap = new HashMap&lt;&gt;();</div><div class="line">        ((RouterProvider) (Class.forName(ROUTER_CLASS_NAME).getConstructor().newInstance())).loadRouter(sRouterMap);</div><div class="line">    &#125; catch (Exception e) &#123;</div><div class="line">        e.printStackTrace();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="页⾯路由"><a href="#页⾯路由" class="headerlink" title="页⾯路由"></a>页⾯路由</h3><p>给定⼀个url以及上下⽂环境，即可使⽤路由。调⽤⽅式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">KaolaRouter.with(context).url(url).start();</div></pre></td></tr></table></figure>
+<p>页⾯路由分为路由请求⽣成，路由查找以及路由结果执⾏这⼏个步骤。路由请求⽬前较为简单，仅是封装了⼀个RouterRequest接⼝</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface RouterRequest &#123;</div><div class="line">	Uri getUriRequest(); </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>路由的查找过程相对复杂，除了遍历路由初始化以后导⼊内存的路由表，还需要判断各种各样的前置条件。具体的条件判断代码中有相关注释。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public RouterResponse findResponse(RouterRequest request) &#123;</div><div class="line">    if (null == sRouterMap) &#123;</div><div class="line">        return null;</div><div class="line">        //throw new IllegalStateException(</div><div class="line">        //        String.format(&quot;Router has not been initialized, please call %s.init() first.&quot;,</div><div class="line">        //                KaolaRouter.class.getSimpleName()));</div><div class="line">    &#125;</div><div class="line">    if (mRouterRequestWrapper.getDestinationClass() != null) &#123;</div><div class="line">        RouterResponse response = RouterResponseFactory.buildRouterResponse(null, mRouterRequestWrapper);</div><div class="line">        reportFoundRequestCallback(request, response);</div><div class="line">        return response;</div><div class="line">    &#125;</div><div class="line">    Uri uri = request.getUriRequest();</div><div class="line">    String requestUrl = uri.toString();</div><div class="line">    if (!TextUtils.isEmpty(requestUrl)) &#123;</div><div class="line">        for (Map.Entry&lt;String, Route&gt; entry : sRouterMap.entrySet()) &#123;</div><div class="line">            if (RouterUtils.matchUrl(requestUrl, entry.getKey())) &#123;</div><div class="line">                Route routerModel = entry.getValue();</div><div class="line">                if (null != routerModel) &#123;</div><div class="line">                    RouterResponse response =</div><div class="line">                            RouterResponseFactory.buildRouterResponse(routerModel, mRouterRequestWrapper);</div><div class="line">                    reportFoundRequestCallback(request, response);</div><div class="line">                    return response;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return null;</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public RouterResult start() &#123;</div><div class="line">	// 判断Context引⽤是否还存在</div><div class="line">    WeakReference&lt;Context&gt; objectWeakReference = mContextWeakReference;</div><div class="line"></div><div class="line">    if (null == objectWeakReference) &#123;</div><div class="line">        reportRouterResultError(null, null, RouterError.ROUTER_CONTEXT_REFERENCE_NULL, null);</div><div class="line">        return getRouterResult(false, mRouterRequestWrapper, null);</div><div class="line">    &#125;</div><div class="line">    Context context = objectWeakReference.get();</div><div class="line">    if (context == null) &#123;</div><div class="line">        reportRouterResultError(null, null, RouterError.ROUTER_CONTEXT_NULL, null);</div><div class="line">        return getRouterResult(false, mRouterRequestWrapper, null);</div><div class="line">    &#125;</div><div class="line">	// 判断路由请求是否有效</div><div class="line">    if (!checkRequest(context)) &#123;</div><div class="line">        return getRouterResult(false, mRouterRequestWrapper, null);</div><div class="line">    &#125;</div><div class="line">	// 遍历查找路路由结果</div><div class="line">    RouterResponse response = findResponse(mRouterRequestWrapper);</div><div class="line">	// 判断路由结果，执行路由结果为空时的拦截</div><div class="line">    if (null == response) &#123;</div><div class="line">        boolean handledByCallback = reportLostRequestCallback(mRouterRequestWrapper);</div><div class="line">        if (!handledByCallback) &#123;</div><div class="line">            reportRouterResultError(context, null, RouterError.ROUTER_RESPONSE_NULL,</div><div class="line">                    mRouterRequestWrapper.getRouterRequest());</div><div class="line">        &#125;</div><div class="line">        return getRouterResult(handledByCallback, mRouterRequestWrapper, null);</div><div class="line">    &#125;</div><div class="line">	// 获取路由结果执⾏的接口</div><div class="line">    ResponseInvoker responseInvoker = getResponseInvoker(context, response);</div><div class="line"></div><div class="line">    if (responseInvoker == null) &#123;</div><div class="line">        return getRouterResult(false, mRouterRequestWrapper, response);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    Intent intent;</div><div class="line">    try &#123;</div><div class="line">        intent = RouterUtils.generateResponseIntent(context, response, mRouterRequestWrapper);</div><div class="line">    &#125; catch (Exception e) &#123;</div><div class="line">        reportRouterResultError(context, null, RouterError.ROUTER_GENERATE_INTENT_ERROR, e);</div><div class="line">        return getRouterResult(false, mRouterRequestWrapper, response);</div><div class="line">    &#125;</div><div class="line">	// ⽣成相应的Intent</div><div class="line">    if (null == intent) &#123;</div><div class="line">        reportRouterResultError(context, null, RouterError.ROUTER_GENERATE_INTENT_NULL, response);</div><div class="line">        return getRouterResult(false, mRouterRequestWrapper, response);</div><div class="line">    &#125;</div><div class="line">	// 获取路由结果回调接口，如果为空，则使用默认提供的实现</div><div class="line">    RouterResultCallback routerResultCallback = getRouterResultCallback();</div><div class="line"></div><div class="line">    // 由使用者处理</div><div class="line">    if (routerResultCallback.beforeRoute(context, intent)) &#123;</div><div class="line">        return getRouterResult(true, mRouterRequestWrapper, response);</div><div class="line">    &#125;</div><div class="line">    try &#123;</div><div class="line">        responseInvoker.invoke(context, intent, mRouterRequestWrapper.getRequestCode(),</div><div class="line">                mRouterRequestWrapper.getOnActivityResultListener());</div><div class="line">        routerResultCallback.doRoute(context, intent, null);</div><div class="line">        return getRouterResult(true, mRouterRequestWrapper, response);</div><div class="line">    &#125; catch (Exception e) &#123;</div><div class="line">        reportRouterResultError(context, intent, RouterError.ROUTER_INVOKER_ERROR, e);</div><div class="line">        return getRouterResult(false, mRouterRequestWrapper, response);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最终会调⽤<code>ResponseInvoker.invoke()</code>⽅法执⾏路由。</p>
+<h1 id="待开发"><a href="#待开发" class="headerlink" title="待开发"></a>待开发</h1><ol>
+<li>职责链模式，参考OkHttp</li>
+<li>集成Fragment</li>
+<li>⽀持异步</li>
+<li>路由缓存</li>
+<li>路由智能优先级（调⽤过的，放最前⾯）</li>
+<li>集成权限管理</li>
+<li>考虑需要登录的情况，统⼀处理掉</li>
+</ol>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>考拉路由框架与其他路由框架相比，目前功能较简单，目的也仅是支持页面跳转。为了达到对开发者友好、使用简单的目的，本文在设计路由框架的过程中使用了一些简单的设计模式，使得整个系统的可扩展性较强，也能够充分的满足考拉的业务需求。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="http://www.jianshu.com/p/79e9a54e85b2" target="_blank" rel="external">http://www.jianshu.com/p/79e9a54e85b2</a></li>
+<li><a href="http://www.jianshu.com/p/8a3eeeaf01e8" target="_blank" rel="external">http://www.jianshu.com/p/8a3eeeaf01e8</a></li>
+<li><a href="http://www.jianshu.com/p/f582c3893bed" target="_blank" rel="external">http://www.jianshu.com/p/f582c3893bed</a></li>
+<li><a href="https://joyrun.github.io/2016/08/01/ActivityRouter/" target="_blank" rel="external">https://joyrun.github.io/2016/08/01/ActivityRouter/</a></li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <ul class="post-copyright">
+    <li class="post-copyright-author">
+      <strong>Post author:</strong>
+      Xing Li
+    </li>
+    <li class="post-copyright-link">
+      <strong>Post link:</strong>
+      <a href="http://iluhcm.com/2017/07/12/design-of-router-using-with-android/" title="考拉Android客户端路由总线设计">http://iluhcm.com/2017/07/12/design-of-router-using-with-android/</a>
+    </li>
+    <li class="post-copyright-license">
+      <strong>Copyright Notice: </strong>
+      All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+    </li>
+  </ul>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/Router/" rel="tag"># Router</a>
+          
+            <a href="/tags/Priority/" rel="tag"># Priority</a>
+          
+            <a href="/tags/Regular-Expression/" rel="tag"># Regular Expression</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/12/experience-of-adapting-to-android-notifications/" rel="next" title="Android通知栏介绍与适配总结">
+                <i class="fa fa-chevron-left"></i> Android通知栏介绍与适配总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div id="sidebar-dimmer"></div>
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="Xing Li" />
+          <p class="site-author-name" itemprop="name">Xing Li</p>
+           
+              <p class="site-description motion-element" itemprop="description">If asked how the pond can be so lucid and fresh, told that sources with flowing water replenish.</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">categories</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">51</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/iluhcm" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.facebook.com/xing.li.731135" target="_blank" title="Facebook">
+                  
+                    <i class="fa fa-fw fa-facebook"></i>
+                  
+                  Facebook
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/iluhcm" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://plus.google.com/101164893136136383839/posts" target="_blank" title="Google+">
+                  
+                    <i class="fa fa-fw fa-google-plus"></i>
+                  
+                  Google+
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/lshcm" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/iluhcm" target="_blank" title="Zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://music.163.com/#/user/home?id=38148117" target="_blank" title="Netease">
+                  
+                    <i class="fa fa-fw fa-music"></i>
+                  
+                  Netease
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前⾔"><span class="nav-number">1.</span> <span class="nav-text">前⾔</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#传统的页⾯跳转"><span class="nav-number">1.1.</span> <span class="nav-text">传统的页⾯跳转</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#native-native页⾯跳转"><span class="nav-number">1.1.1.</span> <span class="nav-text">native-native页⾯跳转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#H5-native页⾯跳转"><span class="nav-number">1.1.2.</span> <span class="nav-text">H5-native页⾯跳转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#native-H5页⾯跳转"><span class="nav-number">1.1.3.</span> <span class="nav-text">native-H5页⾯跳转</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#页⾯路由的意义"><span class="nav-number">1.2.</span> <span class="nav-text">页⾯路由的意义</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#考拉路由总线"><span class="nav-number">2.</span> <span class="nav-text">考拉路由总线</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#考拉路由框架"><span class="nav-number">2.1.</span> <span class="nav-text">考拉路由框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#考拉路由设计思路"><span class="nav-number">2.2.</span> <span class="nav-text">考拉路由设计思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#接⼝设计"><span class="nav-number">2.2.1.</span> <span class="nav-text">接⼝设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#功能设计"><span class="nav-number">2.2.2.</span> <span class="nav-text">功能设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#考拉路由实现原理"><span class="nav-number">2.3.</span> <span class="nav-text">考拉路由实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#收集路由信息"><span class="nav-number">2.3.1.</span> <span class="nav-text">收集路由信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#⽣成路由表"><span class="nav-number">2.3.2.</span> <span class="nav-text">⽣成路由表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化路由"><span class="nav-number">2.3.3.</span> <span class="nav-text">初始化路由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#页⾯路由"><span class="nav-number">2.3.4.</span> <span class="nav-text">页⾯路由</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#待开发"><span class="nav-number">3.</span> <span class="nav-text">待开发</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xing Li</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("CI5TJwN9TiLhei285z2E32es-gzGzoHsz", "RwQ5NncufhCOGqfbhKM1ucxz");AV.useAVCloudUS();</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
