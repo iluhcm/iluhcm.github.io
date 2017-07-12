@@ -79,7 +79,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Blog,Github,GitCafe,Hexo," />
+  <meta name="keywords" content="Github,Blog,GitCafe,Hexo," />
 
 
 
@@ -96,7 +96,7 @@
 
 
 <meta name="description" content="起因在github上建立了个人博客，发现用电脑访问已经缓存过的博客速度挺快，但用别的机子访问就惨不忍睹，迟迟加载不出来。其中缘由大家都懂的，github被特殊照顾也不是一天两天的事了。后来在Godaddy买了个人域名以后，用了DNSPod解析，做了CDN加速，效果还是寥寥。于是乎考虑看能不能在国内也建立一个博客镜像，局域网访问速度总比外网快吧！ 其实这个想法也是偶然的。今天无聊刷着V2EX的时候看">
-<meta name="keywords" content="Blog,Github,GitCafe,Hexo">
+<meta name="keywords" content="Github,Blog,GitCafe,Hexo">
 <meta property="og:type" content="article">
 <meta property="og:title" content="将博客同时部署至Github和GitCafe加速访问站点">
 <meta property="og:url" content="http://iluhcm.com/2015/09/15/accelerate-blogs-access-speed-by-deploying-it-to-github-and-gitcafe/index.html">
@@ -395,7 +395,7 @@
 <li>目前 GitCafe Pages 已不支持 A 记录绑定自定义域名。</li>
 </ul>
 <h1 id="同步博客"><a href="#同步博客" class="headerlink" title="同步博客"></a>同步博客</h1><p>这个时候我们就建立好了GitCafe博客镜像。那么问题来了，写博客一般是在本地写的，怎么方便地同步到Github和GitCafe上呢？又或者我还有第三个需要同步的地方(比如自己在VPS上建立了Gitlab)，怎么做同步呢？好在<a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Hexo</a>给我们提供了非常简单的配置方案。修改Hexo目录下的站点配置文件<code>_config.yml</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"># Deployment</div><div class="line">## Docs: http://hexo.io/docs/deployment.html</div><div class="line">deploy:</div><div class="line">- type: git</div><div class="line">  repository: git@github.com:**/**.github.io.git</div><div class="line">  branch: master</div><div class="line">- type: git</div><div class="line">  repository: git@gitcafe.com:**/**.git</div><div class="line">  branch: gitcafe-pages</div></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Deployment</span></div><div class="line"><span class="comment">## Docs: http://hexo.io/docs/deployment.html</span></div><div class="line"><span class="attr">deploy:</span></div><div class="line"><span class="attr">- type:</span> <span class="string">git</span></div><div class="line"><span class="attr">  repository:</span> <span class="string">git@github.com:**/**.github.io.git</span></div><div class="line"><span class="attr">  branch:</span> <span class="string">master</span></div><div class="line"><span class="attr">- type:</span> <span class="string">git</span></div><div class="line"><span class="attr">  repository:</span> <span class="string">git@gitcafe.com:**/**.git</span></div><div class="line"><span class="attr">  branch:</span> <span class="string">gitcafe-pages</span></div></pre></td></tr></table></figure>
 <p>把配置文件中的<code>**</code>改成你的用户名，这样，用Hexo生成文章并部署的时候，就会同时发布到Github和GitCafe上，达到同步博客的目的。</p>
 <h1 id="加速访问站点"><a href="#加速访问站点" class="headerlink" title="加速访问站点"></a>加速访问站点</h1><p>如果需要根据IP来判断应该访问哪个站点，那么最好的解决方案就是修改DNS解析结果，根据IP记录解析到不同的站点。我使用的是国内的DNSPod，支持<code>CNAME</code>记录。下面是我的配置记录。</p>
 <p><img src="http://7xl6ic.com1.z0.glb.clouddn.com/blog_dnspod.png" alt="DNSPod"></p>
@@ -447,9 +447,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Blog/" rel="tag"># Blog</a>
-          
             <a href="/tags/Github/" rel="tag"># Github</a>
+          
+            <a href="/tags/Blog/" rel="tag"># Blog</a>
           
             <a href="/tags/GitCafe/" rel="tag"># GitCafe</a>
           
