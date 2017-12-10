@@ -1,0 +1,1101 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="2yx0JNDw3DWn3FVwl0XV9ba4wAjjbvZ3viXpvjGwBa8" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android,WebView,JavaScript," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="Android应用层的开发有几大模块，其中WebView是最重要的模块之一。网上能够搜索到的WebView资料可谓寥寥，Github上的开源项目也不是很多，更别提有一个现成封装好的WebView容器直接用于生产环境了。本文仅当记录在使用WebView实现业务需求时所踩下的一些坑，并提供一些解决思路，避免遇到相同问题的朋友再次踩坑。需要说明的是，本文仅提供解决思路，不提供源码。 WebView现状A">
+<meta name="keywords" content="Android,WebView,JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何设计一个优雅健壮的Android WebView？（上）">
+<meta property="og:url" content="http://iluhcm.com/2017/12/10/design-an-elegant-and-powerful-android-webview-part-one/index.html">
+<meta property="og:site_name" content="Xing&#39;s Blog">
+<meta property="og:description" content="Android应用层的开发有几大模块，其中WebView是最重要的模块之一。网上能够搜索到的WebView资料可谓寥寥，Github上的开源项目也不是很多，更别提有一个现成封装好的WebView容器直接用于生产环境了。本文仅当记录在使用WebView实现业务需求时所踩下的一些坑，并提供一些解决思路，避免遇到相同问题的朋友再次踩坑。需要说明的是，本文仅提供解决思路，不提供源码。 WebView现状A">
+<meta property="og:updated_time" content="2017-12-10T08:33:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何设计一个优雅健壮的Android WebView？（上）">
+<meta name="twitter:description" content="Android应用层的开发有几大模块，其中WebView是最重要的模块之一。网上能够搜索到的WebView资料可谓寥寥，Github上的开源项目也不是很多，更别提有一个现成封装好的WebView容器直接用于生产环境了。本文仅当记录在使用WebView实现业务需求时所踩下的一些坑，并提供一些解决思路，避免遇到相同问题的朋友再次踩坑。需要说明的是，本文仅提供解决思路，不提供源码。 WebView现状A">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://iluhcm.com/2017/12/10/design-an-elegant-and-powerful-android-webview-part-one/"/>
+
+
+
+
+
+  <title>如何设计一个优雅健壮的Android WebView？（上） | Xing's Blog</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?03e8bdd436b4561c8e760c9459ee8003";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Xing's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">To be a better man.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://iluhcm.com/2017/12/10/design-an-elegant-and-powerful-android-webview-part-one/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xing Li">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xing's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">如何设计一个优雅健壮的Android WebView？（上）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-10T16:33:32+08:00">
+                2017-12-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/10/design-an-elegant-and-powerful-android-webview-part-one/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/12/10/design-an-elegant-and-powerful-android-webview-part-one/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/12/10/design-an-elegant-and-powerful-android-webview-part-one/" class="leancloud_visitors" data-flag-title="如何设计一个优雅健壮的Android WebView？（上）">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Visitors </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Android应用层的开发有几大模块，其中WebView是最重要的模块之一。网上能够搜索到的WebView资料可谓寥寥，Github上的<a href="https://android-arsenal.com/tag/230" target="_blank" rel="external">开源项目</a>也不是很多，更别提有一个现成封装好的WebView容器直接用于生产环境了。本文仅当记录在使用WebView实现业务需求时所踩下的一些坑，并提供一些解决思路，避免遇到相同问题的朋友再次踩坑。<strong>需要说明的是，本文仅提供解决思路，不提供源码。</strong></p>
+<h1 id="WebView现状"><a href="#WebView现状" class="headerlink" title="WebView现状"></a>WebView现状</h1><p>Android系统的WebView发展历史可谓一波三折，系统WebView开发者肯定费劲心思才换取了今天的局面——应用里的WebView和Chrome表现一致。对于Android初学者，或者刚要开始接触WebView的开发来说，WebView是有点难以适应，甚至是有一些惧怕的。开源社区对于WebView的改造和包装非常少，需要开发者查找大量资料去理解WebView。</p>
+<h2 id="WebView-Changelog"><a href="#WebView-Changelog" class="headerlink" title="WebView Changelog"></a>WebView Changelog</h2><p>在Android4.4（API level 19）系统以前，Android使用了原生自带的Android Webkit内核，这个内核对HTML5的支持不是很好，现在使用4.4以下机子的也不多了，就不对这个内核做过多介绍了，有兴趣可以看下<a href="http://blog.csdn.net/tanqiantot/article/details/7966263" target="_blank" rel="external">这篇文章</a>。</p>
+<p>从Android4.4系统开始，Chromium内核取代了Webkit内核，正式地接管了WebView的渲染工作。Chromium是一个开源的浏览器内核项目，基于Chromium开源项目修改实现的浏览器非常多，包括最著名的Chrome浏览器，以及一众国内浏览器（360浏览器、QQ浏览器等）。其中Chromium在Android上面的实现是<code>Android System WebView</code><a href="https://developer.chrome.com/multidevice/webview/overview" target="_blank" rel="external">^1</a>。</p>
+<p>从Android5.0系统开始，WebView移植成了一个独立的apk，可以不依赖系统而独立存在和更新，我们可以在<code>系统-&gt;设置-&gt;Android System WebView</code>看到WebView的当前版本。</p>
+<p>从Android7.0系统开始，如果系统安装了Chrome (version&gt;51)，那么Chrome将会直接为应用的WebView提供渲染，WebView版本会随着Chrome的更新而更新，用户也可以选择WebView的服务提供方（在开发者选项-&gt;WebView Implementation里），WebView可以脱离应用，在一个独立的沙盒进程中渲染页面（需要在开发者选项里打开）<a href="https://developer.android.com/about/versions/nougat/android-7.0.html#webview" target="_blank" rel="external">^2</a>。</p>
+<p>从Android8.0系统开始，默认开启WebView多进程模式，即WebView运行在独立的沙盒进程中<a href="https://developer.android.com/about/versions/oreo/android-8.0-changes.html#o-sec" target="_blank" rel="external">^3</a>。</p>
+<h2 id="为什么WebView那么难搞？"><a href="#为什么WebView那么难搞？" class="headerlink" title="为什么WebView那么难搞？"></a>为什么WebView那么难搞？</h2><p>尽管应用开发者使用WebView和使用普通的View一样简单，只需要在xml里定义或者直接实例化出来即可使用，但WebView是相当难搞的。为什么呢？以下有几个可能的因素。</p>
+<ul>
+<li>繁杂的WebView配置</li>
+</ul>
+<p>WebView在初始化的时候就提供了默认配置<code>WebSettings</code>，但是很多默认配置是不能够满足业务需求的，还需要进行二次配置，例如考拉App在默认配置基础做了如下修改：</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">public static void <span class="keyword">set</span>DefaultWebSettings<span class="params">(WebView webView)</span> &#123;</div><div class="line">    WebSettings webSettings = webView.getSettings<span class="params">()</span>;</div><div class="line">    <span class="string">//5.0</span>以上开启混合模式加载</div><div class="line">    <span class="keyword">if</span> <span class="params">(Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.LOLLIPOP)</span> &#123;</div><div class="line">        webSettings.<span class="keyword">set</span>MixedContentMode<span class="params">(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW)</span>;</div><div class="line">    &#125;</div><div class="line">    webSettings.<span class="keyword">set</span>LoadWithOverviewMode<span class="params">(true)</span>;</div><div class="line">    webSettings.<span class="keyword">set</span>UseWideViewPort<span class="params">(true)</span>;</div><div class="line">    <span class="string">//</span>允许js代码</div><div class="line">    webSettings.<span class="keyword">set</span>JavaScriptEnabled<span class="params">(true)</span>;</div><div class="line">    <span class="string">//</span>允许SessionStorage/LocalStorage存储</div><div class="line">    webSettings.<span class="keyword">set</span>DomStorageEnabled<span class="params">(true)</span>;</div><div class="line">    <span class="string">//</span>禁用放缩</div><div class="line">    webSettings.<span class="keyword">set</span>DisplayZoomControls<span class="params">(false)</span>;</div><div class="line">    webSettings.<span class="keyword">set</span>BuiltInZoomControls<span class="params">(false)</span>;</div><div class="line">    <span class="string">//</span>禁用文字缩放</div><div class="line">    webSettings.<span class="keyword">set</span>TextZoom<span class="params">(100)</span>;</div><div class="line">    <span class="string">//10M</span>缓存，api 18后，系统自动管理。</div><div class="line">    webSettings.<span class="keyword">set</span>AppCacheMaxSize<span class="params">(10 * 1024 * 1024)</span>;</div><div class="line">    <span class="string">//</span>允许缓存，设置缓存位置</div><div class="line">    webSettings.<span class="keyword">set</span>AppCacheEnabled<span class="params">(true)</span>;</div><div class="line">    webSettings.<span class="keyword">set</span>AppCachePath<span class="params">(context.getDir("appcache", 0)</span><span class="string">.getPath</span><span class="params">()</span>);</div><div class="line">    <span class="string">//</span>允许WebView使用File协议</div><div class="line">    webSettings.<span class="keyword">set</span>AllowFileAccess<span class="params">(true)</span>;</div><div class="line">    <span class="string">//</span>不保存密码</div><div class="line">    webSettings.<span class="keyword">set</span>SavePassword<span class="params">(false)</span>;</div><div class="line">	<span class="string">//</span>设置UA</div><div class="line">    webSettings.<span class="keyword">set</span>UserAgentString<span class="params">(webSettings.getUserAgentString()</span> + <span class="string">" kaolaApp/"</span> + AppUtils.getVersionName<span class="params">()</span>);</div><div class="line">    <span class="string">//</span>移除部分系统JavaScript接口</div><div class="line">    KaolaWebViewSecurity.removeJavascriptInterfaces<span class="params">(webView)</span>;</div><div class="line">    <span class="string">//</span>自动加载图片</div><div class="line">    webSettings.<span class="keyword">set</span>LoadsImagesAutomatically<span class="params">(true)</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>除此之外，使用方还需要根据业务需求实现<code>WebViewClient</code>和<code>WebChromeClient</code>，这两个类所需要覆写的方法更多，用来实现标题定制、加载进度条控制、jsbridge交互、url拦截、错误处理（包括http、资源、网络）等很多与业务相关的功能。</p>
+<ul>
+<li>复杂的前端环境</li>
+</ul>
+<p>如今，万维网的核心语言，超文本标记语言已经发展到了HTML5，随之而来的是html、css、js相应的升级与更新。高版本的语法无法在低版本的内核上识别和渲染，业务上需要使用到新的特性时，开发不得不面对后向兼容的问题。互联网的链接千千万万，使用哪些语言特性不是WebView能决定的，要求WebView适配所有页面几乎是不可能的事情。</p>
+<ul>
+<li>版本间差异</li>
+</ul>
+<p>WebView不同的版本方法的实现是有可能不一样的，而前端一般情况下只会调用系统的api来实现功能，这就会导致Android不同的系统、不同的WebView版本表现不一致的情况。一个典型的例子是下面即将描述的WebView中的文件上传功能，当我们在Web页面上点击选择文件的控件(<code>&lt;input type=&quot;file&quot;&gt;</code>)时，会产生不同的回调方法。除了文件上传功能，版本间的差异还有很多很多，比如缓存机制的版本差异，js安全漏洞的屏蔽，cookie管理等。Google也在想办法解决这些差异给开发者带来的适配压力，例如Webkit内核到Chromium内核的切换对开发者是透明的，底层的API完全没有改变，这也是好的设计模式带来的益处。</p>
+<ul>
+<li>国内ROM、浏览器对WebView内核的魔改</li>
+</ul>
+<p>国产手机的厂商基本在出厂时都自带了浏览器，查看系统应用时，发现并没有内置<code>com.android.webview</code>或者<code>com.google.android.webview</code>包，这些浏览器并不是简单地套了一层WebView的壳，而是直接使用了Chromium内核，至于有没有魔改过内核源码，不得而知。国产出品的浏览器，如360浏览器、QQ浏览器、UC浏览器，几乎都魔改了内核。值得一提的是，腾讯出品的X5内核，号称页面渲染流畅度高于原生内核，客户端减少了WebView带来坑的同时，增加了前端适配的难度，功能实现上需要有更多地考虑。</p>
+<ul>
+<li>需要一定的Web知识</li>
+</ul>
+<p>如果仅仅会使用<code>WebView.loadUrl()</code>来加载一个网页而不了解底层到底发生了什么，那么url发生错误、url中的某些内容加载不出来、url里的内容点击无效、支付宝支付浮层弹不起来、与前端无法沟通等等问题就会接踵而至。要开发好一个功能完整的WebView，需要对Web知识（html、js、css）有一定了解，知道loadUrl，WebView在后台请求这个url以后，服务器做了哪些响应，又下发了哪些资源，这些资源的作用是怎么样的。</p>
+<h2 id="为什么Github上的WebView项目不适用？"><a href="#为什么Github上的WebView项目不适用？" class="headerlink" title="为什么Github上的WebView项目不适用？"></a>为什么Github上的WebView项目不适用？</h2><p>从<a href="https://android-arsenal.com/tag/230" target="_blank" rel="external">上面的链接</a>可以看到，Github上面star过千的WebView项目主要是<a href="https://github.com/TheFinestArtist/FinestWebView-Android" target="_blank" rel="external">FinestWebView-Android</a>和<a href="https://github.com/delight-im/Android-AdvancedWebView" target="_blank" rel="external">Android-AdvancedWebView</a>。看过源码的话应该知道，第一个项目偏向于实现一个浏览器，第二个项目提供的接口太少，并且一些坑并未填完。陆续看过几个别的开源实现，发现并不理想。后来想想，很难不依赖于业务而单独实现一个WebView，特别是与前端约定了jsbridge接口，需要处理页面关闭、全屏、url拦截、登录、分享等一系列功能，即便是接入了开源平台的WebView，也需要做大量的扩展才有可能完全满足需求。与其如此，每个电商平台都有自己一套规则，基于电商的业务需求来自己扩展WebView是比较合理的。</p>
+<h1 id="WebView踩坑历程"><a href="#WebView踩坑历程" class="headerlink" title="WebView踩坑历程"></a>WebView踩坑历程</h1><p>可以说，如果是初次接触WebView，不踩坑几乎是不可能的。笔者在接触到前人留下来的WebView代码时，有些地方写的很trickey，如果不仔细阅读，或者翻阅资料，很有可能就会掉进坑里。下面介绍几个曾经遇到过的坑。</p>
+<h2 id="WebSettings-setJavaScriptEnabled"><a href="#WebSettings-setJavaScriptEnabled" class="headerlink" title="WebSettings.setJavaScriptEnabled"></a>WebSettings.setJavaScriptEnabled</h2><p>我相信99%的应用都会调用下面这句</p>
+<pre><code>WebSettings.setJavaScriptEnabled(true);
+</code></pre><p>在Android 4.3版本调用<code>WebSettings.setJavaScriptEnabled()</code>方法时会调用一下reload方法，同时会回调多次<code>WebChromeClient.onJsPrompt()</code>。如果有业务逻辑依赖于这两个方法，就需要注意判断回调多次是否会带来影响了。</p>
+<p>同时，如果启用了JavaScript，务必做好安全措施，防止远程执行漏洞<a href="http://blog.csdn.net/self_study/article/details/55046348" target="_blank" rel="external">^5</a>。</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@TargetApi</span>(<span class="number">11</span>)</div><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="function"><span class="keyword">void</span> <span class="title">removeJavascriptInterfaces</span><span class="params">(WebView webView)</span> </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= <span class="number">11</span> &amp;&amp; Build.VERSION.SDK_INT &lt; <span class="number">17</span>) &#123;</div><div class="line">	        webView.removeJavascriptInterface(<span class="string">"searchBoxJavaBridge_"</span>);</div><div class="line">	        webView.removeJavascriptInterface(<span class="string">"accessibility"</span>);</div><div class="line">	        webView.removeJavascriptInterface(<span class="string">"accessibilityTraversal"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (Throwable tr) &#123;</div><div class="line">        tr.printStackTrace();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="301-302重定向问题"><a href="#301-302重定向问题" class="headerlink" title="301/302重定向问题"></a>301/302重定向问题</h2><p>WebView的301/302重定向问题，绝对在踩坑排行榜里名列前茅。。。随便搜了几个解决方案，要么不能满足业务需求，要么清一色没有彻底解决问题。</p>
+<p><a href="https://stackoverflow.com/questions/4066438/android-webview-how-to-handle-redirects-in-app-instead-of-opening-a-browser" target="_blank" rel="external">https://stackoverflow.com/questions/4066438/android-webview-how-to-handle-redirects-in-app-instead-of-opening-a-browser</a><br><a href="http://blog.csdn.net/jdsjlzx/article/details/51698250" target="_blank" rel="external">http://blog.csdn.net/jdsjlzx/article/details/51698250</a><br><a href="http://www.cnblogs.com/pedro-neer/p/5318354.html" target="_blank" rel="external">http://www.cnblogs.com/pedro-neer/p/5318354.html</a><br><a href="http://www.jianshu.com/p/c01769ababfa" target="_blank" rel="external">http://www.jianshu.com/p/c01769ababfa</a></p>
+<h3 id="301-302业务场景及白屏问题"><a href="#301-302业务场景及白屏问题" class="headerlink" title="301/302业务场景及白屏问题"></a>301/302业务场景及白屏问题</h3><p>先来分析一下业务场景。对于需要对url进行拦截以及在url中需要拼接特定参数的WebView来说，301和302发生的情景主要有以下几种：</p>
+<ul>
+<li>首次进入，有重定向，然后直接加载H5页面，如http跳转https</li>
+<li>首次进入，有重定向，然后跳转到native页面，如扫一扫短链，然后跳转到native</li>
+<li>二次加载，有重定向，跳转到native页面</li>
+<li>对于考拉业务来说，还有类似登录后跳转到某个页面的需求。如我的拼团，未登录状态下点击我的拼团跳转到登录页面，登录完成后再加载我的拼团页。</li>
+</ul>
+<p>第一种情况属于正常情况，暂时没遇到什么坑。</p>
+<p>第二种情况，会遇到<strong>WebView空白页问题</strong>，属于原始url不能拦截到native页面，但301/302后的url拦截到native页面的情况，当遇到这种情况时，需要把WebView对应的Activity结束，否则当用户从拦截后的页面返回上一个页面时，是一个WebView空白页。</p>
+<p>第三种情况，也会遇到<strong>WebView空白页问题</strong>，原因在于加载的第一个页面发生了重定向到了第二个页面，第二个页面被客户端拦截跳转到native页面，那么WebView就停留在第一个页面的状态了，第一个页面显然是空白页。</p>
+<p>第四种情况，会遇到<strong>无限加载登录页面的问题</strong>。考拉的登录链接是类似下面这种格式：</p>
+<pre><code>https://m.kaola.com/login.html?target=登录后跳转的url
+</code></pre><p>如果登录成功后还重新加载这个url，那么就会循环跳转到登录页面。第四点解决起来比较简单，登录成功以后拿到target后的跳转url再重新加载即可。</p>
+<h3 id="301-302回退栈问题"><a href="#301-302回退栈问题" class="headerlink" title="301/302回退栈问题"></a>301/302回退栈问题</h3><p>无论是哪种重定向场景，都不可避免地会遇到回退栈的处理问题，如果处理不当，用户按返回键的时候不一定能回到重定向之前的那个页面。很多开发者在覆写<code>WebViewClient.shouldOverrideUrlLoading()</code>方法时，会简单地使用以下方式粗暴处理：</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">WebView.setWebViewClient(<span class="keyword">new</span> WebViewClient() &#123;</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">boolean</span> <span class="title">shouldOverrideUrlLoading</span><span class="params">(WebView view, String url)</span> </span>&#123;</div><div class="line">    	view.loadUrl(url);</div><div class="line">    	<span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">)</div></pre></td></tr></table></figure>
+<p>这种方法最致命的弱点就是如果不经过特殊处理，那么按返回键是没有效果的，还会停留在302之前的页面。现有的解决方案无非就几种：</p>
+<ol>
+<li>手动管理回退栈，遇到重定向时回退两次<a href="http://qbeenslee.com/article/android-webview-302-redirect/" target="_blank" rel="external">^6</a>。</li>
+<li>通过<code>HitTestResult</code>判断是否是重定向，从而决定是否自己加载url<a href="http://www.cnblogs.com/zimengfang/p/6183869.html" target="_blank" rel="external">^7</a>。</li>
+<li>通过设置标记位，在<code>onPageStarted</code>和<code>onPageFinished</code>分别标记变量避免重定向<a href="http://blog.csdn.net/dg_summer/article/details/78105582" target="_blank" rel="external">^9</a>。</li>
+</ol>
+<p>可以说，这几种解决方案都不是完美的，都有缺陷。</p>
+<h3 id="301-302较优解决方案"><a href="#301-302较优解决方案" class="headerlink" title="301/302较优解决方案"></a>301/302较优解决方案</h3><h4 id="解决301-302回退栈问题"><a href="#解决301-302回退栈问题" class="headerlink" title="解决301/302回退栈问题"></a>解决301/302回退栈问题</h4><p>能否结合上面的几种方案，来更加准确地判断301/302的情况呢？下面说一下本文的解决思路。在提供解决方案之前，我们需要了解一下<code>shouldOverrideUrlLoading</code>方法的返回值代表什么意思。</p>
+<blockquote>
+<p>Give the host application a chance to take over the control when a new url is about to be loaded in the current WebView. If WebViewClient is not provided, by default WebView will ask Activity Manager to choose the proper handler for the url. If WebViewClient is provided, <strong>return true means the host application handles the url, while return false means the current WebView handles the url.</strong></p>
+</blockquote>
+<p>简单地说，就是返回true，那么url就已经由客户端处理了，WebView就不管了，如果返回false，那么当前的WebView实现就会去处理这个url。</p>
+<p>WebView能否知道某个url是不是301/302呢？当然知道，WebView能够拿到url的请求信息和响应信息，根据header里的code很轻松就可以实现，事实正是如此，交给WebView来处理重定向(<code>return false</code>)，这时候按返回键，是可以正常地回到重定向之前的那个页面的。（PS：从上面的章节可知，WebView在5.0以后是一个独立的apk，可以单独升级，新版本的WebView实现肯定处理了重定向问题）</p>
+<p>但是，业务对url拦截有需求，肯定不能把所有的情况都交给系统WebView处理。为了解决url拦截问题，本文引入了另一种思想——通过用户的touch事件来判断重定向。下面通过代码来说明。</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * WebView基础类，处理一些基础的公有操作</div><div class="line"> *</div><div class="line"> * <span class="doctag">@author</span> xingli</div><div class="line"> * <span class="doctag">@time</span> 2017-12-06</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BaseWebView</span> <span class="keyword">extends</span> <span class="title">WebView</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> mTouchByUser;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BaseWebView</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BaseWebView</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context, attrs);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BaseWebView</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context, attrs, defStyleAttr);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="function"><span class="keyword">void</span> <span class="title">loadUrl</span><span class="params">(String url, Map&lt;String, String&gt; additionalHttpHeaders)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.loadUrl(url, additionalHttpHeaders);</div><div class="line">        resetAllStateInternal(url);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">loadUrl</span><span class="params">(String url)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.loadUrl(url);</div><div class="line">        resetAllStateInternal(url);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="function"><span class="keyword">void</span> <span class="title">postUrl</span><span class="params">(String url, <span class="keyword">byte</span>[] postData)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.postUrl(url, postData);</div><div class="line">        resetAllStateInternal(url);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="function"><span class="keyword">void</span> <span class="title">loadData</span><span class="params">(String data, String mimeType, String encoding)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.loadData(data, mimeType, encoding);</div><div class="line">        resetAllStateInternal(getUrl());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="function"><span class="keyword">void</span> <span class="title">loadDataWithBaseURL</span><span class="params">(String baseUrl, String data, String mimeType, String encoding,</span></span></div><div class="line">            String historyUrl) &#123;</div><div class="line">        <span class="keyword">super</span>.loadDataWithBaseURL(baseUrl, data, mimeType, encoding, historyUrl);</div><div class="line">        resetAllStateInternal(getUrl());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">reload</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.reload();</div><div class="line">        resetAllStateInternal(getUrl());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">boolean</span> <span class="title">isTouchByUser</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> mTouchByUser;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">void</span> <span class="title">resetAllStateInternal</span><span class="params">(String url)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (!TextUtils.isEmpty(url) &amp;&amp; url.startsWith(<span class="string">"javascript:"</span>)) &#123;</div><div class="line">            <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line">        resetAllState();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">	<span class="comment">// 加载url时重置touch状态</span></div><div class="line">    <span class="keyword">protected</span> <span class="function"><span class="keyword">void</span> <span class="title">resetAllState</span><span class="params">()</span> </span>&#123;</div><div class="line">        mTouchByUser = <span class="keyword">false</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">boolean</span> <span class="title">onTouchEvent</span><span class="params">(MotionEvent event)</span> </span>&#123;</div><div class="line">        <span class="keyword">switch</span> (event.getAction()) &#123;</div><div class="line">            <span class="keyword">case</span> MotionEvent.ACTION_DOWN:</div><div class="line">            	//用户按下到下一个链接加载之前，置为<span class="keyword">true</span></div><div class="line">                mTouchByUser = <span class="keyword">true</span>;</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="function"><span class="keyword">return</span> <span class="keyword">super</span>.<span class="title">onTouchEvent</span><span class="params">(event)</span></span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setWebViewClient</span><span class="params">(<span class="keyword">final</span> WebViewClient client)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.setWebViewClient(<span class="keyword">new</span> WebViewClient() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="keyword">public</span> <span class="function"><span class="keyword">boolean</span> <span class="title">shouldOverrideUrlLoading</span><span class="params">(WebView view, String url)</span> </span>&#123;</div><div class="line">                <span class="keyword">boolean</span> handleByChild = <span class="keyword">null</span> != client &amp;&amp; client.shouldOverrideUrlLoading(view, url);</div><div class="line">            	   <span class="keyword">if</span> (handleByChild) &#123;</div><div class="line">             		<span class="comment">// 开放client接口给上层业务调用，如果返回true，表示业务已处理。</span></div><div class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">            	   &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!isTouchByUser()) &#123;</div><div class="line">             		<span class="comment">// 如果业务没有处理，并且在加载过程中用户没有再次触摸屏幕，认为是301/302事件，直接交由系统处理。</span></div><div class="line">                    <span class="function"><span class="keyword">return</span> <span class="keyword">super</span>.<span class="title">shouldOverrideUrlLoading</span><span class="params">(view, url)</span></span>;</div><div class="line">                &#125; <span class="keyword">else</span> &#123;</div><div class="line">                	<span class="comment">//否则，属于二次加载某个链接的情况，为了解决拼接参数丢失问题，重新调用loadUrl方法添加固有参数。</span></div><div class="line">                    loadUrl(url);</div><div class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="meta">@RequiresApi</span>(api = Build.VERSION_CODES.N)</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="keyword">public</span> <span class="function"><span class="keyword">boolean</span> <span class="title">shouldOverrideUrlLoading</span><span class="params">(WebView view, WebResourceRequest request)</span> </span>&#123;</div><div class="line">                <span class="keyword">boolean</span> handleByChild = <span class="keyword">null</span> != client &amp;&amp; client.shouldOverrideUrlLoading(view, request);</div><div class="line"></div><div class="line">                <span class="keyword">if</span> (handleByChild) &#123;</div><div class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!isTouchByUser()) &#123;</div><div class="line">                    <span class="function"><span class="keyword">return</span> <span class="keyword">super</span>.<span class="title">shouldOverrideUrlLoading</span><span class="params">(view, request)</span></span>;</div><div class="line">                &#125; <span class="keyword">else</span> &#123;</div><div class="line">                    loadUrl(request.getUrl().toString());</div><div class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上述代码解决了正常情况下的回退栈问题。</p>
+<h4 id="解决业务白屏问题"><a href="#解决业务白屏问题" class="headerlink" title="解决业务白屏问题"></a>解决业务白屏问题</h4><p>为了解决白屏问题，考拉目前的解决思路和上面的回退栈问题思路有些类似，通过监听<code>touch</code>事件分发以及<code>onPageFinished</code>事件来判断是否产生白屏，代码如下：</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">KaolaWebview</span> <span class="keyword">extends</span> <span class="title">BaseWebView</span> <span class="keyword">implements</span> <span class="title">DownloadListener</span>, <span class="title">Lifeful</span>, <span class="title">OnActivityResultListener</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> mIsBlankPageRedirect;  <span class="comment">//是否因重定向导致的空白页面。</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">KaolaWebview</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context);</div><div class="line">        init();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">KaolaWebview</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context, attrs);</div><div class="line">        init();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">KaolaWebview</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context, attrs, defStyleAttr);</div><div class="line">        init();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">protected</span> <span class="function"><span class="keyword">void</span> <span class="title">back</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (mBackStep &lt; <span class="number">1</span>) &#123;</div><div class="line">            mJsApi.trigger2(<span class="string">"kaolaGoback"</span>);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            realBack();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">boolean</span> <span class="title">dispatchTouchEvent</span><span class="params">(MotionEvent ev)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (ev.getAction() == MotionEvent.ACTION_UP) &#123;</div><div class="line">            mIsBlankPageRedirect = <span class="keyword">true</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="function"><span class="keyword">return</span> <span class="keyword">super</span>.<span class="title">dispatchTouchEvent</span><span class="params">(ev)</span></span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> WebViewClient mWebViewClient = <span class="keyword">new</span> WebViewClient() &#123;</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">boolean</span> <span class="title">shouldOverrideUrlLoading</span><span class="params">(WebView view, String url)</span> </span>&#123;</div><div class="line">            url = WebViewUtils.removeBlank(url);</div><div class="line">            <span class="comment">//允许启动第三方应用客户端</span></div><div class="line">            <span class="keyword">if</span> (WebViewUtils.canHandleUrl(url)) &#123;</div><div class="line">                <span class="keyword">boolean</span> handleByCaller = <span class="keyword">false</span>;</div><div class="line">                <span class="comment">// 如果不是用户触发的操作，就没有必要交给上层处理了，直接走url拦截规则。</span></div><div class="line">                <span class="keyword">if</span> (<span class="keyword">null</span> != mIWebViewClient &amp;&amp; isTouchByUser()) &#123;</div><div class="line">                    handleByCaller = mIWebViewClient.shouldOverrideUrlLoading(view, url);</div><div class="line">                &#125;</div><div class="line">                <span class="keyword">if</span> (!handleByCaller) &#123;</div><div class="line">                    handleByCaller = handleOverrideUrl(url);</div><div class="line">                &#125;</div><div class="line">                <span class="keyword">return</span> handleByCaller || <span class="keyword">super</span>.shouldOverrideUrlLoading(view, url);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    notifyBeforeLoadUrl(url);</div><div class="line">                    Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);</div><div class="line">                    intent.addCategory(Intent.CATEGORY_BROWSABLE);</div><div class="line">                    mContext.startActivity(intent);</div><div class="line">                    <span class="keyword">if</span> (!mIsBlankPageRedirect) &#123;</div><div class="line">                    	<span class="comment">// 如果遇到白屏问题，手动后退</span></div><div class="line">                        back();</div><div class="line">                    &#125;</div><div class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">                    ExceptionUtils.printExceptionTrace(e);</div><div class="line">                &#125;</div><div class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@RequiresApi</span>(Build.VERSION_CODES.LOLLIPOP)</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">boolean</span> <span class="title">shouldOverrideUrlLoading</span><span class="params">(WebView view, WebResourceRequest request)</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> shouldOverrideUrlLoading(view, request.getUrl().toString());</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        <span class="keyword">private</span> <span class="function"><span class="keyword">boolean</span> <span class="title">handleOverrideUrl</span><span class="params">(<span class="keyword">final</span> String url)</span> </span>&#123;</div><div class="line">           RouterResult result =  WebActivityRouter.startFromWeb(</div><div class="line">                    <span class="keyword">new</span> IntentBuilder(mContext, url).setRouterActivityResult(<span class="keyword">new</span> RouterActivityResult() &#123;</div><div class="line">                        <span class="meta">@Override</span></div><div class="line">                        <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onActivityFound</span><span class="params">()</span> </span>&#123;</div><div class="line">                            <span class="keyword">if</span> (!mIsBlankPageRedirect) &#123;</div><div class="line">                    			<span class="comment">// 路由已经拦截到跳转到native页面，但此时可能发生了</span></div><div class="line">                    			<span class="comment">// 301/302跳转，那么执行后退动作，防止白屏。</span></div><div class="line">                                back();</div><div class="line">                            &#125;</div><div class="line">                        &#125;</div><div class="line"></div><div class="line">                        <span class="meta">@Override</span></div><div class="line">                        <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onActivityNotFound</span><span class="params">()</span> </span>&#123;</div><div class="line">                            <span class="keyword">if</span> (mIWebViewClient != <span class="keyword">null</span>) &#123;</div><div class="line">                                mIWebViewClient.onActivityNotFound();</div><div class="line">                            &#125;</div><div class="line">                        &#125;</div><div class="line">                    &#125;));</div><div class="line">            <span class="function"><span class="keyword">return</span> result.<span class="title">isSuccess</span><span class="params">()</span></span>;</div><div class="line">        &#125;</div><div class="line">    &#125;;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onPageFinished</span><span class="params">(WebView view, String url)</span> </span>&#123;</div><div class="line">        mIsBlankPageRedirect = <span class="keyword">true</span>;</div><div class="line">        <span class="keyword">if</span> (<span class="keyword">null</span> != mIWebViewClient) &#123;</div><div class="line">            mIWebViewClient.onPageReallyFinish(view, url);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">super</span>.onPageFinished(view, url);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>本来上面的两个问题可以用同一个变量控制解决的，但由于历史代码遗留问题，目前还没有时间优化测试，这也是代码暂不公布的原因之一（代码太丑陋<code>:(</code>）。</p>
+<h2 id="url参数拼接问题"><a href="#url参数拼接问题" class="headerlink" title="url参数拼接问题"></a>url参数拼接问题</h2><p>一般情况下，WebView会拼接一些本地参数作为识别码传给前端，如app版本号，网络状态等，例如需要加载的url是</p>
+<pre><code>http://m.kaola.com?platform=android
+</code></pre><p>假设我们拼接appVersion和network，则拼接后url变成：</p>
+<pre><code>http://m.kaola.com?platform=android&amp;appVersion=3.10.0&amp;network=4g
+</code></pre><p>使用<code>WebView.loadUrl()</code>加载上面拼接好的url，随意点击这个页面上的某个链接跳转到别的页面，本地拼接的参数是不会自动带过去的。如果需要前端处理参数问题，那么如果是同域，可以通过cookie传递。非同域的话，还是需要客户端拼接参数带过去。</p>
+<h2 id="部分机型没有WebView，应用直接崩溃"><a href="#部分机型没有WebView，应用直接崩溃" class="headerlink" title="部分机型没有WebView，应用直接崩溃"></a>部分机型没有WebView，应用直接崩溃</h2><p>在Crash平台上面发现有部分机型会存在下面这个崩溃，这些机型都是7.0系统及以上的。</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">android<span class="selector-class">.util</span><span class="selector-class">.AndroidRuntimeException</span>: android<span class="selector-class">.webkit</span><span class="selector-class">.WebViewFactory</span><span class="variable">$MissingWebViewPackageException</span>: Failed to load WebView provider: No WebView installed</div><div class="line">at android<span class="selector-class">.webkit</span><span class="selector-class">.WebViewFactory</span><span class="selector-class">.getProviderClass</span>(WebViewFactory<span class="selector-class">.java</span>:<span class="number">371</span>)</div><div class="line">at android<span class="selector-class">.webkit</span><span class="selector-class">.WebViewFactory</span><span class="selector-class">.getProvider</span>(WebViewFactory<span class="selector-class">.java</span>:<span class="number">194</span>)</div><div class="line">at android<span class="selector-class">.webkit</span><span class="selector-class">.WebView</span><span class="selector-class">.getFactory</span>(WebView<span class="selector-class">.java</span>:<span class="number">2325</span>)</div><div class="line">at android<span class="selector-class">.webkit</span><span class="selector-class">.WebView</span><span class="selector-class">.ensureProviderCreated</span>(WebView<span class="selector-class">.java</span>:<span class="number">2320</span>)</div><div class="line">at android<span class="selector-class">.webkit</span><span class="selector-class">.WebView</span><span class="selector-class">.setOverScrollMode</span>(WebView<span class="selector-class">.java</span>:<span class="number">2379</span>)</div><div class="line">at android<span class="selector-class">.view</span><span class="selector-class">.View</span>.(View<span class="selector-class">.java</span>:<span class="number">4015</span>)</div><div class="line">at android<span class="selector-class">.view</span><span class="selector-class">.View</span>.(View<span class="selector-class">.java</span>:<span class="number">4132</span>)</div><div class="line">at android<span class="selector-class">.view</span><span class="selector-class">.ViewGroup</span>.(ViewGroup<span class="selector-class">.java</span>:<span class="number">578</span>)</div><div class="line">at android<span class="selector-class">.widget</span><span class="selector-class">.AbsoluteLayout</span>.(AbsoluteLayout<span class="selector-class">.java</span>:<span class="number">55</span>)</div><div class="line">at android<span class="selector-class">.webkit</span><span class="selector-class">.WebView</span>.(WebView<span class="selector-class">.java</span>:<span class="number">627</span>)</div><div class="line">at android<span class="selector-class">.webkit</span><span class="selector-class">.WebView</span>.(WebView<span class="selector-class">.java</span>:<span class="number">572</span>)</div><div class="line">at android<span class="selector-class">.webkit</span><span class="selector-class">.WebView</span>.(WebView<span class="selector-class">.java</span>:<span class="number">555</span>)</div><div class="line">at android<span class="selector-class">.webkit</span><span class="selector-class">.WebView</span>.(WebView<span class="selector-class">.java</span>:<span class="number">542</span>)</div><div class="line">at com<span class="selector-class">.kaola</span><span class="selector-class">.modules</span><span class="selector-class">.webview</span><span class="selector-class">.BaseWebView</span><span class="selector-class">.void</span> (android<span class="selector-class">.content</span><span class="selector-class">.Context</span>)(Unknown Source)</div></pre></td></tr></table></figure>
+<p>经过测试发现，普通用户是没有办法卸载WebView的（即使能卸载，也只是把更新卸载了，原始版本的WebView还是存在的），所以理论上不会存在异常……但既然发生并且上传上来了，那么就需要细细分析一下原因了。跟着代码<code>WebViewFactory.getProvider()</code>走，</p>
+<figure class="highlight monkey"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">static WebViewFactoryProvider getProvider() &#123;</div><div class="line">    synchronized (sProviderLock) &#123;</div><div class="line">        // <span class="keyword">For</span> now the main purpose of this <span class="function"><span class="keyword">function</span> (</span><span class="literal">and</span> the factory abstraction) is <span class="keyword">to</span> keep</div><div class="line">        // us honest <span class="literal">and</span> minimize usage of WebView internals when binding the proxy.</div><div class="line">        <span class="keyword">if</span> (sProviderInstance != <span class="literal">null</span>) <span class="keyword">return</span> sProviderInstance;</div><div class="line"></div><div class="line">        <span class="keyword">final</span> int uid = android.os.Process.myUid();</div><div class="line">        <span class="keyword">if</span> (uid == android.os.Process.ROOT_UID || uid == android.os.Process.SYSTEM_UID</div><div class="line">                || uid == android.os.Process.PHONE_UID || uid == android.os.Process.NFC_UID</div><div class="line">                || uid == android.os.Process.BLUETOOTH_UID) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedOperationException(</div><div class="line">                    <span class="string">"For security reasons, WebView is not allowed in privileged processes"</span>);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();</div><div class="line">        Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, <span class="string">"WebViewFactory.getProvider()"</span>);</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            <span class="class"><span class="keyword">Class</span>&lt;<span class="title">WebViewFactoryProvider</span>&gt; <span class="title">providerClass</span> = <span class="title">getProviderClass</span>();</span></div><div class="line">            <span class="function"><span class="keyword">Method</span> <span class="title">staticFactory</span> =</span> <span class="literal">null</span>;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                staticFactory = providerClass.getMethod(</div><div class="line">                    CHROMIUM_WEBVIEW_FACTORY_METHOD, WebViewDelegate.class);</div><div class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">                <span class="keyword">if</span> (DEBUG) &#123;</div><div class="line">                    <span class="built_in">Log</span>.w(LOGTAG, <span class="string">"error instantiating provider with static factory method"</span>, e);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, <span class="string">"WebViewFactoryProvider invocation"</span>);</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                sProviderInstance = (WebViewFactoryProvider)</div><div class="line">                        staticFactory.invoke(<span class="literal">null</span>, <span class="keyword">new</span> WebViewDelegate());</div><div class="line">                <span class="keyword">if</span> (DEBUG) <span class="built_in">Log</span>.v(LOGTAG, <span class="string">"Loaded provider: "</span> + sProviderInstance);</div><div class="line">                <span class="keyword">return</span> sProviderInstance;</div><div class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">                <span class="built_in">Log</span>.e(LOGTAG, <span class="string">"error instantiating provider"</span>, e);</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> AndroidRuntimeException(e);</div><div class="line">            &#125; finally &#123;</div><div class="line">                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);</div><div class="line">            &#125;</div><div class="line">        &#125; finally &#123;</div><div class="line">            Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);</div><div class="line">            StrictMode.setThreadPolicy(oldPolicy);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到，获取WebView的实例，就是先拿到<code>WebViewFactoryProvider</code>这个工厂类，通过<code>WebViewFactoryProvider</code>工厂类里的静态方法<code>CHROMIUM_WEBVIEW_FACTORY_METHOD</code>创建一个<code>WebViewFactoryProvider</code>，接着，调用<code>WebViewFactoryProvider.createWebView()</code>创建一个<code>WebViewProvider</code>（相当于WebView的代理类），后面WebView的方法都是通过代理类来实现的。</p>
+<p>在第一步获取<code>WebVIewFactoryProvider</code>类的过程中，</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Class&lt;WebViewFactoryProvider&gt; <span class="title">getProviderClass</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    Context webViewContext = <span class="literal">null</span>;</div><div class="line">    Application initialApplication = AppGlobals.getInitialApplication();</div><div class="line"></div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">    	<span class="comment">//获取WebView上下文并设置provider</span></div><div class="line">        webViewContext = getWebViewContextAndSetProvider();</div><div class="line">    &#125; <span class="keyword">finally</span> &#123;</div><div class="line">        Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);</div><div class="line">    &#125;</div><div class="line">	 代码省略...</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Context <span class="title">getWebViewContextAndSetProvider</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    Application initialApplication = AppGlobals.getInitialApplication();</div><div class="line">    WebViewProviderResponse response = <span class="literal">null</span>;</div><div class="line">    Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,</div><div class="line">            <span class="string">"WebViewUpdateService.waitForAndGetProvider()"</span>);</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        response = getUpdateService().waitForAndGetProvider();</div><div class="line">    &#125; <span class="keyword">finally</span> &#123;</div><div class="line">        Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (response.status != LIBLOAD_SUCCESS</div><div class="line">            &amp;&amp; response.status != LIBLOAD_FAILED_WAITING_FOR_RELRO) &#123;</div><div class="line">        <span class="comment">// 崩溃就发生在这里。</span></div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> MissingWebViewPackageException(<span class="string">"Failed to load WebView provider: "</span></div><div class="line">                + getWebViewPreparationErrorReason(response.status));</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以发现，在与WebView包通信的过程中，so库并没有加载成功，最后代码到了native层，没有继续跟下去了。</p>
+<p>对于这种问题，解决方案有两种，一种是判断包名，如果检测到系统包名里不包含<code>com.google.android.webview</code>或者<code>com.android.webview</code>，则认为用户手机里的WebView不可用；另外一种是通过try/catch判断WebView实例化是否成功，如果抛出了<code>WebViewFactory$MissingWebViewPackageException</code>异常，则认为用户的WebView不可用。</p>
+<p>需要说明的是，第一种解决方案是不可靠的，因为国内的厂商基于Chromium的WebView实现有很多种，很有可能包名就被换了，比如MiWebView，包名是<code>com.mi.webkit.core</code>。</p>
+<h2 id="WebView中的POST请求"><a href="#WebView中的POST请求" class="headerlink" title="WebView中的POST请求"></a>WebView中的POST请求</h2><p>在WebView中，如果前端使用POST方式向后端发起一个请求，那么这个请求是不会走到<code>WebViewClient.shouldOverrideUrlLoading()</code>方法里的<a href="https://issuetracker.google.com/issues/36918490" target="_blank" rel="external">^10</a>。网上有一些解决方案，例如<a href="https://github.com/KeejOow/android-post-webview" target="_blank" rel="external">android-post-webview</a>，通过js判断是否是post请求，如果是的话，在<code>WebViewClient.shouldInterceptRequest()</code>方法里自己建立连接，并拿到对应的页面信息，返回给<code>WebResourceResponse</code>。总之，尽量避免Web页面使用POST请求，否则会带来很大不必要的麻烦。</p>
+<h2 id="WebView文件上传功能"><a href="#WebView文件上传功能" class="headerlink" title="WebView文件上传功能"></a>WebView文件上传功能</h2><p>WebView中的文件上传功能，当我们在Web页面上点击选择文件的控件(<code>&lt;input type=&quot;file&quot;&gt;</code>)时，会产生不同的回调方法:<a href="https://stackoverflow.com/questions/30078217/why-openfilechooser-in-webchromeclient-is-hidden-from-the-docs-is-it-safe-to-us" target="_blank" rel="external">^4</a></p>
+<blockquote>
+<p>void openFileChooser(ValueCallback<uri> uploadMsg) works on Android 2.2 (API level 8) up to Android 2.3 (API level 10)</uri></p>
+<p>openFileChooser(ValueCallback<uri> uploadMsg, String acceptType) works on Android 3.0 (API level 11) up to Android 4.0 (API level 15)</uri></p>
+<p>openFileChooser(ValueCallback<uri> uploadMsg, String acceptType, String capture) works on Android 4.1 (API level 16) up to Android 4.3 (API level 18)</uri></p>
+<p>onShowFileChooser(WebView webView, ValueCallback<uri[]> filePathCallback, WebChromeClient.FileChooserParams fileChooserParams) works on Android 5.0 (API level 21) and above</uri[]></p>
+</blockquote>
+<p>最坑的点是在Android4.4系统上没有回调，这将导致功能的不完整，需要前端去做兼容。解决方案就是和前端另外约定一个jsbridge来解决此类问题。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>限于篇幅，《如何设计一个优雅健壮的Android WebView？（上）》先介绍到这里。本文介绍了目前Android里的WebView现状，以及由于现状的不可改变导致遗留下的一些坑。所幸，世界上没有什么代码问题是一个程序员不能解决的，如果有，那就用两个程序员解决。既然我们已经把前人留下的一些坑填了，那么是时候构造一个可以用于生产环境的WebView了！《如何设计一个优雅健壮的Android WebView？（下）》将会介绍如何打造WebView的实战操作，以及为了用户更好的体验，提出的一些WebView优化策略，敬请期待。</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><ol>
+<li><a href="https://developer.chrome.com/multidevice/webview/overview" target="_blank" rel="external">https://developer.chrome.com/multidevice/webview/overview</a></li>
+<li><a href="https://developer.android.com/about/versions/nougat/android-7.0.html#webview" target="_blank" rel="external">https://developer.android.com/about/versions/nougat/android-7.0.html#webview</a></li>
+<li><a href="https://developer.android.com/about/versions/oreo/android-8.0-changes.html#o-sec" target="_blank" rel="external">https://developer.android.com/about/versions/oreo/android-8.0-changes.html#o-sec</a></li>
+<li><a href="https://stackoverflow.com/questions/30078217/why-openfilechooser-in-webchromeclient-is-hidden-from-the-docs-is-it-safe-to-us" target="_blank" rel="external">https://stackoverflow.com/questions/30078217/why-openfilechooser-in-webchromeclient-is-hidden-from-the-docs-is-it-safe-to-us</a></li>
+<li><a href="http://blog.csdn.net/self_study/article/details/55046348" target="_blank" rel="external">http://blog.csdn.net/self_study/article/details/55046348</a></li>
+<li><a href="http://qbeenslee.com/article/android-webview-302-redirect/" target="_blank" rel="external">http://qbeenslee.com/article/android-webview-302-redirect/</a></li>
+<li><a href="https://juejin.im/entry/5977598d51882548c0045bde" target="_blank" rel="external">https://juejin.im/entry/5977598d51882548c0045bde</a></li>
+<li><a href="http://www.cnblogs.com/zimengfang/p/6183869.html" target="_blank" rel="external">http://www.cnblogs.com/zimengfang/p/6183869.html</a></li>
+<li><a href="http://blog.csdn.net/dg_summer/article/details/78105582" target="_blank" rel="external">http://blog.csdn.net/dg_summer/article/details/78105582</a></li>
+<li><a href="https://issuetracker.google.com/issues/36918490" target="_blank" rel="external">https://issuetracker.google.com/issues/36918490</a></li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <ul class="post-copyright">
+    <li class="post-copyright-author">
+      <strong>Post author:</strong>
+      Xing Li
+    </li>
+    <li class="post-copyright-link">
+      <strong>Post link:</strong>
+      <a href="http://iluhcm.com/2017/12/10/design-an-elegant-and-powerful-android-webview-part-one/" title="如何设计一个优雅健壮的Android WebView？（上）">http://iluhcm.com/2017/12/10/design-an-elegant-and-powerful-android-webview-part-one/</a>
+    </li>
+    <li class="post-copyright-license">
+      <strong>Copyright Notice: </strong>
+      All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> unless stating additionally.
+    </li>
+  </ul>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/WebView/" rel="tag"># WebView</a>
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/12/design-of-router-using-with-android/" rel="next" title="考拉Android客户端路由总线设计">
+                <i class="fa fa-chevron-left"></i> 考拉Android客户端路由总线设计
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div id="sidebar-dimmer"></div>
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="Xing Li" />
+          <p class="site-author-name" itemprop="name">Xing Li</p>
+           
+              <p class="site-description motion-element" itemprop="description">If asked how the pond can be so lucid and fresh, told that sources with flowing water replenish.</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">categories</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">52</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/iluhcm" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.facebook.com/xing.li.731135" target="_blank" title="Facebook">
+                  
+                    <i class="fa fa-fw fa-facebook"></i>
+                  
+                  Facebook
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/iluhcm" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://plus.google.com/101164893136136383839/posts" target="_blank" title="Google+">
+                  
+                    <i class="fa fa-fw fa-google-plus"></i>
+                  
+                  Google+
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/lshcm" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/iluhcm" target="_blank" title="Zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://music.163.com/#/user/home?id=38148117" target="_blank" title="Netease">
+                  
+                    <i class="fa fa-fw fa-music"></i>
+                  
+                  Netease
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#WebView现状"><span class="nav-number">1.</span> <span class="nav-text">WebView现状</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#WebView-Changelog"><span class="nav-number">1.1.</span> <span class="nav-text">WebView Changelog</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么WebView那么难搞？"><span class="nav-number">1.2.</span> <span class="nav-text">为什么WebView那么难搞？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么Github上的WebView项目不适用？"><span class="nav-number">1.3.</span> <span class="nav-text">为什么Github上的WebView项目不适用？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WebView踩坑历程"><span class="nav-number">2.</span> <span class="nav-text">WebView踩坑历程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#WebSettings-setJavaScriptEnabled"><span class="nav-number">2.1.</span> <span class="nav-text">WebSettings.setJavaScriptEnabled</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#301-302重定向问题"><span class="nav-number">2.2.</span> <span class="nav-text">301/302重定向问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#301-302业务场景及白屏问题"><span class="nav-number">2.2.1.</span> <span class="nav-text">301/302业务场景及白屏问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#301-302回退栈问题"><span class="nav-number">2.2.2.</span> <span class="nav-text">301/302回退栈问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#301-302较优解决方案"><span class="nav-number">2.2.3.</span> <span class="nav-text">301/302较优解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#解决301-302回退栈问题"><span class="nav-number">2.2.3.1.</span> <span class="nav-text">解决301/302回退栈问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解决业务白屏问题"><span class="nav-number">2.2.3.2.</span> <span class="nav-text">解决业务白屏问题</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#url参数拼接问题"><span class="nav-number">2.3.</span> <span class="nav-text">url参数拼接问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部分机型没有WebView，应用直接崩溃"><span class="nav-number">2.4.</span> <span class="nav-text">部分机型没有WebView，应用直接崩溃</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WebView中的POST请求"><span class="nav-number">2.5.</span> <span class="nav-text">WebView中的POST请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WebView文件上传功能"><span class="nav-number">2.6.</span> <span class="nav-text">WebView文件上传功能</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考链接"><span class="nav-number">4.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xing Li</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://iluhcm-com.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://iluhcm.com/2017/12/10/design-an-elegant-and-powerful-android-webview-part-one/';
+          this.page.identifier = '2017/12/10/design-an-elegant-and-powerful-android-webview-part-one/';
+          this.page.title = '如何设计一个优雅健壮的Android WebView？（上）';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://iluhcm-com.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("CI5TJwN9TiLhei285z2E32es-gzGzoHsz", "RwQ5NncufhCOGqfbhKM1ucxz");AV.useAVCloudUS();</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
