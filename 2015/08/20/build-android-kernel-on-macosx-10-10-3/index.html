@@ -102,6 +102,7 @@
 <meta property="og:url" content="http://iluhcm.com/2015/08/20/build-android-kernel-on-macosx-10-10-3/index.html">
 <meta property="og:site_name" content="Xing&#39;s Blog">
 <meta property="og:description" content="在上一篇文章中,我们已经完成了android-5.1.1_r9源码的编译和下载工作.但android源码里是不包含Linux Kernel内核源码的,因此我们还需要手动下载内核源码并编译.本文参照在Ubuntu上下载、编译和安装Android最新内核源代码（Linux Kernel）这篇文章在MacOSX环境下进行. 源码下载首先进入之前下载好的android源码根目录,新建kernel目录并进去">
+<meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2017-03-27T08:46:03.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MacOSX 10.10.3下 android-goldfish-3.4 内核下载与编译">
@@ -391,8 +392,8 @@
       
 
       
-        <p>在上一篇文章中,我们已经完成了<code>android-5.1.1_r9</code>源码的编译和下载工作.但android源码里是不包含<code>Linux Kernel</code>内核源码的,因此我们还需要手动下载内核源码并编译.本文参照<a href="http://blog.csdn.net/luoshengyang/article/details/6564592" target="_blank" rel="external">在Ubuntu上下载、编译和安装Android最新内核源代码（Linux Kernel）</a>这篇文章在MacOSX环境下进行.</p>
-<h1 id="源码下载"><a href="#源码下载" class="headerlink" title="源码下载"></a>源码下载</h1><p>首先进入之前下载好的android源码根目录,新建kernel目录并进去,然后从<a href="https://android.googlesource.com/" target="_blank" rel="external">谷歌官网</a>拖源码.</p>
+        <p>在上一篇文章中,我们已经完成了<code>android-5.1.1_r9</code>源码的编译和下载工作.但android源码里是不包含<code>Linux Kernel</code>内核源码的,因此我们还需要手动下载内核源码并编译.本文参照<a href="http://blog.csdn.net/luoshengyang/article/details/6564592" target="_blank" rel="noopener">在Ubuntu上下载、编译和安装Android最新内核源代码（Linux Kernel）</a>这篇文章在MacOSX环境下进行.</p>
+<h1 id="源码下载"><a href="#源码下载" class="headerlink" title="源码下载"></a>源码下载</h1><p>首先进入之前下载好的android源码根目录,新建kernel目录并进去,然后从<a href="https://android.googlesource.com/" target="_blank" rel="noopener">谷歌官网</a>拖源码.</p>
 <pre><code>$ cd /Volumes/android
 $ mkdir kernel
 $ cd kernel
@@ -419,9 +420,9 @@ $ make
 <figure class="highlight stata"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">scripts/kconfig/<span class="keyword">conf</span> --silentoldconfig Kconfig</div><div class="line">  CHK     <span class="keyword">include</span>/linux/<span class="keyword">version</span>.<span class="built_in">h</span></div><div class="line">  CHK     <span class="keyword">include</span>/generated/utsrelease.<span class="built_in">h</span></div><div class="line">  UPD     <span class="keyword">include</span>/generated/utsrelease.<span class="built_in">h</span></div><div class="line">make[1]: `<span class="keyword">include</span>/generated/mach-types.<span class="keyword">h</span>' is up to date.</div><div class="line">  CALL    scripts/checksyscalls.<span class="keyword">sh</span></div><div class="line">  HOSTCC  scripts/mod/mk_elfconfig</div><div class="line">scripts/mod/mk_elfconfig.c:4:10: fatal <span class="keyword">error</span>: 'elf.<span class="keyword">h</span>' <span class="keyword">file</span> not found</div><div class="line">#<span class="keyword">include</span> &lt;elf.<span class="keyword">h</span>&gt;</div><div class="line">         ^</div><div class="line">1 <span class="keyword">error</span> generated.</div><div class="line">make[2]: *** [scripts/mod/mk_elfconfig] <span class="keyword">Error</span> 1</div><div class="line">make[1]: *** [scripts/mod] <span class="keyword">Error</span> 2</div><div class="line">make: *** [scripts] <span class="keyword">Error</span> 2</div></pre></td></tr></table></figure>
 <p>第一次,全盘搜了下<code>elf.h</code>这个文件,发现只有<code>linux</code>目录下有,索性试试看看行不行,放到<code>/usr/include/</code>目录需要<code>sudo</code>权限:</p>
 <pre><code>$ sudo cp -a /Volumes/android//kernel/goldfish/include/linux/elf.h /usr/include/
-</code></pre><p>未果,不起作用.最后继续找啊找,找到如下<a href="http://stackoverflow.com/questions/19346626/building-goldfish-kernel-goldfish-armv7-defconfig-not-found-at-arch-x86-conf" target="_blank" rel="external">解决方案</a>:</p>
+</code></pre><p>未果,不起作用.最后继续找啊找,找到如下<a href="http://stackoverflow.com/questions/19346626/building-goldfish-kernel-goldfish-armv7-defconfig-not-found-at-arch-x86-conf" target="_blank" rel="noopener">解决方案</a>:</p>
 <pre><code>$ make ARCH=arm CROSS_COMPILE=arm-eabi- goldfish_armv7_defconfig
-</code></pre><p>也就是用<code>goldfish_armv7_defconfig</code>的配置代替<code>goldfish_defconfig</code>进行初始化.经过了N(&gt;=50)个问题后(如果不会,按照默认的配置一路按enter就行),接着又出现了上面的一幕,也就是说<code>elf.h</code>这个文件是必不可少的.按照找这个文件的思路,找到了<a href="http://blog.csdn.net/iwantcomputer/article/details/23889585" target="_blank" rel="external">这篇文章</a>. </p>
+</code></pre><p>也就是用<code>goldfish_armv7_defconfig</code>的配置代替<code>goldfish_defconfig</code>进行初始化.经过了N(&gt;=50)个问题后(如果不会,按照默认的配置一路按enter就行),接着又出现了上面的一幕,也就是说<code>elf.h</code>这个文件是必不可少的.按照找这个文件的思路,找到了<a href="http://blog.csdn.net/iwantcomputer/article/details/23889585" target="_blank" rel="noopener">这篇文章</a>. </p>
 <p><strong>这个问题是由于os x的系统include路径里面少了一个elf.h这个文件，到 <code>http://www.rockbox.org/tracker/9006?getfile=16683</code> 这个地方，把里面的内容保存成elf.h，放到内核源码的scripts/mod/下面即可。</strong></p>
 <p>顺便看到了作者遇到的第二个与<code>elf.h</code>有关的问题,</p>
 <p><strong>elf.h之前是因为在系统include库里面，现在放到了scripts/mod下面，编译.c文件的时候定义elf.h的时候有问题，想必会c的人都知道#include <elf.h>和#include “elf.h” 的区别吧。把scripts/mod下面的mk_elfconfig.c，modpost.h这两个文件，开头前几行的#include <elf.h>改成#include “elf.h”。</elf.h></elf.h></strong></p>
@@ -612,7 +613,7 @@ $ lunch full-eng
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">52</span>
+                <span class="site-state-item-count">56</span>
                 <span class="site-state-item-name">tags</span>
               </a>
             </div>
@@ -741,7 +742,7 @@ $ lunch full-eng
         <div class="copyright" >
   
   &copy;  2015 - 
-  <span itemprop="copyrightYear">2017</span>
+  <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

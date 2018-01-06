@@ -102,6 +102,7 @@
 <meta property="og:url" content="http://iluhcm.com/2015/09/07/android-long-click-and-drag-event/index.html">
 <meta property="og:site_name" content="Xing&#39;s Blog">
 <meta property="og:description" content="Android中长按拖动还是比较常见的.比如Launcher中的图标拖动及屏幕切换,ListView中item顺序的改变,新闻类App中新闻类别的顺序改变等.下面就这个事件做一下分析. Android Long Click Event就目前而言,Android中实现长按事件响应有几种方式,包括:  设置View.OnLongClickListener监听器 通过GestureDetector.On">
+<meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2017-03-27T09:16:08.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android长按及拖动事件探究">
@@ -522,13 +523,13 @@
 <ul>
 <li>记得算上动态栏的高度,可以通过<code>getResources().getDimensionPixelSize(resourceId);</code>得到某个资源的像素值;</li>
 <li>需要计算图像的中心点,否则移动的距离以你图标的左上角来计算;</li>
-<li>在上面的源码中,我还做了一件事,就是获取图标的布局,重新设置Margin值.其实如果你除了拖动以外不进行别的操作的话,没必要进行这样的设置.但如果你需要重绘这个按钮的话,那么重绘的时候是按照旧的LayoutParams来绘制的,这样会造成图标又回到了原来的地方.我在设置FloatingActionButton的时候就遇到了这样的问题,具体代码可参考<a href="https://github.com/iluhcm/CircularFloatingActionMenu/blob/master/src/main/java/com/oguzdev/circularfloatingactionmenu/library/FloatingActionMenu.java" target="_blank" rel="external">Github源码</a>.</li>
+<li>在上面的源码中,我还做了一件事,就是获取图标的布局,重新设置Margin值.其实如果你除了拖动以外不进行别的操作的话,没必要进行这样的设置.但如果你需要重绘这个按钮的话,那么重绘的时候是按照旧的LayoutParams来绘制的,这样会造成图标又回到了原来的地方.我在设置FloatingActionButton的时候就遇到了这样的问题,具体代码可参考<a href="https://github.com/iluhcm/CircularFloatingActionMenu/blob/master/src/main/java/com/oguzdev/circularfloatingactionmenu/library/FloatingActionMenu.java" target="_blank" rel="noopener">Github源码</a>.</li>
 <li>如果不想长按拖动,而是直接拖动,那么修改长按触发阈值<code>LONG_PRESS_TIME_THRESHOLD</code>,或者通过<code>public LongPressHandler(View view, long holdTime)</code>构造函数来实例化<code>LongPressHandler</code>就可以了.</li>
 </ul>
 <h2 id="触摸事件小结"><a href="#触摸事件小结" class="headerlink" title="触摸事件小结"></a>触摸事件小结</h2><p>经过上面的分析,我们通过两种方式实现了触摸事件的实现及事件回调处理,分别是View.OnDragListener接口和View.layout()方法.</p>
 <p>实际上触摸事件是和长按事件分不开的,只是触发时间的长短阈值设置不同罢了.在第一种方法中,通过调用<code>View.startDrag()</code>方法触发拖拽事件,通过设置<code>View.OnDragListener</code>设置事件回调,便可以在回调中处理拖拽事件.但是这种方法的应用场景并不是图标拖拽,而是文字的复制粘贴,原始的视图是不会移动的.一般我们会通过覆盖<code>View.onTouchEvent()</code>或者设置<code>View.OnTouchListener</code>监听器来监听滑动事件,并在<code>MotionEvent.ACTION_MOVE</code>状态中处理拖拽问题,这便是第二种方案的思想.</p>
-<h1 id="Source-Code"><a href="#Source-Code" class="headerlink" title="Source Code"></a>Source Code</h1><p>长按拖拽的源码在<a href="https://github.com/iluhcm/CircularFloatingActionMenu" target="_blank" rel="external">Github</a>上,欢迎star&amp;fork:)</p>
-<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="http://grepcode.com/file/repo1.maven.org/maven2/org.robolectric/android-all/5.0.0_r2-robolectric-1/android/view/View.java" target="_blank" rel="external">http://grepcode.com/file/repo1.maven.org/maven2/org.robolectric/android-all/5.0.0_r2-robolectric-1/android/view/View.java</a><br><a href="http://www.ablanxue.com/prone_4213_1.html" target="_blank" rel="external">http://www.ablanxue.com/prone_4213_1.html</a><br><a href="http://www.yiibai.com/android/android_drag_and_drop.html" target="_blank" rel="external">http://www.yiibai.com/android/android_drag_and_drop.html</a><br><a href="http://developer.android.com/guide/topics/ui/drag-drop.html" target="_blank" rel="external">http://developer.android.com/guide/topics/ui/drag-drop.html</a><br><a href="http://www.jcodecraeer.com/a/anzhuokaifa/developer/2013/0311/1003.html" target="_blank" rel="external">http://www.jcodecraeer.com/a/anzhuokaifa/developer/2013/0311/1003.html</a></p>
+<h1 id="Source-Code"><a href="#Source-Code" class="headerlink" title="Source Code"></a>Source Code</h1><p>长按拖拽的源码在<a href="https://github.com/iluhcm/CircularFloatingActionMenu" target="_blank" rel="noopener">Github</a>上,欢迎star&amp;fork:)</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="http://grepcode.com/file/repo1.maven.org/maven2/org.robolectric/android-all/5.0.0_r2-robolectric-1/android/view/View.java" target="_blank" rel="noopener">http://grepcode.com/file/repo1.maven.org/maven2/org.robolectric/android-all/5.0.0_r2-robolectric-1/android/view/View.java</a><br><a href="http://www.ablanxue.com/prone_4213_1.html" target="_blank" rel="noopener">http://www.ablanxue.com/prone_4213_1.html</a><br><a href="http://www.yiibai.com/android/android_drag_and_drop.html" target="_blank" rel="noopener">http://www.yiibai.com/android/android_drag_and_drop.html</a><br><a href="http://developer.android.com/guide/topics/ui/drag-drop.html" target="_blank" rel="noopener">http://developer.android.com/guide/topics/ui/drag-drop.html</a><br><a href="http://www.jcodecraeer.com/a/anzhuokaifa/developer/2013/0311/1003.html" target="_blank" rel="noopener">http://www.jcodecraeer.com/a/anzhuokaifa/developer/2013/0311/1003.html</a></p>
 
       
     </div>
@@ -710,7 +711,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">52</span>
+                <span class="site-state-item-count">56</span>
                 <span class="site-state-item-name">tags</span>
               </a>
             </div>
@@ -839,7 +840,7 @@
         <div class="copyright" >
   
   &copy;  2015 - 
-  <span itemprop="copyrightYear">2017</span>
+  <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

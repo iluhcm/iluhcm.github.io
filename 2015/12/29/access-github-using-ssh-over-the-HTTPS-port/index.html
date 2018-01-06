@@ -102,6 +102,7 @@
 <meta property="og:url" content="http://iluhcm.com/2015/12/29/access-github-using-ssh-over-the-HTTPS-port/index.html">
 <meta property="og:site_name" content="Xing&#39;s Blog">
 <meta property="og:description" content="最近博客一直没有更新，原因之一就是去实习了，然后在公司内网推送代码到远程Github分支的时候总是报如下错误： 1234567891011121314151617181920ssh: connect to host github.com port 22: Operation timed outfatal: Could not read from remote repository.Please m">
+<meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2017-03-27T09:16:08.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="通过SSH-over-HTTPS访问Github">
@@ -397,7 +398,7 @@
 <pre><code>ssh -T git@github.com
 </code></pre><p>报超时错误。</p>
 <pre><code>ssh: connect to host github.com port 22: Operation timed out
-</code></pre><p>使用代理上传也遇到同样的问题。作为懒人，<code>git</code>协议不能正常在Github使用简直让人抓狂，又不想使用http协议来推送（每次都要输入密码，且不安全）。网上搜索了一番，在<a href="https://help.github.com/articles/using-ssh-over-the-https-port/" target="_blank" rel="external">Github官网</a>找到了一种办法，通过https协议建立SSH连接，即让SSH走443端口。经过测试，公司的防火墙并没有封443端口（基本不可能封）。测试代码如下：</p>
+</code></pre><p>使用代理上传也遇到同样的问题。作为懒人，<code>git</code>协议不能正常在Github使用简直让人抓狂，又不想使用http协议来推送（每次都要输入密码，且不安全）。网上搜索了一番，在<a href="https://help.github.com/articles/using-ssh-over-the-https-port/" target="_blank" rel="noopener">Github官网</a>找到了一种办法，通过https协议建立SSH连接，即让SSH走443端口。经过测试，公司的防火墙并没有封443端口（基本不可能封）。测试代码如下：</p>
 <pre><code>ssh -T -p 443 git@ssh.github.com
 </code></pre><p>如果执行命令后不报错并且显示</p>
 <pre><code>Hi userName! You&apos;ve successfully authenticated, but GitHub does not provide shell access.
@@ -572,7 +573,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">52</span>
+                <span class="site-state-item-count">56</span>
                 <span class="site-state-item-name">tags</span>
               </a>
             </div>
@@ -685,7 +686,7 @@
         <div class="copyright" >
   
   &copy;  2015 - 
-  <span itemprop="copyrightYear">2017</span>
+  <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
