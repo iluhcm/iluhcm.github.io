@@ -114,7 +114,7 @@
 <meta property="og:image" content="https://haitao.nos.netease.com/eb5b327a-1e0f-4de8-b354-a15521d696b8.png">
 <meta property="og:image" content="https://haitao.nos.netease.com/641a8a8b-89f5-445a-8935-a933aec9bd07.png">
 <meta property="og:image" content="https://haitao.nos.netease.com/6481f12e-a5f1-41e7-ae75-fc94c63265cf.png">
-<meta property="og:updated_time" content="2018-05-04T11:48:57.000Z">
+<meta property="og:updated_time" content="2018-05-04T11:52:14.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="记一次多进程同步Cookie的解惑历程">
 <meta name="twitter:description" content="前言谈起Cookie，如果没有了解过它，可能会望文生畏。做过WebView开发的人可能会对它比较了解。Android的Cookie是由系统去管理的，其特点是会被持久化成一个db文件，保存在/data/data/{packageName}/app_webview/Cookies中（不同系统、不同浏览器实现可能不一样，但大体如此）。通常，网站的登录信息是使用Cookie来保存的，如果App也是使用Co">
@@ -411,7 +411,7 @@
 <blockquote>
 <p>代码来自 <a href="https://gist.github.com/justinthomas-syncbak/cd29feebd6837d5b45f6576c73faedac" target="_blank" rel="noopener">https://gist.github.com/justinthomas-syncbak/cd29feebd6837d5b45f6576c73faedac</a>。</p>
 </blockquote>
-<h1 id="多进程Cookie同步"><a href="#多进程Cookie同步" class="headerlink" title="多进程Cookie同步"></a>多进程Cookie同步</h1><p>但是如果App和WebView处于不同的进程，事情就没那么简单了。由于不同进程之间数据是不共享的，进程之间的Cookie同步就成了一个问题。随后的测试发现，进程之间的Cookie数据不一定同步，但App的多进程是共享一个Cookies文件的。我们遇到的问题是，WebView进程访问携带了特定Cookie的url后，这些Cookie并没有同步到主进程。于是，带着层层疑问，我们开始了进程间同步Cookie的猜想实验。考虑一下两个进程间可能导致Cookie数据不一致的地方（以下假设App在A进程，WebView在B进程）：</p>
+<h1 id="多进程Cookie同步"><a href="#多进程Cookie同步" class="headerlink" title="多进程Cookie同步"></a>多进程Cookie同步</h1><p>但是如果App和WebView处于不同的进程，事情就没那么简单了。由于不同进程之间数据是不共享的，进程之间的Cookie同步就成了一个问题。随后的测试发现，App的多进程间是共享同一个Cookies文件的，但进程之间的Cookie数据不一定能够实时同步。我们遇到的问题是，WebView进程访问携带了特定Cookie的url后，这些Cookie并没有同步到主进程。于是，带着层层疑问，我们开始了进程间同步Cookie的猜想实验。考虑一下两个进程间可能导致Cookie数据不一致的地方（以下假设App在A进程，WebView在B进程）：</p>
 <ol>
 <li>WebView访问一个url，B进程的WebView写入Cookie以后，没有立即写入Cookies.db持久化，导致A进程读取不到最新的Cookie；</li>
 <li>由于Cookie是和WebView挂钩的，可能需要在A进程创建一个WebView来让Cookie在进程间同步；</li>
