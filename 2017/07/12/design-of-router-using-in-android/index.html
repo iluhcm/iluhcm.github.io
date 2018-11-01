@@ -103,13 +103,13 @@
 <meta property="og:site_name" content="Xing&#39;s Blog">
 <meta property="og:description" content="前言当前，Android路由框架已经有很多了，如雨后春笋般出现，大概是因为去年提出了Android组件化的概念。当一个产品的业务规模上升到一定程度，或者是跨团队开发时，团队/模块间的合作问题就会暴露出来。如何保持团队间业务的往来？如何互不影响或干涉对方的开发进度？如何调用业务方的功能？组件化给上述问题提供了一个答案。组件化所要解决的核心问题是解耦，路由正是为了解决模块间的解耦而出现的。本文阐述了考">
 <meta property="og:locale" content="en">
-<meta property="og:image" content="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router_architecture.png">
-<meta property="og:image" content="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router.jpg">
-<meta property="og:updated_time" content="2017-12-30T05:22:28.000Z">
+<meta property="og:image" content="http://nos.netease.com/knowledge/0d94b9af-bb78-4a7c-9322-e23bcfec551c?imageView&thumbnail=980x0">
+<meta property="og:image" content="http://nos.netease.com/knowledge/130829f3-7355-44ee-af48-b2a7e8ffbbae?imageView&thumbnail=980x0">
+<meta property="og:updated_time" content="2018-11-01T06:14:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="考拉Android客户端路由总线设计">
 <meta name="twitter:description" content="前言当前，Android路由框架已经有很多了，如雨后春笋般出现，大概是因为去年提出了Android组件化的概念。当一个产品的业务规模上升到一定程度，或者是跨团队开发时，团队/模块间的合作问题就会暴露出来。如何保持团队间业务的往来？如何互不影响或干涉对方的开发进度？如何调用业务方的功能？组件化给上述问题提供了一个答案。组件化所要解决的核心问题是解耦，路由正是为了解决模块间的解耦而出现的。本文阐述了考">
-<meta name="twitter:image" content="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router_architecture.png">
+<meta name="twitter:image" content="http://nos.netease.com/knowledge/0d94b9af-bb78-4a7c-9322-e23bcfec551c?imageView&thumbnail=980x0">
 
 
 
@@ -423,7 +423,8 @@
 <li>App内的跳转，可以减少手动构建Intent的成本，同时可以统一携带部分参数到下一个页面（打点）</li>
 </ul>
 <p>除此之外，使用路由可以避免上述弊端，能够降低开发者页面跳转的成本。</p>
-<h1 id="考拉路由总线"><a href="#考拉路由总线" class="headerlink" title="考拉路由总线"></a>考拉路由总线</h1><h2 id="路由框架"><a href="#路由框架" class="headerlink" title="路由框架"></a>路由框架</h2><p><img src="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router_architecture.png" alt=""><br><a href="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router_architecture.png" target="_blank" rel="noopener">点击查看大图</a></p>
+<h1 id="考拉路由总线"><a href="#考拉路由总线" class="headerlink" title="考拉路由总线"></a>考拉路由总线</h1><h2 id="路由框架"><a href="#路由框架" class="headerlink" title="路由框架"></a>路由框架</h2><p> <img src="http://nos.netease.com/knowledge/0d94b9af-bb78-4a7c-9322-e23bcfec551c?imageView&amp;thumbnail=980x0" alt="Alt pic"> </p>
+<p><a href="http://nos.netease.com/knowledge/0d94b9af-bb78-4a7c-9322-e23bcfec551c" target="_blank" rel="noopener">点击查看大图</a></p>
 <p>考拉路由框架主要分为三个模块：<strong>路由收集</strong>、<strong>路由初始化</strong>以及<strong>页面路由</strong>。路由收集阶段，定义了基于Activity类的注解，通过<code>Android Processing Tool</code>(以下简称“APT”)收集路由信息并生成路由表类；路由初始化阶段，根据生成的路由表信息注入路由字典；页面路由阶段，则通过路由字典查找路由信息，并根据查找结果定制不同的路由策略略。</p>
 <h2 id="路由设计思路"><a href="#路由设计思路" class="headerlink" title="路由设计思路"></a>路由设计思路</h2><p>总的来说，考拉路由设计追求的是功能模块的解耦，能够实现基本路由功能，以及开发者使用上足够简单。考拉路由的前两个阶段对于路由使用者几乎是无成本的，只需要在使用路由的页面定义一个类注解<code>@Router</code>即可，页面路由的使用也相当简单，后面会详细介绍。</p>
 <h3 id="功能设计"><a href="#功能设计" class="headerlink" title="功能设计"></a>功能设计</h3><p>路由在一定程度上和网络请求是类似的，可以分为请求、处理以及响应三个阶段。这三个阶段对使用者来说既可以是透明的，也可以在路由过程中进行拦截处理。考拉路由框架目前支持的功能有：</p>
@@ -437,7 +438,8 @@
 <li>支持对路由的动态拦截、监听以及降级；✅</li>
 </ol>
 <p>以上功能保证了考拉业务模块间的解耦，也能够满足目前产品和运营的需求。</p>
-<h3 id="接口设计"><a href="#接口设计" class="headerlink" title="接口设计"></a>接口设计</h3><p><img src="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router.jpg" alt=""><br><a href="http://7xl6ic.com1.z0.glb.clouddn.com/img/router/kaola_router.jpg" target="_blank" rel="noopener">点击查看大图</a></p>
+<h3 id="接口设计"><a href="#接口设计" class="headerlink" title="接口设计"></a>接口设计</h3><p> <img src="http://nos.netease.com/knowledge/130829f3-7355-44ee-af48-b2a7e8ffbbae?imageView&amp;thumbnail=980x0" alt="Alt pic"> </p>
+<p><a href="http://nos.netease.com/knowledge/130829f3-7355-44ee-af48-b2a7e8ffbbae" target="_blank" rel="noopener">点击查看大图</a></p>
 <p>一个好的模块或框架，需要事先设计好接口，预留足够的权限供调用者支配，才能满足各种各样的需求。考拉路由框架在设计过程中使用了常见的设计模式，如Builder模式、Factory模式、Wrapper模式等，并遵循了一些设计原则。（最近在看第二遍Effective Java，对以下原则深有体会，推荐看一下）</p>
 <ul>
 <li><strong>针对接口编程，而不是针对实现编程</strong></li>
