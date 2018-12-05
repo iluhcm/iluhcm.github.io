@@ -1,0 +1,1083 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="2yx0JNDw3DWn3FVwl0XV9ba4wAjjbvZ3viXpvjGwBa8" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android,Architecture,BackEnd,Design,Modularization," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="记资源投放后端工程的架构调整与优化  架构思考一直以来对软件工程架构有着极大的兴趣，无论是之前负责的移动端Android工程，亦或是现在转到后端开发后维护的资源投放工程。可以说一个团队中并非每个开发都能够深入掌握架构知识，但需要每个人能够拥有软件架构的意识。架构是对工程整体结构与组件的抽象描述，是软件工程的基础骨架。架构在工程层面不分领域，且思想是通用的。引用维基百科对于软件架构的定义^1：  软">
+<meta name="keywords" content="Android,Architecture,BackEnd,Design,Modularization">
+<meta property="og:type" content="article">
+<meta property="og:title" content="移动端工程架构与后端工程架构的思想摩擦之旅">
+<meta property="og:url" content="http://iluhcm.com/2018/11/30/project-architecture-optimization-of-resource-management-system/index.html">
+<meta property="og:site_name" content="Xing&#39;s Blog">
+<meta property="og:description" content="记资源投放后端工程的架构调整与优化  架构思考一直以来对软件工程架构有着极大的兴趣，无论是之前负责的移动端Android工程，亦或是现在转到后端开发后维护的资源投放工程。可以说一个团队中并非每个开发都能够深入掌握架构知识，但需要每个人能够拥有软件架构的意识。架构是对工程整体结构与组件的抽象描述，是软件工程的基础骨架。架构在工程层面不分领域，且思想是通用的。引用维基百科对于软件架构的定义^1：  软">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://haitao.nos.netease.com/ca4a1c6f-6c3a-40f7-a09f-46dddde7d0f7_1305_937.png">
+<meta property="og:image" content="https://haitao.nos.netease.com/62129445-5378-4d34-b18e-11ee48d6fdf9_846_833.png">
+<meta property="og:image" content="https://haitao.nos.netease.com/b91b60eb-32cc-4c81-8a61-5acba577a60a_824_423.png">
+<meta property="og:image" content="https://haitao.nos.netease.com/9c1dcba3-de28-4e69-84d3-d85ee5bc5d89_672_638.png">
+<meta property="og:image" content="https://haitao.nos.netease.com/f3bd5ae8-3d32-4337-8001-73cfa7a633a1_1254_470.png">
+<meta property="og:image" content="https://haitao.nos.netease.com/46ee4c0a-8abd-4ac3-8932-2dca5044ff03_1604_599.png">
+<meta property="og:image" content="https://haitao.nos.netease.com/9880b70c-9810-4f82-b418-68b2f557218b_1250_520.png">
+<meta property="og:updated_time" content="2018-12-05T09:45:37.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="移动端工程架构与后端工程架构的思想摩擦之旅">
+<meta name="twitter:description" content="记资源投放后端工程的架构调整与优化  架构思考一直以来对软件工程架构有着极大的兴趣，无论是之前负责的移动端Android工程，亦或是现在转到后端开发后维护的资源投放工程。可以说一个团队中并非每个开发都能够深入掌握架构知识，但需要每个人能够拥有软件架构的意识。架构是对工程整体结构与组件的抽象描述，是软件工程的基础骨架。架构在工程层面不分领域，且思想是通用的。引用维基百科对于软件架构的定义^1：  软">
+<meta name="twitter:image" content="https://haitao.nos.netease.com/ca4a1c6f-6c3a-40f7-a09f-46dddde7d0f7_1305_937.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://iluhcm.com/2018/11/30/project-architecture-optimization-of-resource-management-system/"/>
+
+
+
+
+
+  <title>移动端工程架构与后端工程架构的思想摩擦之旅 | Xing's Blog</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?03e8bdd436b4561c8e760c9459ee8003";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Xing's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">To be a better man.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://iluhcm.com/2018/11/30/project-architecture-optimization-of-resource-management-system/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xing Li">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xing's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">移动端工程架构与后端工程架构的思想摩擦之旅</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-30T10:11:57+08:00">
+                2018-11-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Architecture/" itemprop="url" rel="index">
+                    <span itemprop="name">Architecture</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/30/project-architecture-optimization-of-resource-management-system/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/11/30/project-architecture-optimization-of-resource-management-system/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote class="blockquote-center">记资源投放后端工程的架构调整与优化</blockquote>
+
+<h1 id="架构思考"><a href="#架构思考" class="headerlink" title="架构思考"></a>架构思考</h1><p>一直以来对软件工程架构有着极大的兴趣，无论是之前负责的移动端Android工程，亦或是现在转到后端开发后维护的资源投放工程。可以说一个团队中并非每个开发都能够深入掌握架构知识，但需要每个人能够拥有软件架构的意识。架构是对工程整体结构与组件的抽象描述，是软件工程的基础骨架。架构在工程层面不分领域，且思想是通用的。引用维基百科对于软件架构的定义<a href="https://zh.wikipedia.org/wiki/%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84" target="_blank" rel="noopener">^1</a>：</p>
+<blockquote>
+<p>软件体系结构是构建计算机软件实践的基础。与建筑师设定建筑项目的设计原则和目标，作为绘图员画图的基础一样，软件架构师或者系统架构师陈述软件架构以作为满足不同客户需求的实际系统设计方案的基础。从和目的、主题、材料和结构的联系上来说，软件架构可以和建筑物的架构相比拟。一个软件架构师需要有广泛的软件理论知识和相应的经验来实施和管理软件产品的高级设计。软件架构师定义和设计软件的模块化，模块之间的交互，用户界面风格，对外接口方法，创新的设计特性，以及高层事物的对象操作、逻辑和流程。</p>
+</blockquote>
+<p>架构的合理设计可以解决面对复杂系统时可能面临的很多问题，例如：</p>
+<ul>
+<li>业务边界与模块职责划分问题</li>
+<li>代码权限控制问题（数据库不应直接被业务方调用）</li>
+<li>代码重复，逻辑分支多，坏味道多的问题</li>
+<li>由于考虑不周，可能存在隐藏bug</li>
+<li>修改一个逻辑需要修改N个地方代码逻辑</li>
+</ul>
+<p>从实际的实践来看，的确如此。以前在移动端做的架构设计流程，在后端重新得到了实践。</p>
+<h2 id="移动端架构思考"><a href="#移动端架构思考" class="headerlink" title="移动端架构思考"></a>移动端架构思考</h2><p>尚未接触到强大的Spring容器之前，我一直探索着在移动端有一种能够在编译期暴露服务声明，运行时自动注入实现类的做法；接触到Spring以后，得以理解这其实就是IoC容器的概念。Android的组件化思想，以及网上发布的各类组件化的技术文章，给了我很多值得借鉴的思路。客户端的代码一般是以module来组织的。一个module，既可以配置成为一个独立发布的库，也可以编译成一个单独的apk。组件化的概念正是利用了module这一特点，将一个大工程中的业务拆分成一个个module，各个module间的业务相对独立，组件间通过各自暴露的业务接口实现通信。基于此思想的移动端架构模型可以使用下图来表示。</p>
+<p><img src="https://haitao.nos.netease.com/ca4a1c6f-6c3a-40f7-a09f-46dddde7d0f7_1305_937.png" alt="Android组件化架构设计"><br><a href="https://haitao.nos.netease.com/ca4a1c6f-6c3a-40f7-a09f-46dddde7d0f7_1305_937.png" target="_blank" rel="noopener">点击查看原图</a></p>
+<p>该架构模型由5个部分组成，分别是Toolkit/ToolkitSDK module、基础组件库/基础组件库module、基础服务接口/业务服务接口module、服务调度中心module以及业务module。</p>
+<ul>
+<li>Toolkit/Toolkit SDK</li>
+</ul>
+<p>Toolkit是工具类及与工具类相关的SDK的集合。工具类属于工程架构里最基础的模块，提供了通用的方法与工具类服务（工具类服务是指可以被抽象成一个独立的与业务无关的基础服务，如缓存、数据库操作等）。工具类通常作为最底层的module，被其他所有模块引用。</p>
+<ul>
+<li>基础组件库/基础组件SDK</li>
+</ul>
+<p>基础组件库是基础组件及相关SDK的集合。基础组件库提供与业务相关的基础组件，是构建一个移动端应用所需要的通用组件的集合。它与工具类的区别在于基础组件库可能会包含少量业务逻辑代码，是无法拆分给其他应用使用的；另一方面，基础组件库是基础服务接口的实现，是不对业务层暴露的，避免了业务层与基础SDK打交道，有利于整体替换底层基础框架的实现（例如Volley替换为OkHttp、Fresco替换为Glide）。</p>
+<ul>
+<li>基础服务接口/业务服务接口</li>
+</ul>
+<p>基础服务接口声明了一组通用的基础服务，业务层通过基础服务接口获取基础服务，如网络请求、图片加载等。业务服务接口声明了一组该模块提供给其他模块的服务，业务之间的通信也是通过服务接口来完成的。例如首页模块需要获取购物车的商品数量，首先通过服务调度中心获取购物车的服务接口，再通过服务接口调用购物车获取商品数量的接口方法即可。</p>
+<ul>
+<li>服务调度中心</li>
+</ul>
+<p>服务调度中心，是一个接口收集与管理的容器。服务调度中心将所有基础服务接口与业务接口收集起来，通过一定的方式与它们的实现类进行绑定。所有的业务都需要通过服务调度中心才能够获取到服务。服务的注册与发现和Spring容器的IoC思想是类似的。</p>
+<ul>
+<li>业务层</li>
+</ul>
+<p>业务层是每个业务的具体实现的集合。业务层的业务之间是没有直接引用关系的，业务层提供了业务服务接口中暴露的服务的具体实现。业务之间的通信需要通过服务调度中心获取其他业务的服务接口。</p>
+<h3 id="移动端架构小结"><a href="#移动端架构小结" class="headerlink" title="移动端架构小结"></a>移动端架构小结</h3><p>通过接口服务架构模型，模块之间是高度解耦的。业务负责人唯一需要维护的公共部分便是这个模块在业务服务接口中暴露的服务。对于业务服务的接口功能增改变得非常方便，业务实现的逻辑更改、代码优化等，只要不改变服务接口的签名，就不需要其他业务方改动任何代码即可完成，由此团队的开发效率是非常高的。</p>
+<h2 id="后端架构思考"><a href="#后端架构思考" class="headerlink" title="后端架构思考"></a>后端架构思考</h2><p>对于后端工程来说，架构的设计与实现必定是与工程的业务难度及复杂程度相关的，如果只是很简单的业务模型，就没有必要弄得太过复杂，避免得不偿失。本人只接触了几个月后端知识，对于后端的架构体系与演进过程处于不断地学习和探索中。投放系统是我接触到的第一个完整的后端工程，其中Web工程采用传统的MVC架构<a href="https://zh.wikipedia.org/wiki/MVC" target="_blank" rel="noopener">^2</a>，对我具有很大地学习和借鉴意义，项目架构如下图所示。</p>
+<p><img src="https://haitao.nos.netease.com/62129445-5378-4d34-b18e-11ee48d6fdf9_846_833.png" alt="投放Web工程MVC架构图"><br><a href="https://haitao.nos.netease.com/62129445-5378-4d34-b18e-11ee48d6fdf9_846_833.png" target="_blank" rel="noopener">点击查看原图</a></p>
+<p>该架构纵向划分成展示层、控制层、服务层、对象关系映射层和数据服务层5个部分，层级间通过AOP的方式插入了业务监控、日志、权限控制、统计分析等功能。</p>
+<ul>
+<li>展示层（View）</li>
+</ul>
+<p>展示层是系统与用户打交道的地方，提供与用户交互的界面。对于用户而言，只有展示层是可见的、可操作的。展示层对于某些工程来说不是必须的，例如提供纯后台服务的工程。</p>
+<ul>
+<li>控制层（Controller）</li>
+</ul>
+<p>主要负责与Model和View打交道，但同时又保持其相对独立。Controller决定使用哪些Model，对Model执行什么操作，为视图准备哪些数据，是MVC中沟通的桥梁。在Controller层提供了http服务供展示层调用。在依赖管理中，控制层需要依赖服务层提供服务。</p>
+<ul>
+<li>服务层（Service/Facade）</li>
+</ul>
+<p>服务层是业务逻辑实现的地方，上层需要使用的功能都在服务层来实现具体的业务逻辑。服务层就是将底层的数据通过一定的条件和方式进行数据组装并提供给上层调用。服务层可以拆分为业务接口和业务实现，业务实现可以对外部隐藏。在投放工程中，控制层既依赖了业务接口，又依赖了业务实现。后面的改造我们可以看到，编译期红色线依赖是完全没有必要的。服务层需要依赖数据关系映射层与持久层的数据打交道。</p>
+<ul>
+<li>对象关系映射层（ORM）</li>
+</ul>
+<p>对象关系映射层的作用是在持久层和业务实体对象之间作一层数据实体的映射，这样在具体操作业务对象时，只需简单的操作对象的属性和方法，不需要去和复杂的SQL语句打交道。ORM使得业务不需要关心底层数据库的任何细节，包括使用的数据库类型、数据库连接与释放细节等。对象关系映射层只依赖数据服务层提供服务。</p>
+<ul>
+<li>数据服务层（Data Server）</li>
+</ul>
+<p>数据服务就是提供数据源的地方。数据服务可以提供持久化数据及缓存数据。持久，即把数据（如内存中的对象）保存到可永久保存的存储设备中（如磁盘）。持久化的主要应用是将内存中的数据存储在关系型的数据库中，当然也可以存储在磁盘文件中、XML数据文件中等等。而缓存是将信息（数据或页面）放在内存中以避免频繁的数据库存储或执行整个页面的生命周期，直到缓存的信息过期或依赖变更才再次从数据库中读取数据或重新执行页面的生命周期。数据服务层是数据源头，处于架构的最底层。</p>
+<h3 id="后端架构小结"><a href="#后端架构小结" class="headerlink" title="后端架构小结"></a>后端架构小结</h3><p>后端工程，更加注重层级的概念，每一层的职责非常明确。展示层负责与用户进行页面交互，控制层合并业务数据并控制View的展示，服务层则是实现业务逻辑的聚集地，对象关系映射层在业务层和数据服务层之间建立通道，而数据服务层则提供数据。总体而言，投放工程的MVC架构给我的感觉是比移动端架构复杂，层级多，职责分工明确，带来的问题是层级间的交互也比较麻烦。另外服务层里承载了几乎所有的业务逻辑，层级偏重，如果没有好好地梳理业务逻辑划清边界，很容易把服务层搞成一锅粥。清晰的模块职责划分，可以帮助服务层更好地为控制层服务。</p>
+<h1 id="架构思想的摩擦"><a href="#架构思想的摩擦" class="headerlink" title="架构思想的摩擦"></a>架构思想的摩擦</h1><p>可以看到，客户端与后端有着非常相似的架构模型。</p>
+<ul>
+<li>从代码组织的角度：以module作为层级代码组织的基本工具，分为工具库、基础组件库（中间件）、服务接口/API、服务层/业务层、视图层等。module间的依赖关系几乎是一样的。</li>
+<li>从业务模型的角度：后端工程分为交易组、商品组、售后组、客服组等，对应移动端的交易链路浮层、商品详情页、售后详情页、帮助与客服页等，每个业务是由不同的组负责的，业务之间通过约定的接口相互提供服务，各种各样的业务模型聚合成了整个系统。</li>
+<li>从功能服务的角度：分为业务服务接口的暴露、业务服务实现的隔离、业务服务的查找与注册。</li>
+</ul>
+<p>下面从功能服务的角度，详细说明本文在思想摩擦过程中想要表达的观点。</p>
+<h2 id="业务接口的作用"><a href="#业务接口的作用" class="headerlink" title="业务接口的作用"></a>业务接口的作用</h2><p>业务接口，可以认为是这组业务向外暴露其功能的一套标准。标准一旦形成并发布，就需要业务方持续维护这套标准，使得标准变得完善和稳定。同时标准可以更新升级，可以通过版本来实现，提供新的功能。业务接口一般具备以下特性：</p>
+<ul>
+<li>业务接口包含一组Java的接口集合以及与这些接口相关的POJO，通常打包成一个JAR/AAR包。</li>
+<li>业务接口只提供接口功能的定义，不包含任务业务逻辑。</li>
+<li>业务接口可以进行版本管理，一旦版本发布，则该版本的接口不再可变。业务需要新增功能时，只需要在原有业务接口的基础上，增加新的功能接口或方法，同时升级业务接口版本号并发布。</li>
+</ul>
+<p>其他业务方需要使用该业务的功能，只需要引入该业务的JAR/AAR包，通过服务调度中心获取该服务接口即可。</p>
+<h2 id="业务逻辑的存放"><a href="#业务逻辑的存放" class="headerlink" title="业务逻辑的存放"></a>业务逻辑的存放</h2><p>业务接口仅提供了功能的定义，不包含任何业务逻辑。那么，业务逻辑（即接口的实现类）放哪里呢？不管是移动端架构还是后端架构，在工程领域，业务逻辑在任何时候都不应该对业务的使用方暴露。这样做有两个好处：</p>
+<ul>
+<li>业务方只关心功能，不关心功能实现的过程。隐藏业务的实现逻辑可以降低业务方使用该功能的成本及复杂度。</li>
+<li>业务功能的后端逻辑改动及必要的技术优化、性能优化，只要不更改接口签名，则不会影响当前的业务方使用。</li>
+</ul>
+<p>一般情况下，业务的逻辑实现会放在单独的业务模块中，该业务模块仅限工程内部引用。后端传统的MVC工程架构把业务的实现逻辑放在了Service/Facade层，层级之间的类不相互引用；而基于驱动领域的设计模型把业务的实现逻辑限定在了一个领域/子域里，领域之间通过界限上下文绑定。在移动端，时下较为热门的众多组件化方案，也是将一个独立的功能模块作为单独的module，module可以独立编译为apk，也可以通过aar的方式集成到主Application中。</p>
+<h2 id="业务逻辑的隔离"><a href="#业务逻辑的隔离" class="headerlink" title="业务逻辑的隔离"></a>业务逻辑的隔离</h2><p>业务的使用方包括工程内部的上层业务和外部服务，业务接口与业务逻辑有必要进行代码级别的隔离，这样才能避免上层业务引用到业务逻辑的代码。通常，工程的每个模块负责不同的功能，模块之间的引用关系通过依赖管理工具（如Maven或Gradle）来配置。我们可以巧用依赖管理工具的runtime compile机制来实现运行时依赖。即在编写对外接口的时候，不直接引用包含业务逻辑的module，等到编译的时候再把业务逻辑代码一起编译进来，然后在运行时通过一定的方式调用对应的业务逻辑。</p>
+<ul>
+<li>Maven通过在dependencyManagement的依赖中加入<scope>runtime<scope>标签实现<a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html" target="_blank" rel="noopener">^3</a>。</scope></scope></li>
+<li>Gradle通过在dependencies将compile改为runtime实现<a href="https://docs.gradle.org/current/userguide/dependency_types.html" target="_blank" rel="noopener">^4</a>。</li>
+</ul>
+<p>下面的两张图简单介绍了后端工程和移动端工程基于业务逻辑隔离的工程架构思路。其中，虚线表示runtime compile依赖，实线表示正常的依赖关系。</p>
+<p><img src="https://haitao.nos.netease.com/b91b60eb-32cc-4c81-8a61-5acba577a60a_824_423.png" alt="后端业务逻辑隔离思路"><br><a href="https://haitao.nos.netease.com/b91b60eb-32cc-4c81-8a61-5acba577a60a_824_423.png" target="_blank" rel="noopener">点击查看原图</a></p>
+<p>工程的启动入口几乎不包含业务代码，只包含配置文件。Controller层是一组RestfulApi的集合，给前端和客户端提供http请求服务，业务接口/API是一组dubbo接口，给其他工程业务方提供RPC调用。Controller层在编码的时候只依赖Service/Facade接口，在编译期依赖Service和Facade接口的实现。这样设计还有一个好处是对DAO层的保护，DAO层只和Service层打交道，Controller以及对外提供的dubbo接口是引用不到的，更好地保护数据安全。</p>
+<p><img src="https://haitao.nos.netease.com/9c1dcba3-de28-4e69-84d3-d85ee5bc5d89_672_638.png" alt="移动端业务逻辑隔离思路"><br><a href="https://haitao.nos.netease.com/9c1dcba3-de28-4e69-84d3-d85ee5bc5d89_672_638.png" target="_blank" rel="noopener">点击查看原图</a></p>
+<p>在移动端的架构中，单Application+多module已经成为主流。每个module负责一块独立的业务，如首页、订单、购物车等，核心模块也可以拆分为独立模块，如网络引擎、图片引擎。这些独立的模块可以抽离出BusinessService/CoreService服务接口，模块间的交互只需要通过Service接口通信即可，业务对于其他的p_CoreSDK/Business的逻辑实现是不可见的。</p>
+<h2 id="业务接口的注册"><a href="#业务接口的注册" class="headerlink" title="业务接口的注册"></a>业务接口的注册</h2><p>有了业务接口和业务实现，还需要一种在运行时把它们“粘合”起来的工具，这一过程可以称为业务接口的注册。当业务方访问业务接口时，这个工具需要帮助我们查找到对应的业务实现。控制反转（IoC）或依赖注入（DI）的思想给我们提供了解决办法。</p>
+<p>在后端工程中，Spring是最为常用的IoC容器之一。Spring在运行时根据配置文件或注解动态生成对象，再由变量注解通过Java反射注入到对应的实例中。因此代码中只需要通过在全局变量声明相应的注解即可完成业务接口的注册。</p>
+<p>移动端由于有限的硬件资源，更多地把CPU时间分配给了页面渲染，保证应用体验流畅，不太可能在应用启动的过程中大量通过反射生成实例对象，因此移动端并没有出现Spring框架。尽管如此，依赖注入的思想是通用的。通常移动端只需要保证在运行时能够获取到对应的业务实现，几乎没有在运行时动态改变业务实现的需求，聪明的工程师想到了把服务的注册提前到编译期进行，这一过程可以使用JDK提供的<code>Annocation Processing Tool</code>完成（例如<a href="https://github.com/google/dagger" target="_blank" rel="noopener">Dagger2</a>），也可以在编译生成Class字节码以后使用ASM操作字节码注册实现（如<a href="https://github.com/alibaba/ARouter" target="_blank" rel="noopener">ARouter</a>）。</p>
+<h1 id="投放工程架构调整"><a href="#投放工程架构调整" class="headerlink" title="投放工程架构调整"></a>投放工程架构调整</h1><p>有了前面的“理论基础”，以及跃跃欲试的心动，我们来对投放工程的架构做一次调整和优化，原则是不改变原有的业务逻辑，目的是使投放工程的业务边界和业务功能更为清晰。</p>
+<h2 id="旧工程架构"><a href="#旧工程架构" class="headerlink" title="旧工程架构"></a>旧工程架构</h2><p>资源投放系统一共分为4个工程，分别是</p>
+<ul>
+<li>后端前台工程：<strong>kaola-resource-app</strong></li>
+<li>后端离线工程：<strong>kaola-resource-offline</strong></li>
+<li>后端后台Web工程：<strong>kaola-resource-web</strong></li>
+<li>前端后台fed工程：<strong>kaola-resource-fed</strong></li>
+</ul>
+<p>其中，kaola-resource-app和kaola-resource-offline提供纯dubbo服务。app提供前台服务，负责给其他业务在线获取投放的素材信息；offline提供离线服务，负责给其他业务的后台系统获取投放相关的数据。kaola-resource-web和kaola-resource-fed分别是投放系统的Web后端和前端工程，资源的分配、审核、投放都在该系统完成。kaola-resource-fed属于前端工程，不在本文讨论范围内，下面介绍三个后端工程的架构体系。</p>
+<h3 id="工程依赖关系"><a href="#工程依赖关系" class="headerlink" title="工程依赖关系"></a>工程依赖关系</h3><p><img src="https://haitao.nos.netease.com/f3bd5ae8-3d32-4337-8001-73cfa7a633a1_1254_470.png" alt="resource-management-classified-old"><br><a href="https://haitao.nos.netease.com/f3bd5ae8-3d32-4337-8001-73cfa7a633a1_1254_470.png" target="_blank" rel="noopener">点击查看原图</a></p>
+<p>工程依赖关系如图所示，主要分为几类，分别是工具模块、接口模块、业务模块以及启动模块，箭头表示依赖关系。</p>
+<ul>
+<li>工具模块</li>
+</ul>
+<p><strong>kaola-common-cache</strong>：主要包含Solo缓存中间件的封装，JVM缓存相关的不在该模块里。<br><strong>kaola-common-util</strong>：工具类，包括常量、异常信息及util类。<br><strong>kaola-resource-search</strong>-&gt;kaola-resource-generic：ndir索引服务工程。<br><strong>kaola-resource-schema（图中未列出）</strong>：存放投放自带部分模板xml的地方，暂无其他工程引用。</p>
+<ul>
+<li>接口模块</li>
+</ul>
+<p><strong>kaola-resource-api</strong>：提供在线和离线服务的dubbo接口。<br><strong>kaola-resource-generic</strong>：通过mybatis与数据库打交道，提供数据的工程，相当于DAO层。<br><strong>kaola-resource-facade</strong>-&gt;kaola-resource-generic：提供Web层的facade接口，相当于Service层。</p>
+<ul>
+<li>业务实现</li>
+</ul>
+<p><strong>kaola-resource-cache</strong>-&gt;kaola-resource-api、kaola-resource-generic、kaola-common-cache：提供业务报警、disconf配置、JVM缓存、NCR缓存、熔断、业务监控、线程池管理等功能，且提供resource-api部分facade接口的实现、Service接口定义与实现，是resource-app工程的业务实现工程。<br><strong>kaola-resource-provider</strong>-&gt;kaola-resource-facade、kaola-resource-api、kaola-service-util、kaola-resource-search、kaola-resource-generic：提供web工程facade接口的实现、Service接口定义与实现。<br><strong>kaola-resource-service</strong>-&gt;kaola-resource-generic、kaola-resource-api：提供offline工程facade接口的实现、Service接口定义与实现。<br><strong>kaola-service-util</strong>-&gt;kaola-resource-facade、kaola-common-util、kaola-resource-api：主要包含外部模板XML校验业务的工程。</p>
+<ul>
+<li>启动模块</li>
+</ul>
+<p><strong>kaola-resource-app</strong>-&gt;kaola-resource-cache、kaola-common-cache、kaola-resource-api、kaola-resource-generic：app工程启动入口，SpringBoot配置。<br><strong>kaola-resource-offline</strong>-&gt;kaola-resource-service、kaola-resource-generic、kaola-resource-api：offline工程启动入口，SpringBoot配置。<br><strong>kaola-resource-fed</strong>：前端后台工程<br><strong>kaola-resource-web</strong>-&gt;kaola-resource-facade、kaola-resource-provider、kaola-resource-facade、kaola-resource-api、kaola-service-util、kaola-resource-search、kaola-resource-generic、kaola-common-util：web工程启动入口，提供http服务。</p>
+<h3 id="现有工程问题"><a href="#现有工程问题" class="headerlink" title="现有工程问题"></a>现有工程问题</h3><ul>
+<li>工程模块命名混乱</li>
+</ul>
+<p>刚接触投放工程的时候完全不知道从何入手，只能根据启动工程的依赖关系找到对应的业务模块。总工程里有4个小工程，通常找一个模块的业务实现不知道去哪个模块去找。例如，从命名上来看，并不知道kaola-resource-facade是web工程的业务接口，kaola-resource-provider是web工程的业务实现，kaola-resource-service是offline工程的业务实现，对新人来说命名不够友好。</p>
+<ul>
+<li>模块职责不清晰</li>
+</ul>
+<p>由上面梳理的模块功能可以知道，kaola-resource-cache工程不仅承担了缓存管理、业务报警、熔断等基础业务，也是app工程的业务实现；kaola-resource-service既提供了业务接口，又提供了业务实现；kaola-common-util没有发挥它作为工具类应该提供的职责和义务。总体而言，模块的职责可以通过一定的修改变得更为清晰。</p>
+<ul>
+<li>工具类、常量类管理混乱</li>
+</ul>
+<p>目前几乎每个工程下面都有一个util包，且工程包含多个BusinessException/ParameterException类，带来的问题是使用时不知道用哪个类。工具类与常量类应统一为一个工具类模块，统一管理。</p>
+<ul>
+<li>版本依赖管理</li>
+</ul>
+<p>每个工程的依赖目前都是独立管理的，存在不同工程依赖中间件版本不一致的情况。主工程的pom管理机制可以优化一下，比如disconf是每个工程都要使用的，可以放在父工程使用dependencyManagement统一管理。</p>
+<ul>
+<li>业务代码分支多</li>
+</ul>
+<p>当前工程存在很多业务分支，遇到业务分支时大部分是通过if/else判断的，修改一个业务点需要修改很多地方，通常很容易遗漏，造成隐藏的bug。</p>
+<h2 id="新工程架构"><a href="#新工程架构" class="headerlink" title="新工程架构"></a>新工程架构</h2><p>考虑到现有工程架构的特点，在新工程的设计上采用平滑过渡的方式，后端主体还是分为web/offline/app三个小工程，这三个小工程分别采用传统的MVC架构。前端工程由于与后端工程关系不大，后续可以迁移到新工程里。</p>
+<h3 id="工程依赖关系调整"><a href="#工程依赖关系调整" class="headerlink" title="工程依赖关系调整"></a>工程依赖关系调整</h3><p>针对旧工程中存在的不合理的点，以及工程中存在的问题，我们对工程及工程的依赖关系进行了如下调整。</p>
+<p><img src="https://haitao.nos.netease.com/46ee4c0a-8abd-4ac3-8932-2dca5044ff03_1604_599.png" alt="resource-management-classified-old-vs-new"><br><a href="https://haitao.nos.netease.com/46ee4c0a-8abd-4ac3-8932-2dca5044ff03_1604_599.png" target="_blank" rel="noopener">点击查看原图</a></p>
+<p>红色背景为删除或整合的模块，包括kaola-service-util、kaola-common-util、kaola-common-cache。<br>黄色背景为重命名的模块，目的是使模块功能定位更清晰，包括</p>
+<ul>
+<li>kaola-resource-provider-&gt;kaola-resource-web-provider，表示web工程的业务实现</li>
+<li>kaola-resource-facade-&gt;kaola-resource-web-facade，表示web工程的业务接口</li>
+<li>kaola-resource-generic-&gt;kaola-resource-dao，表示对象关系映射，即DAO层</li>
+<li>kaola-resource-service-&gt;kaola-resource-offline-provider，表示offline工程的业务实现</li>
+</ul>
+<p>绿色背景为新增模块，包括kaola-resource-util、kaola-resource-offline-facade、kaola-resource-app-provider、kaola-resource-app-facade，模块的定义也比较明确。<br>红色的线为可以移除的依赖关系，黄色的线表示修改为runtime依赖，绿色的线表示新增依赖。</p>
+<p>经过上述调整后，一张更为清晰的投放工程架构图便展现出来了。</p>
+<p><img src="https://haitao.nos.netease.com/9880b70c-9810-4f82-b418-68b2f557218b_1250_520.png" alt="resource-management-classified-new"><br><a href="https://haitao.nos.netease.com/9880b70c-9810-4f82-b418-68b2f557218b_1250_520.png" target="_blank" rel="noopener">点击查看原图</a></p>
+<h3 id="工程架构基本思想"><a href="#工程架构基本思想" class="headerlink" title="工程架构基本思想"></a>工程架构基本思想</h3><p>新的工程架构，模块间的职责与依赖关系更为清晰。</p>
+<p>从模块的职责来说，浅蓝色表示底层提供的工具类（包括各种util、缓存、索引服务等）；绿色表示数据对象关系映射服务层；黄色表示对第三方暴露的api；粉红色表示对内提供的业务接口；土黄色表示业务接口的真正实现；深蓝色则是工程的启动入口，包含各种配置文件。</p>
+<p>从模块的依赖关系来说，启动工程在编译期仅依赖业务接口，运行时才会依赖业务实现以及与业务实现相关的底层服务，这一操作通过maven的scope标签完成，编译期编译使用的标签为<code>&lt;scope&gt;compile&lt;/scope&gt;</code>，运行时编译使用的标签为<code>&lt;scope&gt;runtime&lt;/scope&gt;</code>。索引、缓存、工具类作为基础服务以独立的模块存在，需要与数据库打交道的模块则直接依赖kaola-resource-dao即可。</p>
+<p>对于当前的架构还不是最完美的，存在两个问题。</p>
+<ol>
+<li>kaola-resource-cache提供了kaola-resource-api的实现，应将这一部分的业务逻辑移至kaola-resource-app-provider中。</li>
+<li>业务接口依赖了kaola-resource-dao，这一部分因为接口使用了dao层的Entity，需要重新规划建模，去除对dao层的依赖。</li>
+</ol>
+<p>该架构的设计可以做到业务层仅和接口打交道，在业务层实现业务逻辑时，不关心底层服务的实现。业务层也没有办法直接和dao层打交道，避免数据被业务层无故修改。</p>
+<h3 id="工程模块划分"><a href="#工程模块划分" class="headerlink" title="工程模块划分"></a>工程模块划分</h3><ul>
+<li>基础模块/服务</li>
+</ul>
+<p><strong>kaola-resource-fed</strong>：前端工程单独拆出，不与后端工程公用同一个git仓库<br><strong>kaola-resource-util</strong>：工具类、异常类、常量，可以被所有子工程引用<br><strong>kaola-resource-cache</strong>：缓存相关的模块，需要使用缓存的工程引用此module<br><strong>kaola-resource-index</strong>：索引工程服务<br><strong>kaola-resource-dao</strong>：数据库dao层<br><strong>kaola-resource-api</strong>：暴露对第三方提供的所有服务api，包括online和offline接口<br><strong>kaola-resource-facade-base</strong>：存放所有facade工程的基础接口和异常类，上述流程图没有展示出来，但确实是有必要的基础模块。</p>
+<ul>
+<li>web工程</li>
+</ul>
+<p><strong>kaola-resource-web-facade</strong>：web工程服务暴露，仅提供facade接口和数据实体类<br><strong>kaola-resource-web-provider</strong>：web工程服务实现，根据需要自定义service层组件<br><strong>kaola-resource-web</strong>：web工程启动类，compile依赖facade，runtime依赖provider</p>
+<ul>
+<li>offline工程</li>
+</ul>
+<p><strong>kaola-resource-offline-facade</strong>：offline工程内部服务，仅提供接口和数据实体类<br><strong>kaola-resource-offline-provider</strong>：offline工程服务实现，及部分kaola-resource-api实现，提供dubbo provider<br><strong>kaola-resource-offline</strong>：offline工程启动类，compile依赖facade，runtime依赖provider</p>
+<ul>
+<li>app工程</li>
+</ul>
+<p><strong>kaola-resource-app-facade</strong>：app工程内部服务，仅提供接口和数据实体类<br><strong>kaola-resource-app-provider</strong>：app工程服务实现，及部分kaola-resource-api实现，提供dubbo provider<br><strong>kaola-resource-app-starter</strong>：app工程启动类，compile依赖facade，runtime依赖provider</p>
+<h2 id="现有工程改造方案"><a href="#现有工程改造方案" class="headerlink" title="现有工程改造方案"></a>现有工程改造方案</h2><h3 id="工程模块改造"><a href="#工程模块改造" class="headerlink" title="工程模块改造"></a>工程模块改造</h3><p>在上述改造原则基础上，投放工程的模块改造计划可以清晰地列出来。针对基础模块来说，需要进行如下改造：</p>
+<ul>
+<li>新增kaola-resource-facade-base工程，存放facade的异常类</li>
+<li>kaola-common-cache重命名为kaola-resource-cache</li>
+<li>kaola-common-util重命名为kaola-resource-util</li>
+<li>kaola-resource-generic重命名为kaola-resource-dao</li>
+<li>新增kaola-resource-facade-base工程，存放facade的异常类</li>
+</ul>
+<p>剩余的三个工程，以resource-web工程为例，需要进行如下改造：</p>
+<ul>
+<li>将kaola-resource-facade重命名为kaola-resource-web-facade，存放对web工程提供的服务接口，将BusinessException和ParameterException移除放到facade-base工程中</li>
+<li>kaola-resource-provider重命名为kaola-resource-web-provider，将模块中的util迁移至resource-util工程</li>
+<li>kaola-service-util中非业务相关的所有util全部移动到kaola-resource-util这个module中，剩余业务相关的，移动到kaola-resource-web-provider工程</li>
+<li>kaola-resource-web，将web对provider的依赖由compile改为runtime</li>
+</ul>
+<p>offline和app工程采用类似的方案，不再赘述。</p>
+<h3 id="maven依赖改造"><a href="#maven依赖改造" class="headerlink" title="maven依赖改造"></a>maven依赖改造</h3><p>maven依赖改造的目的，一是减少由于版本依赖不一致带来的新坑，方便第三方中间件的统一管理；二是对工程权限有所约束，不至于代码乱放，难以维护。</p>
+<ul>
+<li><p>共有的jar包依赖管理<br>在父pom增加dependencyManagement标签，把常用的Spring、log、guava、junit、jsonserializer、disconf和网易自研的中间件等jar包统一进行版本管理。子工程需要相关组件时，仅需引入依赖，无需指定版本。</p>
+</li>
+<li><p>模块依赖权限管理<br>由改造后的工程架构可知，启动工程是没有办法接触到业务实现的，这需要依靠runtime时再依赖业务实现模块来实现。因此，对于每个需要依赖*-provider的工程，都需要通过<scope>runtime</scope>来依赖。</p>
+</li>
+<li><p>api版本发布管理<br>需要对外发布的包，依赖尽量使用provided引入。在父pom增加本地api发布的版本，子工程如需依赖api或实现api的业务，需要引用父pom的api版本，api版本的升级，需要同时升级父pom和api模块工程两个地方<br>resource-util工程与api工程管理一致。</p>
+</li>
+</ul>
+<h1 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h1><ul>
+<li>kaola-resource-api迁移所有page相关的api接口</li>
+<li>kaola-resource-fed迁移使用新的git工程</li>
+<li>kaola-resource-cache逻辑迁移</li>
+<li>kaola-resource-dao业务接口的依赖去除</li>
+</ul>
+<h1 id="架构调整总结"><a href="#架构调整总结" class="headerlink" title="架构调整总结"></a>架构调整总结</h1><p>架构永远是聊不完的话题，特别是涉猎了知识面较广的后端以后，越发感觉需要学习的东西越来越多。本文分别从移动端和后端的架构思想谈起，从中探索共同点，结合微服务的思想，探索过程中对多端架构有了思想的摩擦，总结了一套业务接口与业务实现的规范，能够更好地为其他业务提供服务。在此基础上，将这一套规范运用在投放工程上，完成从旧架构的问题分析，到新架构的优化设计与实现的整个过程。从结果来看，模块的职责更为清晰，代码的权限与边界得到了比较好的控制，对以后业务的纵横向扩展、代码的健壮性都有了质的保障。</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><ol>
+<li><a href="https://zh.wikipedia.org/wiki/%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/MVC" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/MVC</a></li>
+<li><a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html" target="_blank" rel="noopener">https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html</a></li>
+<li><a href="https://docs.gradle.org/current/userguide/dependency_types.html" target="_blank" rel="noopener">https://docs.gradle.org/current/userguide/dependency_types.html</a></li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <ul class="post-copyright">
+    <li class="post-copyright-author">
+      <strong>Post author:</strong>
+      Xing Li
+    </li>
+    <li class="post-copyright-link">
+      <strong>Post link:</strong>
+      <a href="http://iluhcm.com/2018/11/30/project-architecture-optimization-of-resource-management-system/" title="移动端工程架构与后端工程架构的思想摩擦之旅">http://iluhcm.com/2018/11/30/project-architecture-optimization-of-resource-management-system/</a>
+    </li>
+    <li class="post-copyright-license">
+      <strong>Copyright Notice: </strong>
+      All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> unless stating additionally.
+    </li>
+  </ul>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/Architecture/" rel="tag"># Architecture</a>
+          
+            <a href="/tags/BackEnd/" rel="tag"># BackEnd</a>
+          
+            <a href="/tags/Design/" rel="tag"># Design</a>
+          
+            <a href="/tags/Modularization/" rel="tag"># Modularization</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/27/android-cookie-sync-between-multiprocess/" rel="next" title="记一次多进程同步Cookie的解惑历程">
+                <i class="fa fa-chevron-left"></i> 记一次多进程同步Cookie的解惑历程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div id="sidebar-dimmer"></div>
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="Xing Li" />
+          <p class="site-author-name" itemprop="name">Xing Li</p>
+           
+              <p class="site-description motion-element" itemprop="description">If asked how the pond can be so lucid and fresh, told that sources with flowing water replenish.</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">categories</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">66</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/iluhcm" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.facebook.com/xing.li.731135" target="_blank" title="Facebook">
+                  
+                    <i class="fa fa-fw fa-facebook"></i>
+                  
+                  Facebook
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/iluhcm" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://plus.google.com/101164893136136383839/posts" target="_blank" title="Google+">
+                  
+                    <i class="fa fa-fw fa-google-plus"></i>
+                  
+                  Google+
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/lshcm" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/iluhcm" target="_blank" title="Zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://music.163.com/#/user/home?id=38148117" target="_blank" title="Netease">
+                  
+                    <i class="fa fa-fw fa-music"></i>
+                  
+                  Netease
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#架构思考"><span class="nav-number">1.</span> <span class="nav-text">架构思考</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#移动端架构思考"><span class="nav-number">1.1.</span> <span class="nav-text">移动端架构思考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#移动端架构小结"><span class="nav-number">1.1.1.</span> <span class="nav-text">移动端架构小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后端架构思考"><span class="nav-number">1.2.</span> <span class="nav-text">后端架构思考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#后端架构小结"><span class="nav-number">1.2.1.</span> <span class="nav-text">后端架构小结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架构思想的摩擦"><span class="nav-number">2.</span> <span class="nav-text">架构思想的摩擦</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#业务接口的作用"><span class="nav-number">2.1.</span> <span class="nav-text">业务接口的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#业务逻辑的存放"><span class="nav-number">2.2.</span> <span class="nav-text">业务逻辑的存放</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#业务逻辑的隔离"><span class="nav-number">2.3.</span> <span class="nav-text">业务逻辑的隔离</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#业务接口的注册"><span class="nav-number">2.4.</span> <span class="nav-text">业务接口的注册</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#投放工程架构调整"><span class="nav-number">3.</span> <span class="nav-text">投放工程架构调整</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#旧工程架构"><span class="nav-number">3.1.</span> <span class="nav-text">旧工程架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#工程依赖关系"><span class="nav-number">3.1.1.</span> <span class="nav-text">工程依赖关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#现有工程问题"><span class="nav-number">3.1.2.</span> <span class="nav-text">现有工程问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#新工程架构"><span class="nav-number">3.2.</span> <span class="nav-text">新工程架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#工程依赖关系调整"><span class="nav-number">3.2.1.</span> <span class="nav-text">工程依赖关系调整</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工程架构基本思想"><span class="nav-number">3.2.2.</span> <span class="nav-text">工程架构基本思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工程模块划分"><span class="nav-number">3.2.3.</span> <span class="nav-text">工程模块划分</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#现有工程改造方案"><span class="nav-number">3.3.</span> <span class="nav-text">现有工程改造方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#工程模块改造"><span class="nav-number">3.3.1.</span> <span class="nav-text">工程模块改造</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#maven依赖改造"><span class="nav-number">3.3.2.</span> <span class="nav-text">maven依赖改造</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TODO"><span class="nav-number">4.</span> <span class="nav-text">TODO</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架构调整总结"><span class="nav-number">5.</span> <span class="nav-text">架构调整总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考链接"><span class="nav-number">6.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xing Li</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://iluhcm-com.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://iluhcm.com/2018/11/30/project-architecture-optimization-of-resource-management-system/';
+          this.page.identifier = '2018/11/30/project-architecture-optimization-of-resource-management-system/';
+          this.page.title = '移动端工程架构与后端工程架构的思想摩擦之旅';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://iluhcm-com.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.1"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.1"></script>
+
+
+  
+
+</body>
+</html>
