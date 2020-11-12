@@ -1,0 +1,893 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="2yx0JNDw3DWn3FVwl0XV9ba4wAjjbvZ3viXpvjGwBa8">
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Tech,Android,Sensor,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1">
+
+
+
+
+
+
+<meta name="description" content="传感器类型最近在做一个收集Android传感器信息的应用,发现Android的传感器并没有想象中的那么好用. 与iOS不同的是,Android手机上的硬件设备可能来自不同的厂商,硬件信息千篇一律,完全掌握其对应的传感器基本是不可能的.在Android系统里,定义了26种传感器类型,分别是: 1234567891011121314151617181920212223242526public stat">
+<meta name="keywords" content="Tech,Android,Sensor">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android系统中Sensor及SensorManager探究">
+<meta property="og:url" content="https://iluhcm.com/2015/09/03/how-to-detect-useful-sensors-for-android-devices/index.html">
+<meta property="og:site_name" content="Xing&#39;s Blog">
+<meta property="og:description" content="传感器类型最近在做一个收集Android传感器信息的应用,发现Android的传感器并没有想象中的那么好用. 与iOS不同的是,Android手机上的硬件设备可能来自不同的厂商,硬件信息千篇一律,完全掌握其对应的传感器基本是不可能的.在Android系统里,定义了26种传感器类型,分别是: 1234567891011121314151617181920212223242526public stat">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2020-11-12T07:25:02.078Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android系统中Sensor及SensorManager探究">
+<meta name="twitter:description" content="传感器类型最近在做一个收集Android传感器信息的应用,发现Android的传感器并没有想象中的那么好用. 与iOS不同的是,Android手机上的硬件设备可能来自不同的厂商,硬件信息千篇一律,完全掌握其对应的传感器基本是不可能的.在Android系统里,定义了26种传感器类型,分别是: 1234567891011121314151617181920212223242526public stat">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://iluhcm.com/2015/09/03/how-to-detect-useful-sensors-for-android-devices/">
+
+
+
+
+
+  <title>Android系统中Sensor及SensorManager探究 | Xing's Blog</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?03e8bdd436b4561c8e760c9459ee8003";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Xing's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">To be a better man.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://iluhcm.com/2015/09/03/how-to-detect-useful-sensors-for-android-devices/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xing Li">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xing's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android系统中Sensor及SensorManager探究</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-09-03T20:06:12+08:00">
+                2015-09-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/09/03/how-to-detect-useful-sensors-for-android-devices/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/09/03/how-to-detect-useful-sensors-for-android-devices/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="传感器类型"><a href="#传感器类型" class="headerlink" title="传感器类型"></a>传感器类型</h1><p>最近在做一个收集Android传感器信息的应用,发现Android的传感器并没有想象中的那么好用. 与iOS不同的是,Android手机上的硬件设备可能来自不同的厂商,硬件信息千篇一律,完全掌握其对应的传感器基本是不可能的.在Android系统里,定义了26种传感器类型,分别是:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_ACCELEROMETER = <span class="string">"android.sensor.accelerometer"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_MAGNETIC_FIELD = <span class="string">"android.sensor.magnetic_field"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_ORIENTATION = <span class="string">"android.sensor.orientation"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_GYROSCOPE = <span class="string">"android.sensor.gyroscope"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_LIGHT = <span class="string">"android.sensor.light"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_PRESSURE = <span class="string">"android.sensor.pressure"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_TEMPERATURE = <span class="string">"android.sensor.temperature"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_PROXIMITY = <span class="string">"android.sensor.proximity"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_GRAVITY = <span class="string">"android.sensor.gravity"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_LINEAR_ACCELERATION = <span class="string">"android.sensor.linear_acceleration"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_ROTATION_VECTOR = <span class="string">"android.sensor.rotation_vector"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_RELATIVE_HUMIDITY = <span class="string">"android.sensor.relative_humidity"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_AMBIENT_TEMPERATURE = <span class="string">"android.sensor.ambient_temperature"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_MAGNETIC_FIELD_UNCALIBRATED = <span class="string">"android.sensor.magnetic_field_uncalibrated"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_GAME_ROTATION_VECTOR = <span class="string">"android.sensor.game_rotation_vector"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_GYROSCOPE_UNCALIBRATED = <span class="string">"android.sensor.gyroscope_uncalibrated"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_SIGNIFICANT_MOTION = <span class="string">"android.sensor.significant_motion"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_STEP_DETECTOR = <span class="string">"android.sensor.step_detector"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_STEP_COUNTER = <span class="string">"android.sensor.step_counter"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_GEOMAGNETIC_ROTATION_VECTOR = <span class="string">"android.sensor.geomagnetic_rotation_vector"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_HEART_RATE = <span class="string">"android.sensor.heart_rate"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String SENSOR_STRING_TYPE_TILT_DETECTOR = <span class="string">"android.sensor.tilt_detector"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_WAKE_GESTURE = <span class="string">"android.sensor.wake_gesture"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_GLANCE_GESTURE = <span class="string">"android.sensor.glance_gesture"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_PICK_UP_GESTURE = <span class="string">"android.sensor.pick_up_gesture"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String STRING_TYPE_WRIST_TILT_GESTURE = <span class="string">"android.sensor.wrist_tilt_gesture"</span>;</span><br></pre></td></tr></table></figure>
+<p>其中常用的有<code>加速度计</code>,<code>磁力计</code>,<code>方向传感器</code>,<code>陀螺仪</code>,<code>重力传感器</code>,<code>光线传感器</code>等.并不是每一台手机都包含了这26种类型的传感器,甚至有些低端的手机可能只有其中的几个.</p>
+<h1 id="获取手机支持的传感器信息"><a href="#获取手机支持的传感器信息" class="headerlink" title="获取手机支持的传感器信息"></a>获取手机支持的传感器信息</h1><p>获取某个手机里所有的传感器信息只需要三行代码:</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SensorManager mSensorManager = (SensorManager) <span class="built_in">context</span>.getSystemService(<span class="built_in">Context</span>.SENSOR_SERVICE)<span class="comment">;</span></span><br><span class="line">List&lt;Sensor&gt; allSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL)<span class="comment">;// 获得传感器列表</span></span><br><span class="line">Log.v(TAG, allSensors.toString())<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+<p>当然如何格式化输出可以自由定制,其中,一个Sensor包含了如下字段:</p>
+<ul>
+<li>name : 传感器名称</li>
+<li>vendor : 设备商名称</li>
+<li>version : 设备版本</li>
+<li>type : 类型</li>
+<li>max range : 最大量程</li>
+<li>resolution : 分辨率</li>
+<li>power : 功耗</li>
+<li>min delay : 最小延迟</li>
+</ul>
+<p>注意,使用此方法获取的传感器可能有多个相同的名字,可能是因为手机里内置了两个相同的传感器.例如,在我的测试机小米3上就有两个温度传感器.</p>
+<h1 id="在Android中注册指定类型的传感器"><a href="#在Android中注册指定类型的传感器" class="headerlink" title="在Android中注册指定类型的传感器"></a>在Android中注册指定类型的传感器</h1><p>最近做的应用,需要获取的传感器类型有:<code>线性加速度计</code>,<code>磁力计</code>,<code>重力传感器</code>,<code>陀螺仪</code>.在Android中使用传感器比较简单,可以通过下面的代码注册,这段代码实现需要在主类实现<code>SensorEventListener</code>接口.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> void registerSensorListener() &#123;</span><br><span class="line">    SensorDataRecorder mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);</span><br><span class="line">    Sensor acc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);</span><br><span class="line">    Sensor linearAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);</span><br><span class="line">    Sensor gravity = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);</span><br><span class="line">    Sensor gyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);</span><br><span class="line">    Sensor geoMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);</span><br><span class="line">    Sensor rotationVector = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);</span><br><span class="line">    <span class="keyword">if</span> (linearAcc != <span class="literal">null</span> &amp;&amp; gyroscope != <span class="literal">null</span> &amp;&amp; geoMagnetic != <span class="literal">null</span> &amp;&amp; gravity != <span class="literal">null</span>) &#123;</span><br><span class="line">        Log.v(TAG, <span class="string">"register all sensors"</span>);</span><br><span class="line">        mSensorManager.registerListener(<span class="keyword">this</span>, acc, SensorManager.SENSOR_DELAY_FASTEST);</span><br><span class="line">        mSensorManager.registerListener(<span class="keyword">this</span>, linearAcc, SensorManager.SENSOR_DELAY_FASTEST);</span><br><span class="line">        mSensorManager.registerListener(<span class="keyword">this</span>, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);</span><br><span class="line">        mSensorManager.registerListener(<span class="keyword">this</span>, gravity, SensorManager.SENSOR_DELAY_FASTEST);</span><br><span class="line">        mSensorManager.registerListener(<span class="keyword">this</span>, geoMagnetic, SensorManager.SENSOR_DELAY_FASTEST);</span><br><span class="line">        mSensorManager.registerListener(<span class="keyword">this</span>, rotationVector, SensorManager.SENSOR_DELAY_FASTEST);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实际上在注册传感器时,最终都会调用抽象方法</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">boolean</span> <span class="title">registerListenerImpl</span><span class="params">(SensorEventListener listener, Sensor sensor, <span class="keyword">int</span> delayUs, Handler <span class="keyword">handler</span>, <span class="keyword">int</span> maxReportLatencyUs, <span class="keyword">int</span> SensorManager.SENSOR_DELAY_FASTEST)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>第一个参数便是注册事件回调;第二个即要注册的传感器;第三个延迟时间是通过第五个参数计算得到;第四个Handler表示事件可以被该Handler处理,可以为空,表示不使用Handler处理;第五个参数可定义传感器的采样频率,必须是系统中设定的几个值:</p>
+<ul>
+<li><code>SENSOR_DELAY_NORMAL</code></li>
+<li><code>SENSOR_DELAY_UI</code></li>
+<li><code>SENSOR_DELAY_GAME</code></li>
+<li><code>SENSOR_DELAY_FASTEST</code></li>
+</ul>
+<p>采样频率逐个提高,最快是<code>SENSOR_DELAY_FASTEST</code>,1ms采样一次;第六个参数官方没有解释,表示不太清楚.在官方的文档解释中,可以通过返回值判断是否注册成功了某个传感器.然而在实际的测试中,即使注册成功了在回调中也不一定有返回值.下面就可以通过回调判断传感器类型并获取值:</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSensorChanged</span>(<span class="params">SensorEvent <span class="keyword">event</span></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">event</span> != <span class="literal">null</span> &amp;&amp; <span class="keyword">event</span>.sensor != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">event</span>.values[<span class="number">0</span>] == <span class="number">0.0</span> &amp;&amp; <span class="keyword">event</span>.values[<span class="number">1</span>] == <span class="number">0.0</span> &amp;&amp; <span class="keyword">event</span>.values[<span class="number">2</span>] == <span class="number">0.0</span>) &#123; <span class="comment">// 所有数值为0时认为传感器未工作</span></span><br><span class="line">            Log.v(TAG, <span class="string">"sensor not work normally. "</span> + <span class="keyword">event</span>.sensor.getName());</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">switch</span> (<span class="keyword">event</span>.sensor.getType()) &#123;</span><br><span class="line">            <span class="keyword">case</span> Sensor.TYPE_ACCELEROMETER:</span><br><span class="line">                mAccValues = <span class="keyword">event</span>.values.clone();</span><br><span class="line">                mAccAccuracy = <span class="keyword">event</span>.accuracy;</span><br><span class="line">                mAllSensorValid |= LINEAR_ACC_VALID;</span><br><span class="line">                mAllSensorValid |= GRAVITY_VALID;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> Sensor.TYPE_LINEAR_ACCELERATION:</span><br><span class="line">                mLinearAccValues = <span class="keyword">event</span>.values.clone();</span><br><span class="line">                mAccAccuracy = <span class="keyword">event</span>.accuracy;</span><br><span class="line">                mAllSensorValid |= LINEAR_ACC_VALID;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> Sensor.TYPE_GYROSCOPE:</span><br><span class="line">                mGyroscopeValues = <span class="keyword">event</span>.values.clone();</span><br><span class="line">                mAllSensorValid |= GYROSCOPE_VALID;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> Sensor.TYPE_GRAVITY:</span><br><span class="line">                mGravityValues = <span class="keyword">event</span>.values.clone();</span><br><span class="line">                mAllSensorValid |= GRAVITY_VALID;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> Sensor.TYPE_MAGNETIC_FIELD:</span><br><span class="line">                mGeoMagneticValues = <span class="keyword">event</span>.values.clone();</span><br><span class="line">                mMagneticAccuracy = <span class="keyword">event</span>.accuracy;</span><br><span class="line">                mAllSensorValid |= GEOMAGNETIC_VALID;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> Sensor.TYPE_ROTATION_VECTOR:</span><br><span class="line">                mRotationVectorValues = <span class="keyword">event</span>.values.clone();</span><br><span class="line">                <span class="comment">// mAllSensorValid |= ROTATION_VECTOR_VALID;</span></span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中,我注册了6个传感器.由于加速度传感器是通过线性加速度传感器和重力传感器计算出来的,前者等于后两者之和.比较坑的是,有些手机只能够检测到加速度传感器,而屏蔽了加速度传感器和重力传感器的值.这也是上面的代码中,为什么我获取到加速度的值后,将线性加速度传感器和重力传感器对应的比特位置为了有效值.</p>
+<h1 id="如何判断传感器是否可用"><a href="#如何判断传感器是否可用" class="headerlink" title="如何判断传感器是否可用"></a>如何判断传感器是否可用</h1><p>通过上面的分析,我们可以通过两种方式获取到Android手机里是否包含某个传感器</p>
+<ul>
+<li>通过获取传感器列表,再判断集合中是否包含某传感器<br><code>mSensorManager.getSensorList(Sensor.TYPE_ALL)</code></li>
+<li>通过注册某传感器,判断返回值</li>
+</ul>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Sensor acc</span> = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);</span><br><span class="line"><span class="attribute">boolean isAccValid</span> = mSensorManager.registerListener(this, acc, SensorManager.SENSOR_DELAY_FASTEST);</span><br></pre></td></tr></table></figure>
+<p>然而这只能证明手机中确实是存在这个传感器硬件的,想要判断传感器是否可用,通过这两种方式还是无能为力.我采用了最笨的一种方法,去判断传感器是否可用,那就是在回调中判断传感器类型,如果能够返回不等于零的值,则证明该传感器可用.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">checkSensor2</span><span class="params">(<span class="keyword">final</span> ISensorCallback callback)</span> </span>&#123;</span><br><span class="line">    List&lt;Sensor&gt; allSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);<span class="comment">// 获得传感器列表</span></span><br><span class="line">    callback.checkResult(<span class="string">"Total Sensor: "</span> + allSensors.size(), <span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">final</span> Sensor sensor : allSensors) &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">long</span> currentTime = System.currentTimeMillis();</span><br><span class="line">        mSensorManager.registerListener(<span class="keyword">new</span> SensorEventListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSensorChanged</span><span class="params">(SensorEvent event)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">if</span> (System.currentTimeMillis() - currentTime &lt;= <span class="number">5000</span>) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (event.sensor == sensor) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (event.values.length != <span class="number">0</span>) &#123;</span><br><span class="line">                            <span class="keyword">float</span>[] values = event.values;</span><br><span class="line">                            callback.checkResult(</span><br><span class="line">                                    <span class="string">"---------------------------\nSensor '"</span> + sensor.getName()</span><br><span class="line">                                            + <span class="string">"' is available\nTest Data: "</span> + values[<span class="number">0</span>] + <span class="string">" "</span> + values[<span class="number">1</span>] + <span class="string">" "</span> + values[<span class="number">2</span>],</span><br><span class="line">                                    sensor);</span><br><span class="line">                            mSensorManager.unregisterListener(<span class="keyword">this</span>);</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            callback.checkResult(</span><br><span class="line">                                    <span class="string">"---------------------------\nSensor '"</span> + sensor.getName() + <span class="string">"' is unavailable"</span>,</span><br><span class="line">                                    sensor);</span><br><span class="line">                            mSensorManager.unregisterListener(<span class="keyword">this</span>);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        callback</span><br><span class="line">                                .checkResult(<span class="string">"---------------------------\nWrong sensor data received.\nSensor wanted: "</span></span><br><span class="line">                                        + sensor.getName() + <span class="string">", Sensor provided: "</span> + event.sensor.getName(), sensor);</span><br><span class="line">                        mSensorManager.unregisterListener(<span class="keyword">this</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    callback.checkResult(</span><br><span class="line">                            <span class="string">"---------------------------\nSensor: '"</span> + sensor.getName() + <span class="string">"' Timeout! "</span>, sensor);</span><br><span class="line">                    mSensorManager.unregisterListener(<span class="keyword">this</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAccuracyChanged</span><span class="params">(Sensor sensor, <span class="keyword">int</span> accuracy)</span> </span>&#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, sensor, SensorManager.SENSOR_DELAY_NORMAL);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ISensorCallback</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">checkResult</span><span class="params">(String result, Sensor sensor)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这段代码中,我设定了5秒钟来获取传感器的值,获取不到则返回获取某个传感器超时.我测试了几个手机,发现每个手机上具备的传感器都不一样.在华为的C199手机上,通过获取传感器类型可以得到11个传感器,但实际上只有7个传感器可用.</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <ul class="post-copyright">
+    <li class="post-copyright-author">
+      <strong>Post author:</strong>
+      Xing Li
+    </li>
+    <li class="post-copyright-link">
+      <strong>Post link:</strong>
+      <a href="https://iluhcm.com/2015/09/03/how-to-detect-useful-sensors-for-android-devices/" title="Android系统中Sensor及SensorManager探究">https://iluhcm.com/2015/09/03/how-to-detect-useful-sensors-for-android-devices/</a>
+    </li>
+    <li class="post-copyright-license">
+      <strong>Copyright Notice: </strong>
+      All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> unless stating additionally.
+    </li>
+  </ul>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Tech/" rel="tag"># Tech</a>
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/Sensor/" rel="tag"># Sensor</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/08/20/build-android-kernel-on-macosx-10-10-3/" rel="next" title="MacOSX 10.10.3下 android-goldfish-3.4 内核下载与编译">
+                <i class="fa fa-chevron-left"></i> MacOSX 10.10.3下 android-goldfish-3.4 内核下载与编译
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/09/07/android-long-click-and-drag-event/" rel="prev" title="Android长按及拖动事件探究">
+                Android长按及拖动事件探究 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div id="sidebar-dimmer"></div>
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.png" alt="Xing Li">
+          <p class="site-author-name" itemprop="name">Xing Li</p>
+           
+              <p class="site-description motion-element" itemprop="description">If asked how the pond can be so lucid and fresh, told that sources with flowing water replenish.</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">categories</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">71</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/iluhcm" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.facebook.com/xing.li.731135" target="_blank" title="Facebook">
+                  
+                    <i class="fa fa-fw fa-facebook"></i>
+                  
+                  Facebook
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/iluhcm" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://plus.google.com/101164893136136383839/posts" target="_blank" title="Google+">
+                  
+                    <i class="fa fa-fw fa-google-plus"></i>
+                  
+                  Google+
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/lshcm" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/iluhcm" target="_blank" title="Zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://music.163.com/#/user/home?id=38148117" target="_blank" title="Netease">
+                  
+                    <i class="fa fa-fw fa-music"></i>
+                  
+                  Netease
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+            </a>
+          </div>
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#传感器类型"><span class="nav-number">1.</span> <span class="nav-text">传感器类型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#获取手机支持的传感器信息"><span class="nav-number">2.</span> <span class="nav-text">获取手机支持的传感器信息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#在Android中注册指定类型的传感器"><span class="nav-number">3.</span> <span class="nav-text">在Android中注册指定类型的传感器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何判断传感器是否可用"><span class="nav-number">4.</span> <span class="nav-text">如何判断传感器是否可用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xing Li</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://iluhcm-com.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://iluhcm.com/2015/09/03/how-to-detect-useful-sensors-for-android-devices/';
+          this.page.identifier = '2015/09/03/how-to-detect-useful-sensors-for-android-devices/';
+          this.page.title = 'Android系统中Sensor及SensorManager探究';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://iluhcm-com.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.1"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.1"></script>
+
+
+  
+
+</body>
+</html>

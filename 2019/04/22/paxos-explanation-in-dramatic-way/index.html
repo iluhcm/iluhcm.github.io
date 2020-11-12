@@ -1,0 +1,1038 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="2yx0JNDw3DWn3FVwl0XV9ba4wAjjbvZ3viXpvjGwBa8">
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Backend,Paxos,Consensus,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1">
+
+
+
+
+
+
+<meta name="description" content="小白也能看得懂的BASIC PAXOS协议  团建游戏组里有一段时间没有去团建了，勤政作为组里的“生活委员”，出谋划策，打算选一个晴好的周末，带着大伙去放松放松。活动聚焦在户外真人CS或者喝啤酒吃小龙虾二选一。为了统一组内的意见，达成共识，勤政召集了组内的5位大佬（博文、宏达、松阳、郭哥、爱东）共商大计。  不巧的是，大佬们吵得不可开交，最终还是没能确定去哪里团建。大佬们的意见如下：  博文：去户">
+<meta name="keywords" content="Backend,Paxos,Consensus">
+<meta property="og:type" content="article">
+<meta property="og:title" content="程序员们的团建——戏说Paxos">
+<meta property="og:url" content="https://iluhcm.com/2019/04/22/paxos-explanation-in-dramatic-way/index.html">
+<meta property="og:site_name" content="Xing&#39;s Blog">
+<meta property="og:description" content="小白也能看得懂的BASIC PAXOS协议  团建游戏组里有一段时间没有去团建了，勤政作为组里的“生活委员”，出谋划策，打算选一个晴好的周末，带着大伙去放松放松。活动聚焦在户外真人CS或者喝啤酒吃小龙虾二选一。为了统一组内的意见，达成共识，勤政召集了组内的5位大佬（博文、宏达、松阳、郭哥、爱东）共商大计。  不巧的是，大佬们吵得不可开交，最终还是没能确定去哪里团建。大佬们的意见如下：  博文：去户">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/f219d98a-b878-45df-9c99-da1b1f225020_1596_270.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/47f1b4ca-7524-40f8-ace3-4be6abba078e_600_600.jpg">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/2f8c6752-6849-4e3c-9e2b-9449e7830429_225_225.jpeg">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/d3613354-1c6d-4c81-80dd-402a97210737_640_640.jpg">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/ad30b885-ca90-4eae-b49c-cb3817040e4a_636_612.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/adc5c822-3c1b-430c-9472-a169f5479e78_636_612.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/1e7e2e3f-fadf-4615-a812-9344a947e342_636_612.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/65c61ce5-0429-44aa-bf3a-48a9e71ea564_640_640.jpg">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/6833e279-a58a-4d68-afc7-46051d6d5aef_636_612.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/165124cf-d236-4ae1-b04a-456018cb49d9_636_613.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/f9d1efb5-202e-436f-b75c-669fceb0dfdf_640_355.jpg">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/d38bab4a-8525-4225-adaf-ea2be142cef9_670_612.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/109b313b-271d-4f9e-9c5f-8ae31baa2f56_670_696.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/3d2dd74e-5170-4c61-a105-0fd51db41d38_670_612.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/2d9583a6-f51c-4139-a887-5cc54b65bc88_670_696.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/93357bfd-8ff7-4946-a4dd-8010610116b7_670_612.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/5e24d97b-6fd3-4285-8397-cafd839d809f_670_612.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/3c061029-804d-437e-a904-4cfd10dca686_670_612.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/d7b07645-f200-42c2-8ec7-5e794c778285_670_612.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/ca963a03-dbab-4981-a4c1-a7f67dd23f04_670_612.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/d31f8d8f-2e16-4d16-83d8-52e1c6bb3ce1_893_672.jpg">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/cccdc765-ae8a-4db2-8d80-55fec3674728_1046_754.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/62b284ca-e196-4f09-b7ee-bafcf5fc13eb_1044_754.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/46e044c6-edd6-41d6-8413-ac22a4100cb2_1044_754.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/d5deaa18-d7e5-49f7-9a58-94461da32c66_1044_754.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/600c9125-f4de-4bfb-825d-58f648d1f357_1571_1093.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/c689d821-45af-4ecc-917b-69e35965228b_1525_749.png">
+<meta property="og:image" content="https://kaola-haitao.oss.kaolacdn.com/97b74abf-2280-47bb-a739-0d1d9c22058d_1565_749.png">
+<meta property="og:updated_time" content="2020-11-12T07:49:31.553Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="程序员们的团建——戏说Paxos">
+<meta name="twitter:description" content="小白也能看得懂的BASIC PAXOS协议  团建游戏组里有一段时间没有去团建了，勤政作为组里的“生活委员”，出谋划策，打算选一个晴好的周末，带着大伙去放松放松。活动聚焦在户外真人CS或者喝啤酒吃小龙虾二选一。为了统一组内的意见，达成共识，勤政召集了组内的5位大佬（博文、宏达、松阳、郭哥、爱东）共商大计。  不巧的是，大佬们吵得不可开交，最终还是没能确定去哪里团建。大佬们的意见如下：  博文：去户">
+<meta name="twitter:image" content="https://kaola-haitao.oss.kaolacdn.com/f219d98a-b878-45df-9c99-da1b1f225020_1596_270.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://iluhcm.com/2019/04/22/paxos-explanation-in-dramatic-way/">
+
+
+
+
+
+  <title>程序员们的团建——戏说Paxos | Xing's Blog</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?03e8bdd436b4561c8e760c9459ee8003";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Xing's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">To be a better man.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://iluhcm.com/2019/04/22/paxos-explanation-in-dramatic-way/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xing Li">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xing's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">程序员们的团建——戏说Paxos</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-04-22T16:49:17+08:00">
+                2019-04-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Consensus-Algorithm/" itemprop="url" rel="index">
+                    <span itemprop="name">Consensus Algorithm</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/22/paxos-explanation-in-dramatic-way/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/04/22/paxos-explanation-in-dramatic-way/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote class="blockquote-center">小白也能看得懂的BASIC PAXOS协议</blockquote>
+
+<h1 id="团建游戏"><a href="#团建游戏" class="headerlink" title="团建游戏"></a>团建游戏</h1><p>组里有一段时间没有去团建了，勤政作为组里的“生活委员”，出谋划策，打算选一个晴好的周末，带着大伙去放松放松。活动聚焦在户外真人CS或者喝啤酒吃小龙虾二选一。为了统一组内的意见，<strong>达成共识</strong>，勤政召集了组内的5位大佬（<strong>博文</strong>、<strong>宏达</strong>、<strong>松阳</strong>、<strong>郭哥</strong>、<strong>爱东</strong>）共商大计。</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/f219d98a-b878-45df-9c99-da1b1f225020_1596_270.png" alt="大佬头像"></p>
+<p>不巧的是，大佬们吵得不可开交，最终还是没能确定去哪里团建。大佬们的意见如下：</p>
+<ul>
+<li>博文：<strong>去户外真人CS</strong>，1 vs 10</li>
+</ul>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/47f1b4ca-7524-40f8-ace3-4be6abba078e_600_600.jpg" alt="Drawing" style="width: 250px;"></p>
+<ul>
+<li>爱东：<strong>吃小龙虾</strong>，每种口味来一遍</li>
+</ul>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/2f8c6752-6849-4e3c-9e2b-9449e7830429_225_225.jpeg" alt="Drawing" style="width: 250px;"></p>
+<ul>
+<li>宏达、松阳、爱东：<strong>随意吧</strong>，要不楼上打一架，谁赢听谁的</li>
+</ul>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/d3613354-1c6d-4c81-80dd-402a97210737_640_640.jpg" alt="Drawing" style="width: 250px;"></p>
+<p>勤政作为团建的组织者，当然不能放任这种情况不管，于是乎，他想到了一个游戏，通过玩游戏的方式，让他们能够统一意见，大佬们纷纷赞同。</p>
+<h2 id="游戏约定"><a href="#游戏约定" class="headerlink" title="游戏约定"></a>游戏约定</h2><p>勤政对大佬们说，玩这个游戏，需要<strong>事先遵守一些约定</strong>，如果不能遵守，那就相当于弃权啦。约定如下：</p>
+<ul>
+<li>只要<strong>超过半数</strong>的人同意去户外CS或者同意去吃小龙虾，那么<strong>少数服从多数</strong>，剩下的人需要遵从多数人的意愿</li>
+<li>每个人都<strong>要诚实</strong>，不能相互欺骗。如不能对博文说去户外CS，对爱东说去吃小龙虾，否则游戏没法玩了</li>
+<li>在游戏的过程中，不论对方给的诱惑如何大，一旦<strong>确定意见</strong>以后就不能改了</li>
+</ul>
+<p>大佬们默默点头，表示同意。</p>
+<h2 id="游戏规则"><a href="#游戏规则" class="headerlink" title="游戏规则"></a>游戏规则</h2><p>勤政继续道，游戏规则比较简单，主要两个阶段，</p>
+<ol>
+<li>给自己<strong><em>拉票阶段</em></strong>，这一阶段的目的是争夺“发言权”，只有多数人同意听你“发言”，才能进入下一阶段；</li>
+<li><strong><em>确认阶段</em></strong>：大多数人听你发言以后，告诉他们具体的行动是啥，即确定去户外CS或者吃小龙虾。</li>
+</ol>
+<p>博文：小意思，开始吧！</p>
+<p>爱东：没问题，听明白了！</p>
+<h2 id="第一次游戏"><a href="#第一次游戏" class="headerlink" title="第一次游戏"></a>第一次游戏</h2><p>在勤政的组织下，大佬们开始第一次游戏。</p>
+<h3 id="拉票阶段"><a href="#拉票阶段" class="headerlink" title="拉票阶段"></a>拉票阶段</h3><p>精明的博文暗地里想，程序员都需要防秃生发，何不每人给他们来一瓶黑吕洗发水，让他们乖乖听我“发言”！于是抢占先机说道：听我的建议，我给你们<strong>每人一瓶黑吕洗发水</strong>，解决秃发烦恼！</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/ad30b885-ca90-4eae-b49c-cb3817040e4a_636_612.png" alt="game1_phase1_req"></p>
+<p>松阳和郭哥听了很高兴，免费拿新的洗发水，为什么不呢，<strong>况且之前也没答应过别人</strong>，于是爽快地答应了博文。</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/adc5c822-3c1b-430c-9472-a169f5479e78_636_612.png" alt="game1_phase1_ack"></p>
+<p>博文心里暗自高兴，没想到这么快就收买了松阳和郭哥，连我自己（我当然不会背叛自己啦），已经<strong>超过半数的人</strong>听我“发言”了，这时候可以进入第二阶段了！</p>
+<h3 id="确认阶段"><a href="#确认阶段" class="headerlink" title="确认阶段"></a>确认阶段</h3><p>博文见状，立马对松阳和郭哥说：按照之前的约定，我给你们<strong>每人一瓶黑吕，我们一起去户外CS</strong>吧！松阳和郭哥听了都表示同意，并在行程表上写下：<strong>得一瓶黑吕洗发水，去户外CS</strong>。</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/1e7e2e3f-fadf-4615-a812-9344a947e342_636_612.png" alt="game1_phase2"></p>
+<p>博文看到松阳和郭哥记录了行程表，高兴地对全组宣布：已经有超过半数的人确认去户外CS，<strong>按照游戏约定</strong>，咱们就定户外CS了！</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/65c61ce5-0429-44aa-bf3a-48a9e71ea564_640_640.jpg" alt="Drawing" style="width: 250px;"></p>
+<p>爱东：我还没参与呢，游戏就结束了！不公平，要求重新玩一次！</p>
+<p>勤政：好好好，刚才算试玩，下一次一局定胜负！</p>
+<h2 id="第二次游戏"><a href="#第二次游戏" class="headerlink" title="第二次游戏"></a>第二次游戏</h2><p>经历第一次游戏，双方心理都有了准备，意味着久经沙场的老铁们要使出浑身解数决胜负了！</p>
+<h3 id="博文拉票阶段"><a href="#博文拉票阶段" class="headerlink" title="博文拉票阶段"></a>博文拉票阶段</h3><p>经过第一次试玩，博文心里早有了计划——抢占先机！于是，使出老套路：每人一瓶黑吕洗发水，争夺发言权。</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/6833e279-a58a-4d68-afc7-46051d6d5aef_636_612.png" alt="game2_phase1_round1_req"></p>
+<p>松阳和郭哥依旧陶醉于“免费的午餐”，欣然同意了博文的要求。</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/165124cf-d236-4ae1-b04a-456018cb49d9_636_613.png" alt="game2_phase1_round1_ack"></p>
+<p>博文心里暗喜：情况和第一次游戏几乎一样，只要我抓紧时间进入确认阶段并取得松阳和郭哥的确认，那么便一锤定音了！</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/f9d1efb5-202e-436f-b75c-669fceb0dfdf_640_355.jpg" alt="Drawing" style="width: 250px;"></p>
+<p>爱东这时候来了个回马枪，打得博文措手不及！</p>
+<h3 id="爱东拉票阶段"><a href="#爱东拉票阶段" class="headerlink" title="爱东拉票阶段"></a>爱东拉票阶段</h3><p>吸取了第一次游戏的经验教训，爱东自然不肯放弃机会，在博文进入确认阶段之前，提高了“待遇”，试图笼络人心：<strong>向每人提供两瓶黑吕洗发水</strong>！</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/d38bab4a-8525-4225-adaf-ea2be142cef9_670_612.png" alt="game2_phase1_round2_req"></p>
+<p>之前宏达并没有上博文的车，原来这小子是在等更多的洗发水呢！宏达毫不犹豫地接受了爱东的邀请！</p>
+<p>郭哥本来已经答应博文了，可是见到爱东提供了双倍的福利，<strong>情不自禁地调头上了爱东的车</strong>。</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/109b313b-271d-4f9e-9c5f-8ae31baa2f56_670_696.png" alt="game2_phase1_round2_ack"></p>
+<h3 id="博文二次拉票阶段"><a href="#博文二次拉票阶段" class="headerlink" title="博文二次拉票阶段"></a>博文二次拉票阶段</h3><p>博文竟然被郭哥拒绝了，感到不可思议，暗暗发誓一定要争取回来，否则CS计划无法实施！于是，<strong><em>在爱东还没有进入确认阶段前</em></strong>，对郭哥抛出了<strong>三瓶黑吕洗发水</strong>的“橄榄枝”！</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/3d2dd74e-5170-4c61-a105-0fd51db41d38_670_612.png" alt="game2_phase1_round3"></p>
+<p>为了公平对待，同时也避免别人被爱东“拐走”，博文把每个人的待遇都提高到了三瓶。</p>
+<p>松阳听了当然很高兴，之前给一瓶就欣然接受了，给三瓶当然更好啦！</p>
+<p>郭哥这时候犹豫了，心里暗想：当墙头草不好吧，不过谁给的多我就听谁的，才不管呢！于是礼貌地拒绝了爱东，果断对博文投怀送抱！</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/2d9583a6-f51c-4139-a887-5cc54b65bc88_670_696.png" alt="game2_phase1_round3_ack"></p>
+<h3 id="博文确认阶段"><a href="#博文确认阶段" class="headerlink" title="博文确认阶段"></a>博文确认阶段</h3><p>聪明的博文看到拉拢回了郭哥的心，马不停蹄地进入确认阶段，他心里明白：<strong>只有进入确认阶段，才能把去户外CS这件事情确定下来</strong>。于是对松阳和郭哥说：按照约定，我给你们<strong>每人三瓶黑吕洗发水，我们去户外CS</strong>吧！</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/93357bfd-8ff7-4946-a4dd-8010610116b7_670_612.png" alt="game2_phase2_round3"></p>
+<p>郭哥想：会不会有人给我四瓶黑吕洗发水把我拉拢过去，我要不要再等等呢？一旦接受了博文的确认，那么即便别人给我更多的洗发水，我也没法接受了。算了算了，先接受吧，谁知道未来会发生什么事呢！于是，郭哥同意了博文的确认请求，并在行程表上记录下：<strong>给三瓶黑吕洗发水，去户外CS</strong>。松阳也答应了博文并记录了一样的行程。</p>
+<p>博文看到松阳和郭哥的行程表上已经更新了最新的记录，脸上露出了得意的表情，超过半数的人去户外CS，心里暗喜，他已经赢了第二局游戏。</p>
+<h3 id="爱东确认阶段"><a href="#爱东确认阶段" class="headerlink" title="爱东确认阶段"></a>爱东确认阶段</h3><p>爱东此时还不知道博文已经向他们抛出了三瓶黑吕的橄榄枝，且已经确认完了。于是不慌不忙地对郭哥和宏达说：按照约定，我给你们<strong>每人两瓶黑吕洗发水，我们去吃小龙虾</strong>吧！</p>
+<p>宏达：之前已经说好了，我没有改变主意，听你的。于是在行程表上写下：爱东给我两瓶黑吕洗发水，跟他去吃饭。</p>
+<p>郭哥：爱东啊，不好意思！本来之前已经答应听你的，但由于<strong>博文给了我更丰厚的“福利”，我已经答应他去户外CS</strong>了，下次再和你去吃小龙虾吧！</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/5e24d97b-6fd3-4285-8397-cafd839d809f_670_612.png" alt="game2_phase2_round2"></p>
+<p>只有宏达一人同意了爱东的确认，郭哥拒绝了，没有超过半数，表示爱东确认失败了。</p>
+<h3 id="爱东二次拉票阶段"><a href="#爱东二次拉票阶段" class="headerlink" title="爱东二次拉票阶段"></a>爱东二次拉票阶段</h3><p>尽管大家去户外CS玩的都很开心，但爱东对吃小龙虾念念不忘，为了尽快达成心愿，爱东豁出去了。之前从郭哥的口中了解到，博文已经把对他们的“福利”提高到了三瓶黑吕洗发水，爱东自然不能落后，并且还要提高“待遇”才能收服他们的心，于是给每人发<strong>四瓶黑吕洗发水</strong>！</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/3c061029-804d-437e-a904-4cfd10dca686_670_612.png" alt="game2_phase1_round4"></p>
+<p>郭哥和宏达在沾沾自喜：竟然主动提高“福利”，受宠若惊啊。此时郭哥也跟爱东如实交代：我目前收到的<strong>最大“诱惑”</strong>是四瓶瓶黑吕洗发水，曾经在别人<strong>给我三瓶黑吕洗发水的时候，我同意一起去户外CS</strong>。宏达自然不用说了，“老相好了”，跟爱东吐露心声：目前收到的最大“诱惑”是四瓶黑吕洗发水，曾经在别人给我<strong>两瓶黑吕洗发水的时候，我同意一起去吃小龙虾</strong>。说到这里，郭哥和宏达早已跟爱东一起畅想吃小龙虾的快感。。</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/d7b07645-f200-42c2-8ec7-5e794c778285_670_612.png" alt="game2_phase1_round4_ack"></p>
+<h3 id="爱东二次确认阶段"><a href="#爱东二次确认阶段" class="headerlink" title="爱东二次确认阶段"></a>爱东二次确认阶段</h3><p>尽管有了郭哥和宏达的支持，但爱东意识到必须尽快确认行程，否则不知道又被哪个土豪把他们抢走了。于是爽快地发起二次确认：按照约定，我给你们<strong>每人四瓶黑吕洗发水，跟我去吃小龙虾</strong>吧！郭哥和宏达抑制不住内心的激动，欣然接受了邀请，并在行程表上更新：爱东答应给四瓶黑吕洗发水，一起去吃小龙虾。</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/ca963a03-dbab-4981-a4c1-a7f67dd23f04_670_612.png" alt="game2_phase2_round4_ack"></p>
+<p>对郭哥和宏达的确认无误后，爱东自然也就放松起来。<strong>多数人达成了统一的意见</strong>，这下每种口味的小龙虾都可以尝一遍了。</p>
+<h1 id="Paxos简介"><a href="#Paxos简介" class="headerlink" title="Paxos简介"></a>Paxos简介</h1><p>这个游戏的名字叫Paxos。</p>
+<blockquote>
+<p>Paxos算法是莱斯利·兰伯特（英语：Leslie Lamport，LaTeX中的“La”）于1990年提出的一种基于消息传递且具有高度容错特性的一致性算法<a href="https://zh.wikipedia.org/wiki/Paxos%E7%AE%97%E6%B3%95" target="_blank" rel="noopener">^1</a>。</p>
+<p>分布式系统中的节点通信存在两种模型：共享内存（Shared memory）和消息传递（Messages passing）。基于消息传递通信模型的分布式系统，不可避免的会发生以下错误：进程可能会慢、被杀死或者重启，消息可能会延迟、丢失、重复，在基础 Paxos 场景中，先不考虑可能出现消息篡改即拜占庭错误的情况。Paxos 算法解决的问题是在一个可能发生上述异常的分布式系统中如何就某个值达成一致，保证不论发生以上任何异常，都不会破坏决议的一致性。</p>
+</blockquote>
+<p>Paxos有几个重要的概念需要说明：</p>
+<ul>
+<li><strong>Proposer</strong>: 提议者，即写入数据的发起者，是发起Paxos算法的进程，Paxos角色之一。</li>
+<li><strong>Acceptor</strong>: 接受者，拥有接受/不接受提议的投票权，作用是存储节点，接受、处理和存储消息，Paxos角色之一。</li>
+<li><strong>Learner</strong>: 最终决策学习者，没有投票权，当接受者达成多数派意见后，学习Acceptor的意见，Paxos角色之一。（通常情况下，Proposer同时担任Learner一职）</li>
+<li><strong>Round（rnd）</strong>: Proposer向Acceptor拉票和确认的一轮过程，分为两个阶段：拉票阶段（phase-1）和确认阶段（phase-2）。</li>
+<li><strong>Acceptor收到的最大rnd（last_rnd）</strong>: Acceptor记住这个值来识别哪个Proposer可以写，Proposer发起写请求时，只接受和这个rnd相等的Proposer的请求。</li>
+<li><strong>Value（v）</strong>：Acceptor接受的值，即要写入的数据。</li>
+<li><strong>Value Round Number（vrnd）</strong>：Acceptor接受Value时候的rnd。</li>
+</ul>
+<h2 id="Paxos执行条件与约束"><a href="#Paxos执行条件与约束" class="headerlink" title="Paxos执行条件与约束"></a>Paxos执行条件与约束</h2><p>经典的Paxos算法是<strong>不考虑数据丢失以及消息被串改</strong>这两种情况的，即<strong>拜占庭将军问题</strong><a href="https://zh.wikipedia.org/wiki/%E6%8B%9C%E5%8D%A0%E5%BA%AD%E5%B0%86%E5%86%9B%E9%97%AE%E9%A2%98" target="_blank" rel="noopener">^3</a>。</p>
+<p>Paxos算法的执行具有一些约束条件，具体如下<a href="https://www.jianshu.com/p/5e9aeb46540f" target="_blank" rel="noopener">^4</a>：</p>
+<ol>
+<li>一个Acceptor必须接受第一次接收到的value；</li>
+<li>一旦一个value被确认，那么之后确认的提案必须具有该value</li>
+<li>一旦一个value被确认，那么之后任何Acceptor再次接受提案必须具有该value</li>
+<li>一旦一个value被确认，那么以后任何Proposer提出的提案必须具有该value。</li>
+<li>如果一个编号为n的提案具有值value，那么存在一个多数派，要么他们中所有人都没有接受编号小于n的任何提案，要么他们已经接受的所有编号小于n的提案中编号最大的那个提案具有该value。</li>
+</ol>
+<h2 id="Paxos算法执行流程"><a href="#Paxos算法执行流程" class="headerlink" title="Paxos算法执行流程"></a>Paxos算法执行流程</h2><p>Paxos算法主要分为三个阶段，但主要由前两个阶段来确认并通过一个提议：</p>
+<ol>
+<li><strong>第一阶段</strong>：Prepare阶段。Proposer生成一个提案n，向Acceptors广播Prepare(n)请求，Acceptors针对收到的Prepare(n)请求进行Promise承诺，此处并非所有的Acceptor都会回复。</li>
+<li><strong>第二阶段</strong>：Accept阶段。Proposer收到多数Acceptors承诺的Promise后，向Acceptors发出Propose请求，Acceptors针对收到的Propose请求进行Accept处理。</li>
+<li><strong>第三阶段</strong>：Learn阶段。Proposer在收到多数Acceptors的Accept之后，标志着本次Accept成功，决议形成，将形成的决议发送给所有Learners。</li>
+</ol>
+<p>算法流程图可以用下图表示（图片引用自<a href="https://blog.the-pans.com/paxos-explained/" target="_blank" rel="noopener">网络</a>）</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/d31f8d8f-2e16-4d16-83d8-52e1c6bb3ce1_893_672.jpg" alt="paxos_procedure"></p>
+<h1 id="游戏剧情回顾"><a href="#游戏剧情回顾" class="headerlink" title="游戏剧情回顾"></a>游戏剧情回顾</h1><p>让我们来看看，Paxos协议在游戏中是如何体现的。</p>
+<h2 id="游戏中的角色"><a href="#游戏中的角色" class="headerlink" title="游戏中的角色"></a>游戏中的角色</h2><p>游戏中的角色对应的Paxos协议中的什么概念呢？</p>
+<ul>
+<li><strong>Proposer</strong>：博文、爱东，他俩分别提出了去CS和去吃小龙虾的提议，即发起Paxos的进程</li>
+<li><strong>Acceptor</strong>：宏达、松阳、郭哥，他们对博文和爱东提出的提议进行投票，跟随并记录别人的意见。</li>
+<li><strong>Round（rnd）</strong>：游戏轮数，1轮包含两个阶段：选举（phase-1）和确认（phase-2）。在游戏中用N瓶黑吕来记录轮次，在Paxos中是一个普通的数字n，单调递增，后写胜出，全局唯一</li>
+<li><strong>Last Round（last_rnd）</strong>：Acceptor看到的最大rnd，如博文和爱东在拉票抢郭哥的过程中，郭哥看到的最大黑吕数是3</li>
+<li><strong>Value（v）</strong>：写入的值，在游戏中是去CS或者吃饭</li>
+<li><strong>Value Round Number（vrnd）</strong>：Acceptor接受CS或者吃饭的提议时对应的N瓶黑吕</li>
+</ul>
+<h2 id="第一次游戏-1"><a href="#第一次游戏-1" class="headerlink" title="第一次游戏"></a>第一次游戏</h2><p>郭哥、松阳和宏达之前都没有接受过任何的提议，所以行程表上还是空空如也。下面将第一次游戏分为4个回合。</p>
+<h3 id="Proposer广播Prepare-1"><a href="#Proposer广播Prepare-1" class="headerlink" title="Proposer广播Prepare(1)"></a>Proposer广播Prepare(1)</h3><p><img src="https://kaola-haitao.oss.kaolacdn.com/cccdc765-ae8a-4db2-8d80-55fec3674728_1046_754.png" alt="exp_game1_phase1_req"></p>
+<p><strong>第一个回合</strong>，博文向松阳、郭哥和宏达提出每人给一瓶黑吕的提议<code>（rnd=1黑吕）</code>，即<strong>Proposer向所有的Acceptors广播<code>Prepare(1)</code></strong>。</p>
+<h3 id="Acceptor回应Prepare-1"><a href="#Acceptor回应Prepare-1" class="headerlink" title="Acceptor回应Prepare(1)"></a>Acceptor回应Prepare(1)</h3><p><img src="https://kaola-haitao.oss.kaolacdn.com/62b284ca-e196-4f09-b7ee-bafcf5fc13eb_1044_754.png" alt="exp_game1_phase1_ack"></p>
+<p><strong>第二个回合</strong>，松阳和郭哥收到博文的请求后，由于他们之前没有接受过任何的提议，所以在回应博文时告诉他，现在能接受的提议是1黑吕<code>（last_rnd=1黑吕）</code>，行程表上没有任何内容<code>（v=随意，vrnd=0黑吕）</code>。而<strong>一旦松阳和郭哥回应了博文并同意他的提议，那么任何小于或等于一瓶黑吕的提议他们便不再接受</strong>（此时<code>last_rnd=1黑吕</code>，只接受诱惑力更大的提议）<a href="https://zhuanlan.zhihu.com/p/31780743" target="_blank" rel="noopener">^5</a>。</p>
+<h3 id="Proposer广播Accept-1-CS"><a href="#Proposer广播Accept-1-CS" class="headerlink" title="Proposer广播Accept(1, CS)"></a>Proposer广播Accept(1, CS)</h3><p><img src="https://kaola-haitao.oss.kaolacdn.com/46e044c6-edd6-41d6-8413-ac22a4100cb2_1044_754.png" alt="exp_game1_phase2_req"></p>
+<p><strong>第三个回合</strong>，博文看到松阳和郭哥能够接受过提议时只需要1瓶黑吕，和自己的提议一致<code>（rnd==last_rnd）</code>，于是博文给每人带了1瓶黑吕，并告诉他们提议就是去CS。在Paxos中，即<strong>广播<code>Accept(rnd=1黑吕, v=CS)</code>给所有的Acceptors</strong>。</p>
+<h3 id="Acceptor回应Accept-1-CS"><a href="#Acceptor回应Accept-1-CS" class="headerlink" title="Acceptor回应Accept(1, CS)"></a>Acceptor回应Accept(1, CS)</h3><p><img src="https://kaola-haitao.oss.kaolacdn.com/d5deaa18-d7e5-49f7-9a58-94461da32c66_1044_754.png" alt="exp_game1_phase2_ack"></p>
+<p><strong>第四个回合</strong>，郭哥和松阳收到了博文的1瓶黑吕，由于目前没有其他人给他们更多的黑吕，所以他们愉快地接受了请求，并<strong>在行程表上记录当收到1瓶黑吕<code>（vrnd=1黑吕）</code>时，接受去CS<code>（v=CS）</code></strong>，随后分别将这条消息通知博文。博文收到郭哥和松阳的回应以后，这时候可以确定是去CS了<code>（v=CS）</code>。</p>
+<h2 id="第二次游戏-1"><a href="#第二次游戏-1" class="headerlink" title="第二次游戏"></a>第二次游戏</h2><p>第二次游戏情况比第一次复杂，下面来一一分析。</p>
+<h3 id="拉票阶段-1"><a href="#拉票阶段-1" class="headerlink" title="拉票阶段"></a>拉票阶段</h3><p><img src="https://kaola-haitao.oss.kaolacdn.com/600c9125-f4de-4bfb-825d-58f648d1f357_1571_1093.png" alt="exp_game2_phase1"></p>
+<p><strong>第一个回合</strong>，博文向松阳、郭哥和宏达提出每人给一瓶黑吕的提议<code>（rnd=1黑吕）</code>，即<strong>Proposer向所有的Acceptors广播<code>Prepare(1)</code></strong>。</p>
+<p><strong>第二个回合</strong>，松阳和郭哥收到博文的请求后，由于他们之前没有接受过任何的提议，所以在回应博文时告诉他，现在能接受的提议是1黑吕<code>（last_rnd=1黑吕）</code>，行程表上没有任何内容<code>（v=随意，vrnd=0黑吕）</code>。而<strong>一旦松阳和郭哥回应了博文并同意他的提议，那么任何小于或等于一瓶黑吕的提议他们便不再接受</strong>（此时<code>last_rnd=1黑吕</code>，只接受诱惑力更大的提议）。</p>
+<p><strong>第三个回合</strong>，在博文向每个人发起确认前，爱东抢先向松阳、郭哥和宏达提出每人给两瓶黑吕的提议，即<strong>Proposer向所有的Acceptors广播<code>Prepare(2)</code></strong>。</p>
+<p><strong>第四个回合</strong>，郭哥收到爱东的请求，发现自己之前接受的最大提议是1瓶黑吕<code>（last_rnd=1黑吕）</code>，且还没有在行程表上记录任何值<code>（v=随意）</code>，而<strong>当前的提议是2黑吕<code>（rnd=2黑吕）</code>，比之前的多，因此他接受了爱东的提议<code>（last_rnd=2黑吕）</code></strong>，并回应爱东行程表上的内容<code>（v=随意，vrnd=0黑吕）</code>；而宏达之前没有接受过任何的提议，所以在回应爱东时告诉他，现在能接受的提议是2黑吕<code>（last_rnd=2黑吕）</code>，行程表上没有任何内容（v=随意，vrnd=0黑吕）。</p>
+<p><strong>第五个回合</strong>，在爱东向每个人发起确认前，博文抢先向松阳、郭哥和宏达提出每人给三瓶黑吕的提议，即<strong>Proposer向所有的Acceptors广播<code>Prepare(3)</code></strong>。</p>
+<p><strong>第六个回合</strong>，松阳收到博文的请求，发现自己之前接受的最大提议是1瓶黑吕<code>（last_rnd=1黑吕）</code>，且还没有在行程表上记录任何值<code>（v=随意）</code>，而当前的提议是3黑吕<code>（rnd=3黑吕）</code>，比之前的多<code>（rnd&gt;last_rnd）</code>，因此他接受了博文的提议<code>（last_rnd=3黑吕）</code>，并回应博文行程表上的内容<code>（v=随意，vrnd=0黑吕）</code>；郭哥收到爱东的请求，发现自己之前接受的最大提议是2瓶黑吕<code>（last_rnd=2黑吕）</code>，且还没有在行程表上记录任何值<code>（v=随意）</code>，而当前的提议是3黑吕<code>（rnd=3黑吕）</code>，比之前的多，因此他接受了博文的提议<code>（last_rnd=3黑吕）</code>，并回应博文行程表上的内容<code>（v=随意，vrnd=0黑吕）</code>。</p>
+<h3 id="确认阶段-1"><a href="#确认阶段-1" class="headerlink" title="确认阶段"></a>确认阶段</h3><p>博文收到松阳和郭哥的回应以后，发现可以进入确认阶段了。</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/c689d821-45af-4ecc-917b-69e35965228b_1525_749.png" alt="exp_game2_phase2"></p>
+<p><strong>第一个回合</strong>，博文抢先爱东向所有人发起确认，博文向松阳、郭哥和宏达提出每人给三瓶黑吕，去CS的提议，即<strong>Proposer向所有的Acceptors广播<code>Accept(rnd=3黑吕，v=CS)</code></strong>。</p>
+<p><strong>第二个回合</strong>，松阳和郭哥收到博文的请求<code>(rnd=3黑吕，v=CS)</code>，与自己能够接受的最大提议进行对比，<strong>发现满足要求<code>（n&gt;=last_rnd）</code></strong>，于是在自己的行程表上写下接受3瓶黑吕<code>（vrnd=3黑吕）</code>，去CS<code>（v=CS）</code>，并把这个结果回应给博文，博文收到请求以后，博文去CS的计划就被确定下来了，<strong>他将这个计划发送给所有的Learners，这时候博文发起的Paxos进程就执行完了</strong>。</p>
+<p><strong>第三个回合</strong>，爱东向每个人发起确认，提出每人给两瓶黑吕，去吃小龙虾的提议，即<strong>Proposer向所有的Acceptors广播<code>Accept(rnd=2黑吕，v=小龙虾)</code></strong>。</p>
+<p><strong>第四个回合</strong>，郭哥之前已经确认给3瓶黑吕去CS<code>（vrnd=3黑吕，v=CS）</code>了，接受的最大提议是3黑吕<code>（last_rnd=3黑吕）</code>，因此不会再同意爱东的提议了，并将他能够接受的最大提议<code>（last_rnd=3黑吕）</code>，以及之前接受过的提议<code>（vrnd=3黑吕，v=CS）</code>告诉爱东。而宏达收到爱东的请求，发现和自己接受的最大黑吕数一致，因此同意了爱东的请求，并在行程表上写下收到2瓶黑吕<code>（vrnd=2黑吕）</code>时，去吃小龙虾<code>（v=小龙虾）</code>。</p>
+<p>爱东收到了郭哥的拒绝，宏达的同意，而松阳可能联系不上没有回应，没有超过半数的人同意去吃小龙虾的提议，因此这轮游戏以失败告终，<strong>此时爱东仍然遵循游戏规则，在郭哥和宏达的回应中找到最大的提议值<code>（last_rnd=3）</code>，遵循他的意见去CS<code>（v=CS）</code></strong>。</p>
+<h3 id="二次拉票和确认"><a href="#二次拉票和确认" class="headerlink" title="二次拉票和确认"></a>二次拉票和确认</h3><p>爱东经历了之前的失败，为了尽快达成去吃小龙虾的提议，于是将“待遇”提高到了4瓶黑吕（rnd=4黑吕）。</p>
+<p><img src="https://kaola-haitao.oss.kaolacdn.com/97b74abf-2280-47bb-a739-0d1d9c22058d_1565_749.png" alt="exp_game3_phase1&amp;2"></p>
+<p><strong>第一个回合</strong>，爱东向松阳、郭哥和宏达提出每人给四瓶黑吕的提议<code>（rnd=4黑吕）</code>，即Proposer向所有的Acceptors广播<code>Prepare(4)</code>。</p>
+<p><strong>第二个回合</strong>，郭哥收到爱东的请求后，发现自己之前接受的最大提议是四瓶黑吕<code>（last_rnd=3黑吕）</code>，行程表上有记录<code>（vrnd=3黑吕，v=CS）</code>，而当前的提议是四瓶黑吕<code>（rnd=4黑吕）</code>，比之前的多，因此他接受了爱东的提议<code>（last_rnd=4黑吕）</code>，并回应爱东行程表上的内容。宏达收到爱东的请求，发现自己之前接受的最大提议是两瓶黑吕<code>（last_rnd=2黑吕）</code>，行程表上有记录<code>（vrnd=2黑吕，v=小龙虾）</code>，而当前的提议是四瓶黑吕<code>（rnd=4黑吕）</code>，比之前的多，因此他接受了爱东的提议<code>（last_rnd=4黑吕）</code>，并回应爱东行程表上的内容<code>（vrnd=2黑吕，v=小龙虾）</code>。</p>
+<p><strong>第三个回合</strong>，爱东向每个人发起确认，提出每人给四瓶黑吕，去吃小龙虾的提议，即<strong>Proposer向所有的Acceptors广播<code>Accept(rnd=4黑吕，v=小龙虾)</code></strong>。</p>
+<p><strong>第四个回合</strong>，郭哥和宏达收到了爱东的4瓶黑吕，由于目前没有其他人给他们更多的黑吕，所以他们愉快地接受了请求，并在行程表上记录当收到4瓶黑吕<code>（vrnd=4黑吕）</code>时，接受去吃小龙虾<code>（v=小龙虾）</code>，随后分别将这条消息通知爱东。爱东收到郭哥和宏达的回应以后，这时候可以确定是去吃小龙虾了<code>（v=小龙虾）</code>。</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ol>
+<li><a href="https://zh.wikipedia.org/wiki/Paxos%E7%AE%97%E6%B3%95" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/Paxos%E7%AE%97%E6%B3%95</a> </li>
+<li><a href="https://zh.wikipedia.org/wiki/Quorum_(%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F)" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/Quorum_(%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F)</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E6%8B%9C%E5%8D%A0%E5%BA%AD%E5%B0%86%E5%86%9B%E9%97%AE%E9%A2%98" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/%E6%8B%9C%E5%8D%A0%E5%BA%AD%E5%B0%86%E5%86%9B%E9%97%AE%E9%A2%98</a></li>
+<li><a href="https://www.jianshu.com/p/5e9aeb46540f" target="_blank" rel="noopener">https://www.jianshu.com/p/5e9aeb46540f</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/31780743" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/31780743</a></li>
+</ol>
+<hr>
+<p>全文完。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <ul class="post-copyright">
+    <li class="post-copyright-author">
+      <strong>Post author:</strong>
+      Xing Li
+    </li>
+    <li class="post-copyright-link">
+      <strong>Post link:</strong>
+      <a href="https://iluhcm.com/2019/04/22/paxos-explanation-in-dramatic-way/" title="程序员们的团建——戏说Paxos">https://iluhcm.com/2019/04/22/paxos-explanation-in-dramatic-way/</a>
+    </li>
+    <li class="post-copyright-license">
+      <strong>Copyright Notice: </strong>
+      All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> unless stating additionally.
+    </li>
+  </ul>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Backend/" rel="tag"># Backend</a>
+          
+            <a href="/tags/Paxos/" rel="tag"># Paxos</a>
+          
+            <a href="/tags/Consensus/" rel="tag"># Consensus</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/30/summary-of-2018/" rel="next" title="2018年终总结">
+                <i class="fa fa-chevron-left"></i> 2018年终总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div id="sidebar-dimmer"></div>
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.png" alt="Xing Li">
+          <p class="site-author-name" itemprop="name">Xing Li</p>
+           
+              <p class="site-description motion-element" itemprop="description">If asked how the pond can be so lucid and fresh, told that sources with flowing water replenish.</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">categories</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">71</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/iluhcm" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.facebook.com/xing.li.731135" target="_blank" title="Facebook">
+                  
+                    <i class="fa fa-fw fa-facebook"></i>
+                  
+                  Facebook
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/iluhcm" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://plus.google.com/101164893136136383839/posts" target="_blank" title="Google+">
+                  
+                    <i class="fa fa-fw fa-google-plus"></i>
+                  
+                  Google+
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/lshcm" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/iluhcm" target="_blank" title="Zhihu">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Zhihu
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://music.163.com/#/user/home?id=38148117" target="_blank" title="Netease">
+                  
+                    <i class="fa fa-fw fa-music"></i>
+                  
+                  Netease
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+            </a>
+          </div>
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#团建游戏"><span class="nav-number">1.</span> <span class="nav-text">团建游戏</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#游戏约定"><span class="nav-number">1.1.</span> <span class="nav-text">游戏约定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#游戏规则"><span class="nav-number">1.2.</span> <span class="nav-text">游戏规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第一次游戏"><span class="nav-number">1.3.</span> <span class="nav-text">第一次游戏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#拉票阶段"><span class="nav-number">1.3.1.</span> <span class="nav-text">拉票阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#确认阶段"><span class="nav-number">1.3.2.</span> <span class="nav-text">确认阶段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二次游戏"><span class="nav-number">1.4.</span> <span class="nav-text">第二次游戏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#博文拉票阶段"><span class="nav-number">1.4.1.</span> <span class="nav-text">博文拉票阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#爱东拉票阶段"><span class="nav-number">1.4.2.</span> <span class="nav-text">爱东拉票阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#博文二次拉票阶段"><span class="nav-number">1.4.3.</span> <span class="nav-text">博文二次拉票阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#博文确认阶段"><span class="nav-number">1.4.4.</span> <span class="nav-text">博文确认阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#爱东确认阶段"><span class="nav-number">1.4.5.</span> <span class="nav-text">爱东确认阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#爱东二次拉票阶段"><span class="nav-number">1.4.6.</span> <span class="nav-text">爱东二次拉票阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#爱东二次确认阶段"><span class="nav-number">1.4.7.</span> <span class="nav-text">爱东二次确认阶段</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Paxos简介"><span class="nav-number">2.</span> <span class="nav-text">Paxos简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Paxos执行条件与约束"><span class="nav-number">2.1.</span> <span class="nav-text">Paxos执行条件与约束</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Paxos算法执行流程"><span class="nav-number">2.2.</span> <span class="nav-text">Paxos算法执行流程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#游戏剧情回顾"><span class="nav-number">3.</span> <span class="nav-text">游戏剧情回顾</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#游戏中的角色"><span class="nav-number">3.1.</span> <span class="nav-text">游戏中的角色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第一次游戏-1"><span class="nav-number">3.2.</span> <span class="nav-text">第一次游戏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Proposer广播Prepare-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">Proposer广播Prepare(1)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Acceptor回应Prepare-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">Acceptor回应Prepare(1)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Proposer广播Accept-1-CS"><span class="nav-number">3.2.3.</span> <span class="nav-text">Proposer广播Accept(1, CS)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Acceptor回应Accept-1-CS"><span class="nav-number">3.2.4.</span> <span class="nav-text">Acceptor回应Accept(1, CS)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二次游戏-1"><span class="nav-number">3.3.</span> <span class="nav-text">第二次游戏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#拉票阶段-1"><span class="nav-number">3.3.1.</span> <span class="nav-text">拉票阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#确认阶段-1"><span class="nav-number">3.3.2.</span> <span class="nav-text">确认阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二次拉票和确认"><span class="nav-number">3.3.3.</span> <span class="nav-text">二次拉票和确认</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xing Li</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://iluhcm-com.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://iluhcm.com/2019/04/22/paxos-explanation-in-dramatic-way/';
+          this.page.identifier = '2019/04/22/paxos-explanation-in-dramatic-way/';
+          this.page.title = '程序员们的团建——戏说Paxos';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://iluhcm-com.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.1"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.1"></script>
+
+
+  
+
+</body>
+</html>
